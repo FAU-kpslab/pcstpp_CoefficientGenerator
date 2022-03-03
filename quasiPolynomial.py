@@ -3,7 +3,7 @@ import numpy as np
 
 class Monomial:
     """Data type of monomial."""
-    def __init__(self, coefficient_array):
+    def __init__(self, coefficient_array: np.ndarray) -> None:
         """A quasi-polynomial consists of an array of coefficients."""
         self.coefficients = coefficient_array
 
@@ -12,8 +12,17 @@ class Monomial:
 
     def pretty_print(self) -> str:
         """The monomials can be printed in the mathematical form."""
-        return str(self.coefficients[0])
-        # TODO: Define this function.
+        output = []
+        if len(self.coefficients) == 0:
+            return '0'
+        elif len(self.coefficients) == 1:
+            return str(self.coefficients[0])
+        else:
+            output.append(str(self.coefficients[0]))
+            output.append(str(self.coefficients[1]) + 'x')
+            for coefficient, exponent in list(enumerate(self.coefficients))[2:]:
+                output.append(str(exponent) + 'x^' + str(coefficient))
+            return '+'.join(output)
 
     # TODO: Define multiplication with a scalar.
 
@@ -26,10 +35,9 @@ class Monomial:
 
 class QuasiPolynomial:
     """Data type of quasi-polynomial."""
-    def __init__(self, underlying_array):
+    def __init__(self, underlying_array: np.ndarray) -> None:
         """A quasi-polynomial consists of an array of monomials."""
         self.quasi_polynomial = underlying_array
-        # TODO: Use type hinting.
 
     def __str__(self) -> str:
         return str(self.quasi_polynomial)
@@ -50,7 +58,7 @@ class QuasiPolynomial:
 
 
 def test_main():
-    m = Monomial(np.array([2]))
-    print(m)
-    print(m.pretty_print())
+    qp = QuasiPolynomial(np.array([[2]]))
+    print(qp)
+    print(qp.pretty_print())
 
