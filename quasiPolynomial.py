@@ -1,23 +1,24 @@
 import numpy as np
+from typing import List
 
 
 class Polynomial:     # TODO: Think about making Polynomial a subclass of QuasiMonomial.
     """
-    Polynomial(coefficient_array)
+    Polynomial(coefficient_list)
 
     A class used to represent a polynomial.
 
         Parameters
         ----------
-        coefficient_array : np.ndarray[int]
-            The array of coefficients.
+        coefficient_list : List[int]
+            The list of coefficients.
             The coefficient of x^n is coefficient_array[n].
 
         Attributes
         ----------
-        coefficient_array : np.ndarray[int]
-            The array of coefficients.
-            The coefficient of x^n is coefficient_array[n].
+        coefficients : np.ndarray[int]
+            The numpy array of coefficients.
+            The coefficient of x^n is coefficients[n].
 
         Methods
         -------
@@ -25,16 +26,16 @@ class Polynomial:     # TODO: Think about making Polynomial a subclass of QuasiM
             Transform a polynomial in the mathematical form suitable to be read by humans.
     """
 
-    def __init__(self, coefficient_array: np.ndarray) -> None:
+    def __init__(self, coefficient_list: List[int]) -> None:
         """
-        Parameters
-        ----------
-        coefficient_array : np.ndarray[int]
-            The array of coefficients.
-            The coefficient of x^n is coefficient_array[n].
+            Parameters
+            ----------
+            coefficient_list : List[int]
+                The array of coefficients.
+                The coefficient of x^n is coefficient_list[n].
         """
 
-        self.coefficients = coefficient_array
+        self.coefficients = np.asarray(coefficient_list).astype(int)
 
     def __str__(self) -> str:
         return str(self.coefficients.tolist())
@@ -44,6 +45,10 @@ class Polynomial:     # TODO: Think about making Polynomial a subclass of QuasiM
         p.pretty_print()
 
         Transform a polynomial in the mathematical form suitable to be read by humans.
+
+            Returns
+            -------
+            str
         """
 
         if len(self.coefficients) == 0:
@@ -78,37 +83,37 @@ class Polynomial:     # TODO: Think about making Polynomial a subclass of QuasiM
 
 class QuasiPolynomial:
     """
-        QuasiPolynomial(polynomial_array)
+    QuasiPolynomial(coefficient_list)
 
-        A class used to represent a quasi-polynomial.
+    A class used to represent a quasi-polynomial.
 
+        Parameters
+        ----------
+        coefficient_list : List[List[int]]
+            The list of coefficients.
+            The coefficient of x^m exp(-nx) is coefficient_list[n][m].
+
+        Attributes
+        ----------
+        polynomials : np.ndarray[Polynomial]
+            The array of polynomials.
+            The polynomial in front of exp(-nx) is polynomials[n].
+
+        Methods
+        -------
+        pretty_print : str
+            Transform a quasi-polynomial in the mathematical form suitable to be read by humans.
+    """
+
+    def __init__(self, coefficient_list: List[List[int]]) -> None:
+        """
             Parameters
             ----------
-            polynomial_array : np.ndarray[np.ndarray[int]]
-                The array of polynomials.
-                The polynomial in front of exp(-nx) is polynomial_array[n].
-
-            Attributes
-            ----------
-            polynomial_array : np.ndarray[np.ndarray[int]]
-                The array of polynomials.
-                The polynomial in front of exp(-nx) is polynomial_array[n].
-
-            Methods
-            -------
-            pretty_print : str
-                Transform a quasi-polynomial in the mathematical form suitable to be read by humans.
+            coefficient_list : List[List[int]]
+                The list of coefficients.
+                The coefficient of x^m exp(-nx) is coefficient_list[n][m].
         """
-
-    def __init__(self, polynomial_array: np.ndarray) -> None:
-        """
-                Parameters
-                ----------
-                polynomial_array : np.ndarray[np.ndarray[int]]
-                    The array of polynomials.
-                    The polynomial in front of exp(-nx) is polynomial_array[n].
-                """
-        self.polynomials = polynomial_array
+        self.polynomials = np.asarray([Polynomial(polynomial) for polynomial in coefficient_list])
 
     def __str__(self) -> str:
         return str([polynomial.coefficients.tolist() for polynomial in self.polynomials])
@@ -119,6 +124,10 @@ class QuasiPolynomial:
         qp.pretty_print()
 
         Transform a quasi-polynomial in the mathematical form suitable to be read by humans.
+
+            Returns
+            -------
+            str
         """
         if len(self.polynomials) == 0:
             # Check whether the quasi-polynomial is empty.
@@ -170,11 +179,9 @@ class QuasiPolynomial:
     # TODO: Define multiplication of two quasi-polynomials.
 
 
-
 def test_main():
-    qp = QuasiPolynomial(np.array([Polynomial(np.array([2, 1]).astype(int)), Polynomial(np.array([]).astype(int)),
-                                   Polynomial(np.array([4]).astype(int))]))
+    qp = QuasiPolynomial([[2, 1], [], [4]])
     print(qp)
     print(qp.pretty_print())
-    print(Polynomial(np.array([2, 1])))
-    print(Polynomial(np.array([2, 1])).pretty_print())
+    print(Polynomial([2, 1]))
+    print(Polynomial([2, 1]).pretty_print())
