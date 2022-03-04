@@ -26,6 +26,8 @@ class Polynomial:
             Transform a polynomial in the mathematical form suitable to be read by humans.
         simplify : Polynomial
             Simplifies a polynomial by *removing* zeros.
+        __eq__ : bool
+            Checks whether two polynomials are mathematically equal.
     """
 
     def __init__(self, coefficient_list: List[int]) -> None:
@@ -84,13 +86,27 @@ class Polynomial:
         """
 
         if self.coefficients.size != 0:
+            # Check whether the polynomial is empty.
             while self.coefficients[-1] == 0:
+                # Check whether the last coefficient is zero to remove it.
                 self.coefficients.resize(self.coefficients.size-1)
                 if self.coefficients.size == 0:
+                    # Check whether the polynomial is empty.
                     break
         return self
 
-    # TODO: Define equal sign.
+    def __eq__(self, other) -> bool:
+        """
+        p1 == p2
+
+        Checks whether two polynomials are mathematically equal.
+
+            Returns
+            -------
+            bool
+        """
+
+        return np.array_equal(self.simplify().coefficients, other.simplify().coefficients)
 
     # TODO: Define multiplication with a scalar.
 
@@ -123,6 +139,10 @@ class QuasiPolynomial:
         -------
         pretty_print : str
             Transform a quasi-polynomial in the mathematical form suitable to be read by humans.
+        simplify : QuasiPolynomial
+            Simplifies a quasi-polynomial by *removing* zero polynomials.
+        __eq__ : bool
+            Checks whether two quasi-polynomials are mathematically equal.
     """
 
     def __init__(self, coefficient_list: List[List[int]]) -> None:
@@ -200,12 +220,32 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
-        if self.polynomials.size != 0:
-            while self.polynomials[-1].simplify() == Polynomial([]):   # TODO: Wait until you have implemented equality.
+        if self.polynomials.size == 0:
+            # Check whether the quasi-polynomial is the empty polynomial and replace it by the empty quasi-polynomial.
+            return QuasiPolynomial([[]])
+        else:
+            while self.polynomials[-1] == Polynomial([]):
+                # Check whether the last polynomial is empty to remove it.
                 self.polynomials.resize(self.polynomials.size-1)
                 if self.polynomials.size == 0:
-                    break
+                    # Recheck whether the quasi-polynomial is empty.
+                    return QuasiPolynomial([[]])
+        for polynomial in self.polynomials:
+            polynomial.simplify()
         return self
+
+    def __eq__(self, other) -> bool:
+        """
+        qp1 == qp2
+
+        Checks whether two quasi-polynomials are mathematically equal.
+
+            Returns
+            -------
+            bool
+        """
+
+        return np.array_equal(self.simplify().polynomials, other.simplify().polynomials)
 
     # TODO: Define multiplication with a scalar.
 
@@ -219,5 +259,5 @@ class QuasiPolynomial:
 
 
 def test_main():
-    print(QuasiPolynomial([[2, 4, 8], [1, 5, 25], [0, 0]]).simplify())
-    print(QuasiPolynomial([[2, 4, 8], [1, 5, 25]]))
+    print(QuasiPolynomial([]))
+    print(QuasiPolynomial([]).simplify())

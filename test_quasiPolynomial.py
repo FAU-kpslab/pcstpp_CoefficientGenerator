@@ -23,6 +23,14 @@ class TestPolynomial(TestCase):
         self.assertEqual(print(Polynomial([2, 4, 0, 0]).simplify()), print(Polynomial([2, 4])))
         self.assertEqual(print(Polynomial([0, 0, 0]).simplify()), print(Polynomial([])))
         self.assertEqual(print(Polynomial([]).simplify()), print(Polynomial([])))
+        # TODO: Add a function that checks for equality without simplification.
+
+    def test_eq(self):
+        self.assertTrue(Polynomial([2, 4, 8]) == Polynomial([2, 4, 8]))
+        self.assertFalse(Polynomial([2, 8]) == Polynomial([2, 4, 8]))
+        self.assertFalse(Polynomial([2, 4, 8]) == Polynomial([2, 4]))
+        self.assertTrue(Polynomial([0]) == Polynomial([]))
+        self.assertTrue(Polynomial([2, 4, 0, 0]) == Polynomial([2, 4]))
 
 
 class TestQuasiPolynomial(TestCase):
@@ -58,3 +66,12 @@ class TestQuasiPolynomial(TestCase):
                          print(QuasiPolynomial([[2, 4, 8], [1, 5, 25]])))
         self.assertEqual(print(QuasiPolynomial([[2, 4, 8], [0, 0, 0], [3, 9]]).simplify()),
                          print(QuasiPolynomial([[2, 4, 8], [], [3, 9]])))
+        self.assertEqual(print(QuasiPolynomial([[], [], []]).simplify()), print(QuasiPolynomial([])))
+
+    def test_eq(self):
+        self.assertTrue(QuasiPolynomial([[2, 4, 8]]) == QuasiPolynomial([[2, 4, 8]]))
+        self.assertFalse(QuasiPolynomial([[2, 4]]) == QuasiPolynomial([[2, 4, 8]]))
+        self.assertTrue(QuasiPolynomial([]) == QuasiPolynomial([[]]))
+        self.assertFalse(QuasiPolynomial([[2, 4], [3]]) == QuasiPolynomial([[2, 4]]))
+        self.assertTrue(QuasiPolynomial([[2, 4], []]) == QuasiPolynomial([[2, 4]]))
+        self.assertTrue(QuasiPolynomial([[0, 0], [2]]) == QuasiPolynomial([[], [2]]))
