@@ -6,6 +6,9 @@ from quasiPolynomial import Polynomial, QuasiPolynomial
 
 class TestPolynomial(TestCase):
 
+    def test_to_list(self):
+        self.assertEqual(Polynomial([2]).to_list(), [2])
+
     def test_pretty_print(self):
         self.assertEqual(Polynomial([]).pretty_print(), '0')
         self.assertEqual(Polynomial([0]).pretty_print(), '0')
@@ -31,6 +34,13 @@ class TestPolynomial(TestCase):
         self.assertFalse(Polynomial([2, 4, 8]) == Polynomial([2, 4]))
         self.assertTrue(Polynomial([0]) == Polynomial([]))
         self.assertTrue(Polynomial([2, 4, 0, 0]) == Polynomial([2, 4]))
+
+    def test_scalar_multiplication(self):
+        self.assertEqual(Polynomial([2, 4, 8]), Polynomial([1, 2, 4]).scalar_multiplication(2))
+        self.assertEqual(Polynomial([]), Polynomial([1, 2, 4]).scalar_multiplication(0))
+
+    def test_negation(self):
+        self.assertEqual(Polynomial([2, 4, 8]).negation(), Polynomial([-2, -4, -8]))
 
 
 class TestQuasiPolynomial(TestCase):
@@ -75,3 +85,12 @@ class TestQuasiPolynomial(TestCase):
         self.assertFalse(QuasiPolynomial([[2, 4], [3]]) == QuasiPolynomial([[2, 4]]))
         self.assertTrue(QuasiPolynomial([[2, 4], []]) == QuasiPolynomial([[2, 4]]))
         self.assertTrue(QuasiPolynomial([[0, 0], [2]]) == QuasiPolynomial([[], [2]]))
+
+    def test_scalar_multiplication(self):
+        self.assertEqual(QuasiPolynomial([[2, 4, 8], [2, 10, 50]]),
+                         QuasiPolynomial([[1, 2, 4], [1, 5, 25]]).scalar_multiplication(2))
+        self.assertEqual(QuasiPolynomial([[]]), QuasiPolynomial([[2, 4, 8], [1, 5, 25]]).scalar_multiplication(0))
+
+    def test_negation(self):
+        self.assertEqual(QuasiPolynomial([[2, 4, 8], [2, 10, 50]]).negation(),
+                         QuasiPolynomial([[-2, -4, -8], [-2, -10, -50]]))

@@ -22,12 +22,18 @@ class Polynomial:
 
         Methods
         -------
+        to_list : List[int]
+            Transforms a polynomial into the integer list used to construct it.
         pretty_print : str
             Transform a polynomial in the mathematical form suitable to be read by humans.
         simplify : Polynomial
             Simplifies a polynomial by *removing* zeros.
         __eq__ : bool
             Checks whether two polynomials are mathematically equal.
+        scalar_multiplication : Polynomial
+            Multiplies a polynomial with a scalar.
+        negation : Polynomial
+            Multiplies a polynomial with -1.
     """
 
     def __init__(self, coefficient_list: List[int]) -> None:
@@ -40,6 +46,19 @@ class Polynomial:
         """
 
         self.coefficients = np.asarray(coefficient_list).astype(int)
+
+    def to_list(self) -> object:
+        """
+        p.to_list()
+
+        Transforms a polynomial into the integer list used to construct it.
+
+            Returns
+            -------
+            List[int]
+        """
+
+        return self.coefficients.tolist()
 
     def __str__(self) -> str:
         return str(self.coefficients.tolist())
@@ -108,9 +127,35 @@ class Polynomial:
 
         return np.array_equal(self.simplify().coefficients, other.simplify().coefficients)
 
-    # TODO: Define multiplication with a scalar.
+    def scalar_multiplication(self, scalar: int):
+        """
+        p.scalar_multiplication(int)
 
-    # TODO: Define negation of a polynomial.
+        Multiplies a polynomial with a scalar.
+
+            Parameters
+            ----------
+            scalar
+
+            Returns
+            -------
+            Polynomial
+        """
+
+        return Polynomial([scalar * coefficient for coefficient in self.coefficients]).simplify()
+
+    def negation(self):
+        """
+        p.negation()
+
+        Multiplies a polynomial with -1.
+
+            Returns
+            -------
+            Polynomial
+        """
+
+        return self.scalar_multiplication(-1)
 
     # TODO: Define addition of two polynomials.
 
@@ -153,6 +198,7 @@ class QuasiPolynomial:
                 The list of coefficients.
                 The coefficient of x^m exp(-nx) is coefficient_list[n][m].
         """
+
         if len(coefficient_list) == 0:
             self.polynomials = np.asarray([Polynomial([])])
         else:
@@ -172,6 +218,7 @@ class QuasiPolynomial:
             -------
             str
         """
+
         if len(self.polynomials) == 0:
             # Check whether the quasi-polynomial is empty.
             return '0'
@@ -247,9 +294,35 @@ class QuasiPolynomial:
 
         return np.array_equal(self.simplify().polynomials, other.simplify().polynomials)
 
-    # TODO: Define multiplication with a scalar.
+    def scalar_multiplication(self, scalar: int):
+        """
+        qp.scalar_multiplication(int)
 
-    # TODO: Define negation of a quasi-polynomial.
+        Multiplies a quasi-polynomial with a scalar.
+
+            Parameters
+            ----------
+            scalar
+
+            Returns
+            -------
+            Polynomial
+        """
+
+        return QuasiPolynomial([polynomial.scalar_multiplication(scalar).to_list() for polynomial in self.polynomials])
+
+    def negation(self):
+        """
+        qp.negation(int)
+
+        Multiplies a quasi-polynomial with -1.
+
+            Returns
+            -------
+            Polynomial
+        """
+
+        return self.scalar_multiplication(-1)
 
     # TODO: Define addition of two quasi-polynomials.
 
