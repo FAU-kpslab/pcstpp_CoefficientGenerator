@@ -2,7 +2,7 @@ import numpy as np
 from typing import List
 
 
-class Polynomial:     # TODO: Think about making Polynomial a subclass of QuasiMonomial.
+class Polynomial:
     """
     Polynomial(coefficient_list)
 
@@ -24,6 +24,8 @@ class Polynomial:     # TODO: Think about making Polynomial a subclass of QuasiM
         -------
         pretty_print : str
             Transform a polynomial in the mathematical form suitable to be read by humans.
+        simplify : Polynomial
+            Simplifies a polynomial by *removing* zeros.
     """
 
     def __init__(self, coefficient_list: List[int]) -> None:
@@ -70,7 +72,25 @@ class Polynomial:     # TODO: Think about making Polynomial a subclass of QuasiM
                     output.append(str(coefficient) + 'x^' + str(exponent))
             return '+'.join(output).replace('+-', '-')
 
-    # TODO: Define simplification.
+    def simplify(self):
+        """
+        p.simplify()
+
+        Simplifies a polynomial by *removing* zeros.
+
+            Returns
+            -------
+            Polynomial
+        """
+
+        if self.coefficients.size != 0:
+            while self.coefficients[-1] == 0:
+                self.coefficients.resize(self.coefficients.size-1)
+                if self.coefficients.size == 0:
+                    break
+        return self
+
+    # TODO: Define equal sign.
 
     # TODO: Define multiplication with a scalar.
 
@@ -113,7 +133,10 @@ class QuasiPolynomial:
                 The list of coefficients.
                 The coefficient of x^m exp(-nx) is coefficient_list[n][m].
         """
-        self.polynomials = np.asarray([Polynomial(polynomial) for polynomial in coefficient_list])
+        if len(coefficient_list) == 0:
+            self.polynomials = np.asarray([Polynomial([])])
+        else:
+            self.polynomials = np.asarray([Polynomial(polynomial) for polynomial in coefficient_list])
 
     def __str__(self) -> str:
         return str([polynomial.coefficients.tolist() for polynomial in self.polynomials])
@@ -166,7 +189,23 @@ class QuasiPolynomial:
                         output.append('(' + polynomial.pretty_print() + ')exp(-' + str(exponent) + 'x)')
             return '+'.join(output).replace('+-', '-')
 
-    # TODO: Define simplification.
+    def simplify(self):
+        """
+        qp.simplify()
+
+        Simplifies a quasi-polynomial by *removing* zero polynomials.
+
+            Returns
+            -------
+            QuasiPolynomial
+        """
+
+        if self.polynomials.size != 0:
+            while self.polynomials[-1].simplify() == Polynomial([]):   # TODO: Wait until you have implemented equality.
+                self.polynomials.resize(self.polynomials.size-1)
+                if self.polynomials.size == 0:
+                    break
+        return self
 
     # TODO: Define multiplication with a scalar.
 
@@ -180,8 +219,5 @@ class QuasiPolynomial:
 
 
 def test_main():
-    qp = QuasiPolynomial([[2, 1], [], [4]])
-    print(qp)
-    print(qp.pretty_print())
-    print(Polynomial([2, 1]))
-    print(Polynomial([2, 1]).pretty_print())
+    print(QuasiPolynomial([[2, 4, 8], [1, 5, 25], [0, 0]]).simplify())
+    print(QuasiPolynomial([[2, 4, 8], [1, 5, 25]]))
