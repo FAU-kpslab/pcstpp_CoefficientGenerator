@@ -34,7 +34,7 @@ class Polynomial:
             Checks whether two polynomials are mathematically equal.
         scalar_multiplication : Polynomial
             Multiplies a polynomial with a scalar.
-        negation : Polynomial
+        __neg__ : Polynomial
             Multiplies a polynomial with -1.
         __add__ : Polynomial
             Adds two polynomials.
@@ -161,7 +161,7 @@ class Polynomial:
 
         return Polynomial(scalar * self.coefficients).simplify()
 
-    def negation(self):
+    def __neg__(self):
         """
         p.negation()
 
@@ -226,7 +226,7 @@ class QuasiPolynomial:
             Checks whether two quasi-polynomials are mathematically equal.
         scalar_multiplication
             Multiplies a quasi-polynomial with a scalar.
-        negation : QuasiPolynomial
+        __neg__ : QuasiPolynomial
             Multiplies a quasi-polynomial with -1.
         __add__ : QuasiPolynomial
             Adds two quasi-polynomials.
@@ -244,8 +244,9 @@ class QuasiPolynomial:
         """
 
         if len(coefficient_list) == 0:
-            self.polynomials = np.asarray([Polynomial([])])
-            # TODO self.polynomials = np.asarray([]) überall einbauen
+            self.polynomials = np.asarray([])
+        elif coefficient_list == [[]]:
+            self.polynomials = np.asarray([])
         else:
             self.polynomials = np.asarray([Polynomial(p) for p in coefficient_list])
 
@@ -276,10 +277,10 @@ class QuasiPolynomial:
             str
         """
 
-        if len(self.polynomials) == 0:
+        if self.polynomials.size == 0:
             # Check whether the quasi-polynomial is empty.
             return '0'
-        if len(self.polynomials) == 1:
+        if self.polynomials.size == 1:
             # Check whether the quasi-polynomial contains only the first polynomial.
             return self.polynomials[0].pretty_print()
         else:
@@ -326,7 +327,7 @@ class QuasiPolynomial:
 
         if self.polynomials.size == 0:
             # Check whether the quasi-polynomial is the empty polynomial and replace it by the empty quasi-polynomial.
-            return QuasiPolynomial([[]])
+            return QuasiPolynomial([])
         else:
             while self.polynomials[-1] == Polynomial([]):
                 # Check whether the last polynomial is empty to remove it.
@@ -392,13 +393,13 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
-        if len(self.polynomials) > len(other.polynomials):
+        if self.polynomials.size > other.polynomials.size:
             output = self.copy()
-            for idx in np.arange(len(other.polynomials)):
+            for idx in np.arange(other.polynomials.size):
                 output.polynomials[idx] = output.polynomials[idx] + other.polynomials[idx]
         else:
             output = other.copy()
-            for idx in np.arange(len(self.polynomials)):
+            for idx in np.arange(self.polynomials.size):
                 output.polynomials[idx] = output.polynomials[idx] + self.polynomials[idx]
         return output.simplify()
 
@@ -422,8 +423,4 @@ class QuasiPolynomial:
 
 
 def test_main():
-    print(QuasiPolynomial([[5, 100], []]) + QuasiPolynomial([[2, 4, 8], []]))
-    print(QuasiPolynomial([[2, 4, 8]]) - QuasiPolynomial([[2, 4, 8], [2, 10, 50]]))
-    print(QuasiPolynomial([[], [2, 10, 50]]) + QuasiPolynomial([[2, 4, 8]]))
-    print(QuasiPolynomial([[2, 4, 8]]) - QuasiPolynomial([[2, 4, 8]]))
-    print(-QuasiPolynomial([[2]]))
+    print(QuasiPolynomial([]))

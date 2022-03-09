@@ -1,6 +1,5 @@
 from unittest import TestCase
 
-import numpy as np
 from quasiPolynomial import Polynomial, QuasiPolynomial
 
 
@@ -44,7 +43,7 @@ class TestPolynomial(TestCase):
         self.assertEqual(Polynomial([]), Polynomial([1, 2, 4]).scalar_multiplication(0))
 
     def test_negation(self):
-        self.assertEqual(Polynomial([2, 4, 8]).negation(), Polynomial([-2, -4, -8]))
+        self.assertEqual(-Polynomial([2, 4, 8]), Polynomial([-2, -4, -8]))
 
     def test_addition(self):
         self.assertEqual(Polynomial([2, 4, 8]) + Polynomial([1, 5, 70]), Polynomial([3, 9, 78]))
@@ -66,7 +65,7 @@ class TestQuasiPolynomial(TestCase):
         self.assertNotEqual(id(temp2), id(temp2.copy()))
 
     def test_pretty_print(self):
-        self.assertEqual(QuasiPolynomial([[]]).pretty_print(), '0')
+        self.assertEqual(QuasiPolynomial([]).pretty_print(), '0')
         self.assertEqual(QuasiPolynomial([[0]]).pretty_print(), '0')
         self.assertEqual(QuasiPolynomial([[2, 4, 8]]).pretty_print(), '2+4x+8x^2')
         self.assertEqual(
@@ -107,7 +106,8 @@ class TestQuasiPolynomial(TestCase):
     def test_scalar_multiplication(self):
         self.assertEqual(QuasiPolynomial([[2, 4, 8], [2, 10, 50]]),
                          QuasiPolynomial([[1, 2, 4], [1, 5, 25]]).scalar_multiplication(2))
-        self.assertEqual(QuasiPolynomial([[]]), QuasiPolynomial([[2, 4, 8], [1, 5, 25]]).scalar_multiplication(0))
+        self.assertEqual(QuasiPolynomial([]), QuasiPolynomial([[2, 4, 8], [1, 5, 25]]).scalar_multiplication(0))
+        self.assertEqual(QuasiPolynomial([]), QuasiPolynomial([]).scalar_multiplication(2))
 
     def test_negation(self):
         self.assertEqual(-QuasiPolynomial([[2, 4, 8], [2, 10, 50]]),
@@ -123,7 +123,7 @@ class TestQuasiPolynomial(TestCase):
 
     def test_sub(self):
         self.assertEqual(QuasiPolynomial([[2, 4, 8], [2, 10, 50]]) - QuasiPolynomial([[2, 4, 8], [2, 10, 50]]),
-                         QuasiPolynomial([[]]))
+                         QuasiPolynomial([]))
         self.assertEqual(QuasiPolynomial([[2, 4, 8]]) - QuasiPolynomial([[2, 4, 8], [2, 10, 50]]),
                          QuasiPolynomial([[], [-2, -10, -50]]))
         self.assertEqual(QuasiPolynomial([[2, 4, 8], [2, 10, 50]]) - QuasiPolynomial([[2, 4, 8]]),
