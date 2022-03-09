@@ -24,6 +24,8 @@ class Polynomial:
         -------
         to_list : List[int]
             Transforms a polynomial into the integer list used to construct it.
+        copy : Polynomial
+            Copies a polynomial.
         pretty_print : str
             Transform a polynomial in the mathematical form suitable to be read by humans.
         simplify : Polynomial
@@ -34,6 +36,8 @@ class Polynomial:
             Multiplies a polynomial with a scalar.
         negation : Polynomial
             Multiplies a polynomial with -1.
+        __add__ : Polynomial
+            Adds two polynomials.
     """
 
     def __init__(self, coefficient_list: List[int]) -> None:
@@ -45,9 +49,9 @@ class Polynomial:
                 The coefficient of x^n is coefficient_list[n].
         """
 
-        self.coefficients = np.asarray(coefficient_list).astype(int)
+        self.coefficients = np.asarray(coefficient_list).astype(int, copy=False)
 
-    def to_list(self) -> object:
+    def to_list(self) -> List[int]:
         """
         p.to_list()
 
@@ -58,10 +62,23 @@ class Polynomial:
             List[int]
         """
 
-        return self.coefficients.tolist()
+        return list(self.coefficients)
+
+    def copy(self):
+        """
+        copy(p)
+
+        Copies a polynomial.
+
+            Returns
+            -------
+            Polynomial
+        """
+
+        return Polynomial(self.coefficients.copy())
 
     def __str__(self) -> str:
-        return str(self.coefficients.tolist())
+        return str(self.to_list())
 
     def pretty_print(self) -> str:
         """
@@ -108,7 +125,7 @@ class Polynomial:
             # Check whether the polynomial is empty.
             while self.coefficients[-1] == 0:
                 # Check whether the last coefficient is zero to remove it.
-                self.coefficients.resize(self.coefficients.size-1)
+                self.coefficients.resize(self.coefficients.size - 1)
                 if self.coefficients.size == 0:
                     # Check whether the polynomial is empty.
                     break
@@ -142,7 +159,7 @@ class Polynomial:
             Polynomial
         """
 
-        return Polynomial([scalar * coefficient for coefficient in self.coefficients]).simplify()
+        return Polynomial(scalar * self.coefficients).simplify()
 
     def negation(self):
         """
@@ -157,7 +174,24 @@ class Polynomial:
 
         return self.scalar_multiplication(-1)
 
-    # TODO: Define addition of two polynomials.
+    def __add__(self, other):
+        """
+        p1 + p2
+
+        Adds two polynomials.
+
+            Returns
+            -------
+            Polynomial
+        """
+        if len(self.coefficients) > len(other.coefficients):
+            short = other.coefficients.copy()
+            short.resize(len(self.coefficients))
+            return Polynomial(list(short + self.coefficients)).simplify()
+        else:
+            short = self.coefficients.copy()
+            short.resize(len(other.coefficients))
+            return Polynomial(list(short + other.coefficients)).simplify()
 
     # TODO: Define multiplication of two polynomials.
 
@@ -182,12 +216,22 @@ class QuasiPolynomial:
 
         Methods
         -------
+        copy : QuasiPolynomial
+            Copies a quasi-polynomial.
         pretty_print : str
             Transform a quasi-polynomial in the mathematical form suitable to be read by humans.
         simplify : QuasiPolynomial
             Simplifies a quasi-polynomial by *removing* zero polynomials.
         __eq__ : bool
             Checks whether two quasi-polynomials are mathematically equal.
+        scalar_multiplication
+            Multiplies a quasi-polynomial with a scalar.
+        negation : QuasiPolynomial
+            Multiplies a quasi-polynomial with -1.
+        __add__ : QuasiPolynomial
+            Adds two quasi-polynomials.
+        __sub__ : QuasiPolynomials
+            Subtracts a quasi-polynomial from another.
     """
 
     def __init__(self, coefficient_list: List[List[int]]) -> None:
@@ -201,12 +245,25 @@ class QuasiPolynomial:
 
         if len(coefficient_list) == 0:
             self.polynomials = np.asarray([Polynomial([])])
+            # TODO self.polynomials = np.asarray([]) überall einbauen
         else:
-            self.polynomials = np.asarray([Polynomial(polynomial) for polynomial in coefficient_list])
+            self.polynomials = np.asarray([Polynomial(p) for p in coefficient_list])
+
+    def copy(self):
+        """
+        copy(p)
+
+        Copies a quasi-polynomial.
+
+            Returns
+            -------
+            quasi-Polynomial
+        """
+
+        return QuasiPolynomial([p.copy().coefficients.tolist() for p in self.polynomials])
 
     def __str__(self) -> str:
-        return str([polynomial.coefficients.tolist() for polynomial in self.polynomials])
-        # TODO: What is "Convert method to property?"
+        return str([p.coefficients.tolist() for p in self.polynomials])
 
     def pretty_print(self) -> str:
         """
@@ -273,7 +330,7 @@ class QuasiPolynomial:
         else:
             while self.polynomials[-1] == Polynomial([]):
                 # Check whether the last polynomial is empty to remove it.
-                self.polynomials.resize(self.polynomials.size-1)
+                self.polynomials.resize(self.polynomials.size - 1)
                 if self.polynomials.size == 0:
                     # Recheck whether the quasi-polynomial is empty.
                     return QuasiPolynomial([[]])
@@ -309,9 +366,9 @@ class QuasiPolynomial:
             Polynomial
         """
 
-        return QuasiPolynomial([polynomial.scalar_multiplication(scalar).to_list() for polynomial in self.polynomials])
+        return QuasiPolynomial([p.scalar_multiplication(scalar).to_list() for p in self.polynomials])
 
-    def negation(self):
+    def __neg__(self):
         """
         qp.negation(int)
 
@@ -324,7 +381,40 @@ class QuasiPolynomial:
 
         return self.scalar_multiplication(-1)
 
-    # TODO: Define addition of two quasi-polynomials.
+    def __add__(self, other):
+        """
+        qp1 + qp2
+
+        Adds two quasi-polynomials.
+
+            Returns
+            -------
+            QuasiPolynomial
+        """
+
+        if len(self.polynomials) > len(other.polynomials):
+            output = self.copy()
+            for idx in np.arange(len(other.polynomials)):
+                output.polynomials[idx] = output.polynomials[idx] + other.polynomials[idx]
+        else:
+            output = other.copy()
+            for idx in np.arange(len(self.polynomials)):
+                output.polynomials[idx] = output.polynomials[idx] + self.polynomials[idx]
+        return output.simplify()
+
+    def __sub__(self, other):
+        """
+        qp1 - qp2
+
+        Subtracts a quasi-polynomial from another.
+
+            Returns
+            -------
+            QuasiPolynomial
+        """
+
+        # TODO: Is this faster when defined without using add?
+        return self + (-other)
 
     # TODO: Define multiplication of a polynomial with a quasi-polynomial.
 
@@ -332,5 +422,8 @@ class QuasiPolynomial:
 
 
 def test_main():
-    print(QuasiPolynomial([]))
-    print(QuasiPolynomial([]).simplify())
+    print(QuasiPolynomial([[5, 100], []]) + QuasiPolynomial([[2, 4, 8], []]))
+    print(QuasiPolynomial([[2, 4, 8]]) - QuasiPolynomial([[2, 4, 8], [2, 10, 50]]))
+    print(QuasiPolynomial([[], [2, 10, 50]]) + QuasiPolynomial([[2, 4, 8]]))
+    print(QuasiPolynomial([[2, 4, 8]]) - QuasiPolynomial([[2, 4, 8]]))
+    print(-QuasiPolynomial([[2]]))
