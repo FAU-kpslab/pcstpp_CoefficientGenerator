@@ -53,6 +53,15 @@ class TestPolynomial(TestCase):
         self.assertEqual(Polynomial([]) + Polynomial([2, 4]), Polynomial([2, 4]))
         self.assertEqual(Polynomial([]) + Polynomial([]), Polynomial([]))
 
+    def test_multiplication(self):
+        self.assertEqual(Polynomial([1, 2]) * Polynomial([5, 1]), Polynomial([5, 11, 2]))
+        self.assertEqual(Polynomial([1, 2, 3, 4]) * Polynomial([5, 1]), Polynomial([5, 11, 17, 23, 4]))
+        self.assertEqual(Polynomial([5, 1]) * Polynomial([1, 2, 3, 4]), Polynomial([5, 11, 17, 23, 4]))
+        self.assertEqual(Polynomial([1]) * Polynomial([1, 2, 3, 4]), Polynomial([1, 2, 3, 4]))
+        self.assertEqual(Polynomial([1, 2, 3, 4]) * Polynomial([1]), Polynomial([1, 2, 3, 4]))
+        self.assertEqual(Polynomial([]) * Polynomial([1, 2, 3, 4]), Polynomial([]))
+        self.assertEqual(Polynomial([1, 2, 3, 4]) * Polynomial([]), Polynomial([]))
+
 
 class TestQuasiPolynomial(TestCase):
     def test_init(self):

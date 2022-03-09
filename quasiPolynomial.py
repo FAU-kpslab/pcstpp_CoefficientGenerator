@@ -184,6 +184,7 @@ class Polynomial:
             -------
             Polynomial
         """
+
         if len(self.coefficients) > len(other.coefficients):
             short = other.coefficients.copy()
             short.resize(len(self.coefficients))
@@ -193,7 +194,27 @@ class Polynomial:
             short.resize(len(other.coefficients))
             return Polynomial(list(short + other.coefficients)).simplify()
 
-    # TODO: Define multiplication of two polynomials.
+    def __mul__(self, other):
+        """
+        p1 * p2
+
+        Multiplies two polynomials.
+
+            Returns
+            -------
+            Polynomial
+        """
+
+        length = self.coefficients.size + other.coefficients.size - 1
+        coeffs = []
+        for total in np.arange(length):
+            mini = max(0, total - other.coefficients.size + 1)
+            maxi = min(total, self.coefficients.size - 1)
+            coeffs.append(
+                sum([self.coefficients[exp1] * other.coefficients[- exp1 + total] for exp1 in
+                     np.arange(mini, maxi + 1)]))
+        return Polynomial(coeffs)
+    # TODO: Do I need additional simplification beforehand?
 
 
 class QuasiPolynomial:
@@ -244,8 +265,6 @@ class QuasiPolynomial:
         """
 
         if len(coefficient_list) == 0:
-            self.polynomials = np.asarray([])
-        elif coefficient_list == [[]]:
             self.polynomials = np.asarray([])
         else:
             self.polynomials = np.asarray([Polynomial(p) for p in coefficient_list])
@@ -334,7 +353,7 @@ class QuasiPolynomial:
                 self.polynomials.resize(self.polynomials.size - 1)
                 if self.polynomials.size == 0:
                     # Recheck whether the quasi-polynomial is empty.
-                    return QuasiPolynomial([[]])
+                    return QuasiPolynomial([])
         for polynomial in self.polynomials:
             polynomial.simplify()
         return self
