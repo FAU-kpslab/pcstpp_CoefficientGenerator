@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List
+from typing import List, Union
 
 
 class Polynomial:
@@ -41,7 +41,9 @@ class Polynomial:
         __add__ : Polynomial
             Adds two polynomials.
         __mul__ : Polynomial
-            Multiplies two polynomials.
+            Multiplies two polynomials or a polynomial with a scalar.
+        __rmul__ : Polynomial
+            Multiplies a scalar with a polynomial.
     """
 
     def __init__(self, coefficient_list: List[int]) -> None:
@@ -205,27 +207,50 @@ class Polynomial:
             output = np.concatenate((self.coefficients, np.zeros(right_size - left_size, dtype=int)))
             return Polynomial(list(output + other.coefficients)).simplify()
 
-    def __mul__(self, other: 'Polynomial') -> 'Polynomial':
+    def __mul__(self, other: Union['Polynomial', int]) -> 'Polynomial':
         """
-        p1 * p2
+        p1 * p2 | p * int
 
-        Multiplies two polynomials.
+        Multiplies two polynomials or a polynomial with a scalar.
 
             Returns
             -------
             Polynomial
         """
 
-        length = self.coefficients.size + other.coefficients.size - 1
-        output = []
-        for total in np.arange(length):
-            mini = max(0, total - other.coefficients.size + 1)
-            maxi = min(total, self.coefficients.size - 1)
-            output.append(
-                sum([self.coefficients[exp1] * other.coefficients[- exp1 + total] for exp1 in
-                     np.arange(mini, maxi + 1)], start=0))
-        return Polynomial(output)
-    # TODO: Maybe it is faster to Kronecker multiply the coefficient arrays and then sum over the resulting matrix.
+        if isinstance(other, Polynomial):
+            # Check whether the second object is a polynomial.
+            length = self.coefficients.size + other.coefficients.size - 1
+            output = []
+            for total in np.arange(length):
+                mini = max(0, total - other.coefficients.size + 1)
+                maxi = min(total, self.coefficients.size - 1)
+                output.append(
+                    sum([self.coefficients[exp1] * other.coefficients[- exp1 + total] for exp1 in
+                         np.arange(mini, maxi + 1)], start=0))
+            return Polynomial(output)
+            # TODO: Maybe it is faster to Kronecker multiply the coefficient arrays and then sum over the resulting
+            #  matrix.
+        elif isinstance(other, int):
+            # Check whether the second object is an integer.
+            return self.scalar_multiplication(other)
+        else:
+            # If the second polynomial is not a polynomial (but e.g. a quasi-polynomial) return NotImplemented to
+            # trigger the function __rmul__ of the other class.
+            return NotImplemented
+
+    def __rmul__(self, other : int) -> 'Polynomial':
+        """
+        int * p
+
+        Multiplies a scalar with a polynomial.
+
+            Returns
+            -------
+            Polynomial
+        """
+
+        return self * other
 
 
 class QuasiPolynomial:
@@ -265,7 +290,9 @@ class QuasiPolynomial:
         __sub__ : QuasiPolynomial
             Subtracts a quasi-polynomial from another.
         __mul__ : QuasiPolynomial
-            Multiplies two quasi-polynomials.
+            Multiplies two quasi-polynomials, a quasi-polynomial with a polynomial or a quasi-polynomial with a scalar.
+        __rmul__ : QuasiPolynomial
+            Multiplies a polynomial with a quasi-polynomial or a scalar with a quasi-polynomial.
     """
 
     def __init__(self, coefficient_list: List[List[int]]) -> None:
@@ -456,27 +483,51 @@ class QuasiPolynomial:
 
     # TODO: Define multiplication of a polynomial with a quasi-polynomial.
 
-    def __mul__(self, other: 'QuasiPolynomial') -> 'QuasiPolynomial':
+    def __mul__(self, other: Union['QuasiPolynomial', Polynomial, int]) -> 'QuasiPolynomial':
         """
-        qp1 * qp2
+        qp1 * qp2 | qp * p | qp * int
 
-        Multiplies two quasi-polynomials.
+        Multiplies two quasi-polynomials, a quasi-polynomial with a polynomial or a quasi-polynomial with a scalar.
 
             Returns
             -------
             QuasiPolynomial
         """
 
-        length = self.polynomials.size + other.polynomials.size - 1
-        output = []
-        for total in np.arange(length):
-            mini = max(0, total - other.polynomials.size + 1)
-            maxi = min(total, self.polynomials.size - 1)
-            output.append(sum(
-                [self.polynomials[exp1] * other.polynomials[- exp1 + total] for exp1 in np.arange(mini, maxi + 1)],
-                start=Polynomial.zero()))
-        return QuasiPolynomial([p.to_list() for p in output]).simplify()
-        # TODO: Maybe it is faster to Kronecker multiply the coefficient arrays and then sum over the resulting matrix.
+        if isinstance(other, QuasiPolynomial):
+            # Check whether the second object is a quasi-polynomial.
+            length = self.polynomials.size + other.polynomials.size - 1
+            output = []
+            for total in np.arange(length):
+                mini = max(0, total - other.polynomials.size + 1)
+                maxi = min(total, self.polynomials.size - 1)
+                output.append(sum(
+                    [self.polynomials[exp1] * other.polynomials[- exp1 + total] for exp1 in np.arange(mini, maxi + 1)],
+                    start=Polynomial.zero()))
+            return QuasiPolynomial([p.to_list() for p in output]).simplify()
+            # TODO: Maybe it is faster to Kronecker multiply the coefficient arrays and then sum over the resulting
+            #  matrix.
+        elif isinstance(other, Polynomial):
+            # Check whether the second object is a polynomial and lift it to a quasi-polynomial.
+            return self * QuasiPolynomial([other.to_list()])
+        if isinstance(other, int):
+            # Check whether the second object is an integer and call scalar_multiplication.
+            return self.scalar_multiplication(other)
+        else:
+            return NotImplemented
+
+    def __rmul__(self, other: Union[Polynomial, int]) -> 'QuasiPolynomial':
+        """
+        p * qp | int * qp
+
+        Multiplies a polynomial with a quasi-polynomial or a scalar with a quasi-polynomial.
+
+            Returns
+            -------
+            QuasiPolynomial
+        """
+
+        return self * other
 
 
 def test_main():
