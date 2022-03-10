@@ -105,7 +105,7 @@ class Polynomial:
             # Check whether the polynomial is empty.
             while self.coefficients[-1] == 0:
                 # Check whether the last coefficient is zero to remove it.
-                self.coefficients.resize(self.coefficients.size - 1)
+                self.coefficients = self.coefficients[:-1].copy()
                 if self.coefficients.size == 0:
                     # Check whether the polynomial is empty.
                     break
@@ -239,7 +239,7 @@ class Polynomial:
             # trigger the function __rmul__ of the other class.
             return NotImplemented
 
-    def __rmul__(self, other : int) -> 'Polynomial':
+    def __rmul__(self, other: int) -> 'Polynomial':
         """
         int * p
 
@@ -261,22 +261,24 @@ class QuasiPolynomial:
 
         Parameters
         ----------
-        coefficient_list : List[List[int]]
-            The list of coefficients.
-            The coefficient of x^m exp(-nx) is coefficient_list[n][m].
+        polynomial_list : List[Polynomial]
+                The list of polynomials.
+                The coefficient polynomial of exp(-nx) is polynomial_list[n].
 
         Attributes
         ----------
         polynomials : np.ndarray[Polynomial]
             The array of polynomials.
-            The polynomial in front of exp(-nx) is polynomials[n].
+            The coefficient polynomial of exp(-nx) is polynomials[n].
 
         Methods
         -------
-        copy : QuasiPolynomial
-            Copies a quasi-polynomial.
         simplify : QuasiPolynomial
             Simplifies a quasi-polynomial by *removing* zero polynomials.
+        new : QuasiPolynomial
+            Creates a quasi-polynomial using a nested list of coefficients.
+        copy : QuasiPolynomial
+            Copies a quasi-polynomial.
         pretty_print : str
             Transform a quasi-polynomial in the mathematical form suitable to be read by humans.
         __eq__ : bool
@@ -295,35 +297,16 @@ class QuasiPolynomial:
             Multiplies a polynomial with a quasi-polynomial or a scalar with a quasi-polynomial.
     """
 
-    def __init__(self, coefficient_list: List[List[int]]) -> None:
+    def __init__(self, polynomial_list: List[Polynomial]) -> None:
         """
             Parameters
             ----------
-            coefficient_list : List[List[int]]
-                The list of coefficients.
-                The coefficient of x^m exp(-nx) is coefficient_list[n][m].
+            polynomial_list : List[Polynomial]
+                The list of polynomials.
+                The coefficient polynomial of exp(-nx) is polynomial_list[n].
         """
 
-        if len(coefficient_list) == 0:
-            self.polynomials = np.asarray([])
-        else:
-            self.polynomials = np.asarray([Polynomial(p) for p in coefficient_list])
-
-    def copy(self) -> 'QuasiPolynomial':
-        """
-        copy(p)
-
-        Copies a quasi-polynomial.
-
-            Returns
-            -------
-            quasi-Polynomial
-        """
-
-        return QuasiPolynomial([p.copy().coefficients.tolist() for p in self.polynomials])
-
-    def __str__(self) -> str:
-        return str([p.coefficients.tolist() for p in self.polynomials])
+        self.polynomials = np.asarray(polynomial_list, dtype=Polynomial)
 
     def simplify(self) -> 'QuasiPolynomial':
         """
@@ -336,20 +319,55 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
+        for polynomial in self.polynomials:
+            # Simplify the remaining polynomials.
+            polynomial.simplify()
         if self.polynomials.size == 0:
             # Check whether the quasi-polynomial is empty.
             return QuasiPolynomial([])
         else:
             while self.polynomials[-1].coefficients.size == 0:
                 # Check whether the last polynomial is empty to remove it.
-                self.polynomials.resize(self.polynomials.size - 1)
+                self.polynomials = self.polynomials[:-1].copy()
                 if self.polynomials.size == 0:
                     # Recheck whether the quasi-polynomial is empty.
                     return QuasiPolynomial([])
-        for polynomial in self.polynomials:
-            # Simplify the remaining polynomials.
-            polynomial.simplify()
         return self
+
+    @staticmethod
+    def new(coefficient_list: List[List[int]]) -> 'QuasiPolynomial':
+        """
+        new(List[List[int]])
+
+        Creates a quasi-polynomial using a nested list of coefficients.
+
+            Parameters
+            ----------
+            coefficient_list
+
+            Returns
+            -------
+            QuasiPolynomial
+        """
+
+        polynomial_list = [Polynomial(coeff) for coeff in coefficient_list]
+        return QuasiPolynomial(polynomial_list).simplify()
+
+    def copy(self) -> 'QuasiPolynomial':
+        """
+        copy(p)
+
+        Copies a quasi-polynomial.
+
+            Returns
+            -------
+            quasi-Polynomial
+        """
+
+        return QuasiPolynomial([p.copy().coefficients for p in self.polynomials])
+
+    def __str__(self) -> str:
+        return str([p.coefficients.tolist() for p in self.polynomials])
 
     def pretty_print(self) -> str:
         """
@@ -427,9 +445,8 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
-        return QuasiPolynomial([p.scalar_multiplication(scalar).to_list() for p in self.polynomials])
+        return QuasiPolynomial([p.scalar_multiplication(scalar) for p in self.polynomials])
         # TODO: Can this be faster?
-        # TODO: Include scalar multiplication in __mul__
 
     def __neg__(self) -> 'QuasiPolynomial':
         """
@@ -458,14 +475,16 @@ class QuasiPolynomial:
         left_size = self.polynomials.size
         right_size = other.polynomials.size
         if left_size > right_size:
-            output = np.concatenate(
+            new_other = np.concatenate(
                 (other.polynomials,
-                 np.array([Polynomial.zero()] * (left_size - right_size)))) + self.polynomials
+                 np.array([Polynomial.zero()] * (left_size - right_size))))
+            output = new_other + self.polynomials
         else:
-            output = np.concatenate(
+            new_self = np.concatenate(
                 (self.polynomials,
-                 np.array([Polynomial.zero()] * (right_size - left_size)))) + other.polynomials
-        return QuasiPolynomial([p.to_list() for p in output]).simplify()
+                 np.array([Polynomial.zero()] * (right_size - left_size))))
+            output = new_self + other.polynomials
+        return QuasiPolynomial(output).simplify()
 
     def __sub__(self, other: 'QuasiPolynomial') -> 'QuasiPolynomial':
         """
@@ -504,12 +523,12 @@ class QuasiPolynomial:
                 output.append(sum(
                     [self.polynomials[exp1] * other.polynomials[- exp1 + total] for exp1 in np.arange(mini, maxi + 1)],
                     start=Polynomial.zero()))
-            return QuasiPolynomial([p.to_list() for p in output]).simplify()
+            return QuasiPolynomial(output).simplify()
             # TODO: Maybe it is faster to Kronecker multiply the coefficient arrays and then sum over the resulting
             #  matrix.
         elif isinstance(other, Polynomial):
             # Check whether the second object is a polynomial and lift it to a quasi-polynomial.
-            return self * QuasiPolynomial([other.to_list()])
+            return self * QuasiPolynomial([other])
         if isinstance(other, int):
             # Check whether the second object is an integer and call scalar_multiplication.
             return self.scalar_multiplication(other)
@@ -531,4 +550,6 @@ class QuasiPolynomial:
 
 
 def test_main():
-    print(QuasiPolynomial([[1, 2], [3, 4]]) * QuasiPolynomial([[5, 6], [7, 8]]))
+    print((QuasiPolynomial.new([[1, 2], [3, 4]]) + QuasiPolynomial.new([[-1, -2], [-3, -4]])).polynomials[0])
+    print((QuasiPolynomial.new([[1, 2], [3, 4]]) + QuasiPolynomial.new([[-1, -2], [-3, -4]])).polynomials[1])
+    print(QuasiPolynomial.new([]))
