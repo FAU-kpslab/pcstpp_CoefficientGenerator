@@ -139,3 +139,15 @@ class TestQuasiPolynomial(TestCase):
                          QuasiPolynomial([[], [-2, -10, -50]]))
         self.assertEqual(QuasiPolynomial([[2, 4, 8], [2, 10, 50]]) - QuasiPolynomial([[2, 4, 8]]),
                          QuasiPolynomial([[], [2, 10, 50]]))
+
+    def test_multiplication(self):
+        self.assertEqual(QuasiPolynomial([[1, 2], [3, 4]]) * QuasiPolynomial([[5, 6], [7, 8]]),
+                         QuasiPolynomial([[5, 16, 12], [22, 60, 40], [21, 52, 32]]))
+        self.assertEqual(QuasiPolynomial([[1, 2], [3, 4]]) * QuasiPolynomial([[5, 6]]),
+                         QuasiPolynomial([[5, 16, 12], [15, 38, 24]]))
+        self.assertEqual(QuasiPolynomial([[5, 6]]) * QuasiPolynomial([[1, 2], [3, 4]]),
+                         QuasiPolynomial([[5, 16, 12], [15, 38, 24]]))
+        self.assertEqual(QuasiPolynomial([[1]]) * QuasiPolynomial([[1, 2], [3, 4]]), QuasiPolynomial([[1, 2], [3, 4]]))
+        self.assertEqual(QuasiPolynomial([[1, 2], [3, 4]]) * QuasiPolynomial([[1]]), QuasiPolynomial([[1, 2], [3, 4]]))
+        self.assertEqual(QuasiPolynomial([[]]) * QuasiPolynomial([[1, 2], [3, 4]]), QuasiPolynomial([[]]))
+        self.assertEqual(QuasiPolynomial([[1, 2], [3, 4]]) * QuasiPolynomial([[]]), QuasiPolynomial([[]]))

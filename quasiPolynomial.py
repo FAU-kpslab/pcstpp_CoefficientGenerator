@@ -214,14 +214,14 @@ class Polynomial:
         """
 
         length = self.coefficients.size + other.coefficients.size - 1
-        coeffs = []
+        output = []
         for total in np.arange(length):
             mini = max(0, total - other.coefficients.size + 1)
             maxi = min(total, self.coefficients.size - 1)
-            coeffs.append(
+            output.append(
                 sum([self.coefficients[exp1] * other.coefficients[- exp1 + total] for exp1 in
-                     np.arange(mini, maxi + 1)]))
-        return Polynomial(coeffs)
+                     np.arange(mini, maxi + 1)], start=0))
+        return Polynomial(output)
     # TODO: Maybe it is faster to Kronecker multiply the coefficient arrays and then sum over the resulting matrix.
 
 
@@ -261,6 +261,8 @@ class QuasiPolynomial:
             Adds two quasi-polynomials.
         __sub__ : QuasiPolynomial
             Subtracts a quasi-polynomial from another.
+        __mul__ : QuasiPolynomial
+            Multiplies two quasi-polynomials.
     """
 
     def __init__(self, coefficient_list: List[List[int]]) -> None:
@@ -450,8 +452,28 @@ class QuasiPolynomial:
 
     # TODO: Define multiplication of a polynomial with a quasi-polynomial.
 
-    # TODO: Define multiplication of two quasi-polynomials.
+    def __mul__(self, other):
+        """
+        qp1 * qp2
+
+        Multiplies two quasi-polynomials.
+
+            Returns
+            -------
+            QuasiPolynomial
+        """
+
+        length = self.polynomials.size + other.polynomials.size - 1
+        output = []
+        for total in np.arange(length):
+            mini = max(0, total - other.polynomials.size + 1)
+            maxi = min(total, self.polynomials.size - 1)
+            output.append(sum(
+                [self.polynomials[exp1] * other.polynomials[- exp1 + total] for exp1 in np.arange(mini, maxi + 1)],
+                start=Polynomial.zero()))
+        return QuasiPolynomial([p.to_list() for p in output]).simplify()
+        # TODO: Maybe it is faster to Kronecker multiply the coefficient arrays and then sum over the resulting matrix.
 
 
 def test_main():
-    print(QuasiPolynomial([]))
+    print(QuasiPolynomial([[1, 2], [3, 4]]) * QuasiPolynomial([[5, 6], [7, 8]]))
