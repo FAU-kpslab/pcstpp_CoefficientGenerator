@@ -24,6 +24,8 @@ class Polynomial:
         -------
         to_list : List[int]
             Transforms a polynomial into the integer list used to construct it.
+        zero : Polynomial
+
         copy : Polynomial
             Copies a polynomial.
         simplify : Polynomial
@@ -54,7 +56,7 @@ class Polynomial:
         self.coefficients = np.asarray(coefficient_list).astype(int, copy=False)
 
     @staticmethod
-    def zero():
+    def zero() -> 'Polynomial':
         return Polynomial([])
 
     def to_list(self) -> List[int]:
@@ -70,7 +72,7 @@ class Polynomial:
 
         return list(self.coefficients)
 
-    def copy(self):
+    def copy(self) -> 'Polynomial':
         """
         copy(p)
 
@@ -86,7 +88,7 @@ class Polynomial:
     def __str__(self) -> str:
         return str(self.to_list())
 
-    def simplify(self):
+    def simplify(self) -> 'Polynomial':
         """
         p.simplify()
 
@@ -137,7 +139,7 @@ class Polynomial:
                     output.append(str(coefficient) + 'x^' + str(exponent))
             return '+'.join(output).replace('+-', '-')
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: 'Polynomial') -> bool:
         """
         p1 == p2
 
@@ -150,7 +152,7 @@ class Polynomial:
 
         return np.array_equal(self.simplify().coefficients, other.simplify().coefficients)
 
-    def scalar_multiplication(self, scalar: int):
+    def scalar_multiplication(self, scalar: int) -> 'Polynomial':
         """
         p.scalar_multiplication(int)
 
@@ -166,8 +168,9 @@ class Polynomial:
         """
 
         return Polynomial(scalar * self.coefficients).simplify()
+        # TODO: Include scalar multiplication in __mul__
 
-    def __neg__(self):
+    def __neg__(self) -> 'Polynomial':
         """
         p.negation()
 
@@ -180,7 +183,7 @@ class Polynomial:
 
         return self.scalar_multiplication(-1)
 
-    def __add__(self, other):
+    def __add__(self, other: 'Polynomial') -> 'Polynomial':
         """
         p1 + p2
 
@@ -202,7 +205,7 @@ class Polynomial:
             output = np.concatenate((self.coefficients, np.zeros(right_size - left_size, dtype=int)))
             return Polynomial(list(output + other.coefficients)).simplify()
 
-    def __mul__(self, other):
+    def __mul__(self, other: 'Polynomial') -> 'Polynomial':
         """
         p1 * p2
 
@@ -279,7 +282,7 @@ class QuasiPolynomial:
         else:
             self.polynomials = np.asarray([Polynomial(p) for p in coefficient_list])
 
-    def copy(self):
+    def copy(self) -> 'QuasiPolynomial':
         """
         copy(p)
 
@@ -295,7 +298,7 @@ class QuasiPolynomial:
     def __str__(self) -> str:
         return str([p.coefficients.tolist() for p in self.polynomials])
 
-    def simplify(self):
+    def simplify(self) -> 'QuasiPolynomial':
         """
         qp.simplify()
 
@@ -369,7 +372,7 @@ class QuasiPolynomial:
                         output.append('(' + polynomial.pretty_print() + ')exp(-' + str(exponent) + 'x)')
             return '+'.join(output).replace('+-', '-')
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: 'QuasiPolynomial') -> bool:
         """
         qp1 == qp2
 
@@ -382,7 +385,7 @@ class QuasiPolynomial:
 
         return np.array_equal(self.simplify().polynomials, other.simplify().polynomials)
 
-    def scalar_multiplication(self, scalar: int):
+    def scalar_multiplication(self, scalar: int) -> 'QuasiPolynomial':
         """
         qp.scalar_multiplication(int)
 
@@ -394,13 +397,14 @@ class QuasiPolynomial:
 
             Returns
             -------
-            Polynomial
+            QuasiPolynomial
         """
 
         return QuasiPolynomial([p.scalar_multiplication(scalar).to_list() for p in self.polynomials])
         # TODO: Can this be faster?
+        # TODO: Include scalar multiplication in __mul__
 
-    def __neg__(self):
+    def __neg__(self) -> 'QuasiPolynomial':
         """
         qp.negation(int)
 
@@ -408,12 +412,12 @@ class QuasiPolynomial:
 
             Returns
             -------
-            Polynomial
+            QuasiPolynomial
         """
 
         return self.scalar_multiplication(-1)
 
-    def __add__(self, other):
+    def __add__(self, other: 'QuasiPolynomial') -> 'QuasiPolynomial':
         """
         qp1 + qp2
 
@@ -436,7 +440,7 @@ class QuasiPolynomial:
                  np.array([Polynomial.zero()] * (right_size - left_size)))) + other.polynomials
         return QuasiPolynomial([p.to_list() for p in output]).simplify()
 
-    def __sub__(self, other):
+    def __sub__(self, other: 'QuasiPolynomial') -> 'QuasiPolynomial':
         """
         qp1 - qp2
 
@@ -452,7 +456,7 @@ class QuasiPolynomial:
 
     # TODO: Define multiplication of a polynomial with a quasi-polynomial.
 
-    def __mul__(self, other):
+    def __mul__(self, other: 'QuasiPolynomial') -> 'QuasiPolynomial':
         """
         qp1 * qp2
 
