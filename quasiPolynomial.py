@@ -22,10 +22,8 @@ class Polynomial:
 
         Methods
         -------
-        to_list : List[int]
-            Transforms a polynomial into the integer list used to construct it.
         zero : Polynomial
-
+            Creates an empty polynomial.
         copy : Polynomial
             Copies a polynomial.
         simplify : Polynomial
@@ -59,20 +57,16 @@ class Polynomial:
 
     @staticmethod
     def zero() -> 'Polynomial':
-        return Polynomial([])
-
-    def to_list(self) -> List[int]:
         """
-        p.to_list()
+        Polynomial.zero()
 
-        Transforms a polynomial into the integer list used to construct it.
+        Creates an empty polynomial.
 
             Returns
             -------
-            List[int]
+            Polynomial
         """
-
-        return list(self.coefficients)
+        return Polynomial([])
 
     def copy(self) -> 'Polynomial':
         """
@@ -88,7 +82,7 @@ class Polynomial:
         return Polynomial(self.coefficients.copy())
 
     def __str__(self) -> str:
-        return str(self.to_list())
+        return str(self.coefficients)
 
     def simplify(self) -> 'Polynomial':
         """
@@ -101,13 +95,13 @@ class Polynomial:
             Polynomial
         """
 
+        # Check whether the polynomial is empty.
         if self.coefficients.size != 0:
-            # Check whether the polynomial is empty.
+            # Check whether the last coefficient is zero to remove it.
             while self.coefficients[-1] == 0:
-                # Check whether the last coefficient is zero to remove it.
                 self.coefficients = self.coefficients[:-1].copy()
+                # Check whether the polynomial is empty.
                 if self.coefficients.size == 0:
-                    # Check whether the polynomial is empty.
                     break
         return self
 
@@ -122,22 +116,22 @@ class Polynomial:
             str
         """
 
+        # Check whether the polynomial is empty.
         if self.coefficients.size == 0:
-            # Check whether the polynomial is empty.
             return '0'
+        # Check whether the polynomial contains only the constant term.
         elif self.coefficients.size == 1:
-            # Check whether the polynomial contains only the constant term.
             return str(self.coefficients[0])
         else:
             output = []
+            # Check whether the constant term is zero to leave that away.
             if self.coefficients[0] != 0:
-                # Check whether the constant term is zero to leave that away.
                 output.append(str(self.coefficients[0]))
             if self.coefficients[1] != 0:
                 output.append(str(self.coefficients[1]) + 'x')
             for exponent, coefficient in list(enumerate(self.coefficients))[2:]:
+                # Check for the remaining coefficients whether they are zero to leave those away.
                 if coefficient != 0:
-                    # Check for the remaining coefficients whether they are zero to leave those away.
                     output.append(str(coefficient) + 'x^' + str(exponent))
             return '+'.join(output).replace('+-', '-')
 
@@ -170,7 +164,6 @@ class Polynomial:
         """
 
         return Polynomial(scalar * self.coefficients).simplify()
-        # TODO: Include scalar multiplication in __mul__
 
     def __neg__(self) -> 'Polynomial':
         """
@@ -199,11 +192,11 @@ class Polynomial:
         left_size = self.coefficients.size
         right_size = other.coefficients.size
         if left_size > right_size:
-            # Check whether the right polynomial is shorter to add enough zeros to make them equally large.
+            # Add zeros to the shorter polynomial to make them equally long.
             output = np.concatenate((other.coefficients, np.zeros(left_size - right_size, dtype=int)))
             return Polynomial(list(output + self.coefficients)).simplify()
         else:
-            # Otherwise, the left polynomial is shorter and has to be extended by adding zeros.
+            # Add zeros to the shorter polynomial to make them equally long.
             output = np.concatenate((self.coefficients, np.zeros(right_size - left_size, dtype=int)))
             return Polynomial(list(output + other.coefficients)).simplify()
 
@@ -218,8 +211,8 @@ class Polynomial:
             Polynomial
         """
 
+        # Check whether the second object is a polynomial.
         if isinstance(other, Polynomial):
-            # Check whether the second object is a polynomial.
             length = self.coefficients.size + other.coefficients.size - 1
             output = []
             for total in np.arange(length):
@@ -231,12 +224,12 @@ class Polynomial:
             return Polynomial(output)
             # TODO: Maybe it is faster to Kronecker multiply the coefficient arrays and then sum over the resulting
             #  matrix.
+        # Check whether the second object is an integer.
         elif isinstance(other, int):
-            # Check whether the second object is an integer.
             return self.scalar_multiplication(other)
+        # If the second polynomial is not a polynomial (but e.g. a quasi-polynomial) return NotImplemented to trigger
+        # the function __rmul__ of the other class.
         else:
-            # If the second polynomial is not a polynomial (but e.g. a quasi-polynomial) return NotImplemented to
-            # trigger the function __rmul__ of the other class.
             return NotImplemented
 
     def __rmul__(self, other: int) -> 'Polynomial':
@@ -319,18 +312,18 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
+        # Simplify the remaining polynomials.
         for polynomial in self.polynomials:
-            # Simplify the remaining polynomials.
             polynomial.simplify()
-        if self.polynomials.size == 0:
             # Check whether the quasi-polynomial is empty.
+        if self.polynomials.size == 0:
             return QuasiPolynomial([])
         else:
+            # Check whether the last polynomial is empty to remove it.
             while self.polynomials[-1].coefficients.size == 0:
-                # Check whether the last polynomial is empty to remove it.
                 self.polynomials = self.polynomials[:-1].copy()
+                # Recheck whether the quasi-polynomial is empty.
                 if self.polynomials.size == 0:
-                    # Recheck whether the quasi-polynomial is empty.
                     return QuasiPolynomial([])
         return self
 
@@ -380,36 +373,36 @@ class QuasiPolynomial:
             str
         """
 
+        # Check whether the quasi-polynomial is empty.
         if self.polynomials.size == 0:
-            # Check whether the quasi-polynomial is empty.
             return '0'
+        # Check whether the quasi-polynomial contains only the first polynomial.
         if self.polynomials.size == 1:
-            # Check whether the quasi-polynomial contains only the first polynomial.
             return self.polynomials[0].pretty_print()
         else:
             output = []
+            # Check whether the first polynomial is zero to leave those away.
             if self.polynomials[0].pretty_print() != '0':
-                # Check whether the first polynomial is zero to leave those away.
                 output.append(self.polynomials[0].pretty_print())
+            # Check whether the second polynomial is zero to leave those away.
             if self.polynomials[1].pretty_print() != '0':
-                # Check whether the second polynomial is zero to leave those away.
+                # Check whether the polynomial contains only the constant term to leave away the brackets.
                 if self.polynomials[1].coefficients.size == 1:
-                    # Check whether the polynomial contains only the constant term to leave away the brackets.
+                    # Check whether the polynomial contains only 1 to leave that away.
                     if self.polynomials[1].coefficients == 1:
-                        # Check whether the polynomial contains only 1 to leave that away.
                         output.append('exp(-x)')
                     else:
                         output.append(self.polynomials[1].pretty_print() + 'exp(-x)')
                 else:
                     output.append('(' + self.polynomials[1].pretty_print() + ')exp(-x)')
             for exponent, polynomial in list(enumerate(self.polynomials))[2:]:
+                # Check for the remaining polynomials whether they are zero to leave those away.
                 if polynomial.pretty_print() != '0':
-                    # Check for the remaining polynomials whether they are zero to leave those away.
+                    # Check for the remaining polynomials whether they contain only the constant term to leave away the
+                    # brackets.
                     if polynomial.coefficients.size == 1:
-                        # Check for the remaining polynomials whether they contain only the constant term to leave away
-                        # the brackets.
+                        # Check for the remaining polynomials whether they contain only 1 to leave that away.
                         if polynomial.coefficients == 1:
-                            # Check for the remaining polynomials whether they contain only 1 to leave that away.
                             output.append('exp(-' + str(exponent) + 'x)')
                         else:
                             output.append(polynomial.pretty_print() + 'exp(-' + str(exponent) + 'x)')
@@ -445,8 +438,7 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
-        return QuasiPolynomial([p.scalar_multiplication(scalar) for p in self.polynomials])
-        # TODO: Can this be faster?
+        return QuasiPolynomial(scalar * self.polynomials).simplify()
 
     def __neg__(self) -> 'QuasiPolynomial':
         """
@@ -475,11 +467,13 @@ class QuasiPolynomial:
         left_size = self.polynomials.size
         right_size = other.polynomials.size
         if left_size > right_size:
+            # Add empty polynomials to the shorter quasi-polynomial to make them equally long.
             new_other = np.concatenate(
                 (other.polynomials,
                  np.array([Polynomial.zero()] * (left_size - right_size))))
             output = new_other + self.polynomials
         else:
+            # Add empty polynomials to the shorter quasi-polynomial to make them equally long.
             new_self = np.concatenate(
                 (self.polynomials,
                  np.array([Polynomial.zero()] * (right_size - left_size))))
@@ -513,8 +507,8 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
+        # Check whether the second object is a quasi-polynomial.
         if isinstance(other, QuasiPolynomial):
-            # Check whether the second object is a quasi-polynomial.
             length = self.polynomials.size + other.polynomials.size - 1
             output = []
             for total in np.arange(length):
@@ -526,11 +520,11 @@ class QuasiPolynomial:
             return QuasiPolynomial(output).simplify()
             # TODO: Maybe it is faster to Kronecker multiply the coefficient arrays and then sum over the resulting
             #  matrix.
+        # Check whether the second object is a polynomial and lift it to a quasi-polynomial.
         elif isinstance(other, Polynomial):
-            # Check whether the second object is a polynomial and lift it to a quasi-polynomial.
             return self * QuasiPolynomial([other])
+        # Check whether the second object is an integer and call scalar_multiplication.
         if isinstance(other, int):
-            # Check whether the second object is an integer and call scalar_multiplication.
             return self.scalar_multiplication(other)
         else:
             return NotImplemented
