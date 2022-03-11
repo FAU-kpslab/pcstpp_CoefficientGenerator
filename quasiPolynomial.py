@@ -213,17 +213,13 @@ class Polynomial:
 
         # Check whether the second object is a polynomial.
         if isinstance(other, Polynomial):
-            length = self.coefficients.size + other.coefficients.size - 1
-            output = []
-            for total in np.arange(length):
-                mini = max(0, total - other.coefficients.size + 1)
-                maxi = min(total, self.coefficients.size - 1)
-                output.append(
-                    sum([self.coefficients[exp1] * other.coefficients[- exp1 + total] for exp1 in
-                         np.arange(mini, maxi + 1)], start=0))
-            return Polynomial(output)
-            # TODO: Maybe it is faster to Kronecker multiply the coefficient arrays and then sum over the resulting
-            #  matrix.
+            # Calculate the matrix containing all combinations of coefficients of both polynomials.
+            # Flip it such that all coefficients corresponding to the same x^n are part of the same diagonals.
+            combinations = np.flipud(np.outer(self.coefficients, other.coefficients))
+            # Sum over the diagonals to obtain the real coefficients.
+            output = [np.sum(combinations.diagonal(exponent), initial=0) for exponent in
+                      np.arange(- self.coefficients.size + 1, other.coefficients.size)]
+            return Polynomial(output).simplify()
         # Check whether the second object is an integer.
         elif isinstance(other, int):
             return self.scalar_multiplication(other)
@@ -494,8 +490,6 @@ class QuasiPolynomial:
         # TODO: Is this faster when defined without using add?
         return self + (-other)
 
-    # TODO: Define multiplication of a polynomial with a quasi-polynomial.
-
     def __mul__(self, other: Union['QuasiPolynomial', Polynomial, int]) -> 'QuasiPolynomial':
         """
         qp1 * qp2 | qp * p | qp * int
@@ -509,17 +503,14 @@ class QuasiPolynomial:
 
         # Check whether the second object is a quasi-polynomial.
         if isinstance(other, QuasiPolynomial):
-            length = self.polynomials.size + other.polynomials.size - 1
-            output = []
-            for total in np.arange(length):
-                mini = max(0, total - other.polynomials.size + 1)
-                maxi = min(total, self.polynomials.size - 1)
-                output.append(sum(
-                    [self.polynomials[exp1] * other.polynomials[- exp1 + total] for exp1 in np.arange(mini, maxi + 1)],
-                    start=Polynomial.zero()))
+            # Calculate the matrix containing all combinations of coefficient polynomials of both quasi-polynomials.
+            # Flip it such that all coefficient polynomials corresponding to the same exp(-nx) are part of the same
+            # diagonals.
+            combinations = np.flipud(np.outer(self.polynomials, other.polynomials))
+            # Sum over the diagonals to obtain the real coefficient polynomials.
+            output = [np.sum(combinations.diagonal(exponent), initial=Polynomial.zero()) for exponent in
+                      np.arange(- self.polynomials.size + 1, other.polynomials.size)]
             return QuasiPolynomial(output).simplify()
-            # TODO: Maybe it is faster to Kronecker multiply the coefficient arrays and then sum over the resulting
-            #  matrix.
         # Check whether the second object is a polynomial and lift it to a quasi-polynomial.
         elif isinstance(other, Polynomial):
             return self * QuasiPolynomial([other])
@@ -544,6 +535,5 @@ class QuasiPolynomial:
 
 
 def test_main():
-    print((QuasiPolynomial.new([[1, 2], [3, 4]]) + QuasiPolynomial.new([[-1, -2], [-3, -4]])).polynomials[0])
-    print((QuasiPolynomial.new([[1, 2], [3, 4]]) + QuasiPolynomial.new([[-1, -2], [-3, -4]])).polynomials[1])
-    print(QuasiPolynomial.new([]))
+    print(Polynomial([1, 2]) * Polynomial([5, 1]))
+    print(Polynomial([5, 11, 2]))
