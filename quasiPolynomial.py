@@ -42,10 +42,14 @@ class Polynomial:
             Multiplies a polynomial with -1.
         __add__ : Polynomial
             Adds two polynomials.
+        __sub__ : Polynomials
+            Subtracts a polynomial from another.
         __mul__ : Polynomial
             Multiplies two polynomials or a polynomial with a scalar.
         __rmul__ : Polynomial
             Multiplies a scalar with a polynomial.
+        integrate : Polynomial
+            Integrate a polynomial with starting condition 0.
     """
 
     def __init__(self, coefficient_list: Union[List[Fraction]]) -> None:
@@ -215,12 +219,25 @@ class Polynomial:
         right_size = other.coefficients.size
         if left_size > right_size:
             # Add zeros to the shorter polynomial to make them equally long.
-            output = np.concatenate((other.coefficients, np.zeros(left_size - right_size, dtype=Fraction)))
+            output = np.concatenate((other.coefficients, np.zeros(left_size - right_size, dtype=int)))
             return Polynomial(list(output + self.coefficients)).simplify()
         else:
             # Add zeros to the shorter polynomial to make them equally long.
-            output = np.concatenate((self.coefficients, np.zeros(right_size - left_size, dtype=Fraction)))
+            output = np.concatenate((self.coefficients, np.zeros(right_size - left_size, dtype=int)))
             return Polynomial(list(output + other.coefficients)).simplify()
+
+    def __sub__(self, other: 'Polynomial') -> 'Polynomial':
+        """
+        p1 - p2
+
+        Subtracts a polynomial from another.
+
+            Returns
+            -------
+            QuasiPolynomial
+        """
+
+        return self + (-other)
 
     def __mul__(self, other: Union['Polynomial', Fraction, int, float]) -> 'Polynomial':
         """
@@ -262,6 +279,36 @@ class Polynomial:
         """
 
         return self * other
+
+    def integrate(self) -> 'Polynomial':
+        """
+        integrate(p)
+
+        Integrate a polynomial with starting condition 0.
+
+            Returns
+            -------
+            Polynomial
+        """
+
+        prefactors = np.array([Fraction(1, n + 1) for n in np.arange(self.coefficients.size)])
+        output = (prefactors * self.coefficients).tolist()
+        return Polynomial([Fraction(0)] + output)
+
+    def diff(self) -> 'Polynomial':
+        """
+        diff(p)
+
+        Perform the derivative of a polynomial.
+
+            Returns
+            -------
+            Polynomial
+        """
+
+        prefactors = np.arange(1, self.coefficients.size)
+        polynomial = self.coefficients[1:].copy()
+        return Polynomial((prefactors * polynomial).tolist())
 
 
 class QuasiPolynomial:
@@ -306,6 +353,8 @@ class QuasiPolynomial:
             Multiplies two quasi-polynomials, a quasi-polynomial with a polynomial or a quasi-polynomial with a scalar.
         __rmul__ : QuasiPolynomial
             Multiplies a polynomial with a quasi-polynomial or a scalar with a quasi-polynomial.
+        integrate : QuasiPolynomial
+            Integrate a quasi-polynomial with starting condition 0.
     """
 
     def __init__(self, polynomial_list: List[Polynomial]) -> None:
@@ -554,6 +603,42 @@ class QuasiPolynomial:
 
         return self * other
 
+    def integrate(self) -> 'QuasiPolynomial':
+        """
+        integrate(p)
+
+        Integrate a polynomial with starting condition 0.
+
+            Returns
+            -------
+            Polynomial
+        """
+
+        # Check whether the quasi-polynomial is empty.
+        if self.polynomials.size == 0:
+            return QuasiPolynomial([])
+        else:
+            # Integrate the first polynomial (that has no exp).
+            output = [self.polynomials[0].integrate()]
+            # Loop over all other polynomials to integrate them one at a time.
+            for alpha in np.arange(1, self.polynomials.size):
+                if self.polynomials[alpha].coefficients.size == 0:
+                    output.append(Polynomial.zero())
+                else:
+                    # Give the polynomial a name to be able to differentiate it multiple times.
+                    temp_polynomial = self.polynomials[alpha]
+                    resulting_polynomial = -temp_polynomial * Fraction(1, alpha)
+                    # Give the respective integration constant a name.
+                    constant = temp_polynomial.coefficients[0] * Fraction(1, alpha)
+                    # Perform partial integration multiple times.
+                    for n in np.arange(1, self.polynomials[alpha].coefficients.size):
+                        temp_polynomial = temp_polynomial.diff()
+                        resulting_polynomial = resulting_polynomial - (temp_polynomial * Fraction(1, alpha**(n + 1)))
+                        constant = constant + temp_polynomial.coefficients[0] * Fraction(1, alpha**(n + 1))
+                    output[0].coefficients[0] = output[0].coefficients[0] + constant
+                    output.append(resulting_polynomial)
+            return QuasiPolynomial(output).simplify()
+
 
 def test_main():
-    print(Polynomial([Fraction(1, 2), 4]).pretty_print())
+    print(QuasiPolynomial.new([[], [], [1, 2, 0, 0, 5]]).integrate())

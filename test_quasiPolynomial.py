@@ -79,6 +79,15 @@ class TestPolynomial(TestCase):
         self.assertEqual(P.new([1, 2, 3, 4]) * 2, P.new([2, 4, 6, 8]))
         self.assertEqual(2 * P.new([1, 2, 3, 4]), P.new([2, 4, 6, 8]))
 
+    def test_integrate(self):
+        self.assertEqual(P.new([5, 5, 7]).integrate(), P.new([0, 5, Fraction(5, 2), Fraction(7, 3)]))
+        self.assertEqual(P.zero().integrate(), P.zero())
+
+    def test_diff(self):
+        self.assertEqual(P.new([5, 5, 7]).diff(), P.new([5, 14]))
+        self.assertEqual(P.zero().diff(), P.zero())
+        self.assertEqual(P.new([5]).diff(), P.zero())
+
 
 class TestQuasiPolynomial(TestCase):
 
@@ -167,3 +176,10 @@ class TestQuasiPolynomial(TestCase):
         self.assertEqual(P.new([5, 6]) * QP.new([[1, 2], [3, 4]]), QP.new([[5, 16, 12], [15, 38, 24]]))
         self.assertEqual(QP.new([[1, 2], [3, 4]]) * 2, QP.new([[2, 4], [6, 8]]))
         self.assertEqual(2 * QP.new([[1, 2], [3, 4]]), QP.new([[2, 4], [6, 8]]))
+
+    def test_integrate(self):
+        self.assertEqual(QP.new([[5, 5, 7]]).integrate(), QP.new([[0, 5, Fraction(5, 2), Fraction(7, 3)]]))
+        self.assertEqual(QP.new([[1, 2], [3, 4], [5, 6]]).integrate(), QP.new([[11, 1, 1], [-7, -4], [-4, -3]]))
+        self.assertEqual(QP.new([[], [], [1, 2, 0, 0, 5]]).integrate(), QP.new(
+            [[Fraction(19, 4)], [], [Fraction(-19, 4), Fraction(-17, 2), Fraction(-15, 2), -5, Fraction(-5, 2)]]))
+        self.assertEqual(QP.new([[]]).integrate(), QP.new([[]]))
