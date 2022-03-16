@@ -1,5 +1,7 @@
-import numpy as np
+from fractions import Fraction
 from typing import List, Union
+
+import numpy as np
 
 
 class Polynomial:
@@ -10,13 +12,13 @@ class Polynomial:
 
         Parameters
         ----------
-        coefficient_list : List[int]
+        coefficient_list : List[Fraction]
             The list of coefficients.
             The coefficient of x^n is coefficient_array[n].
 
         Attributes
         ----------
-        coefficients : np.ndarray[int]
+        coefficients : np.ndarray[Fraction]
             The numpy array of coefficients.
             The coefficient of x^n is coefficients[n].
 
@@ -24,10 +26,12 @@ class Polynomial:
         -------
         zero : Polynomial
             Creates an empty polynomial.
-        copy : Polynomial
-            Copies a polynomial.
         simplify : Polynomial
             Simplifies a polynomial by *removing* zeros.
+        new : Polynomial
+            Creates a quasi-polynomial using a list of coefficients.
+        copy : Polynomial
+            Copies a polynomial.
         pretty_print : str
             Transform a polynomial in the mathematical form suitable to be read by humans.
         __eq__ : bool
@@ -44,7 +48,7 @@ class Polynomial:
             Multiplies a scalar with a polynomial.
     """
 
-    def __init__(self, coefficient_list: List[int]) -> None:
+    def __init__(self, coefficient_list: Union[List[Fraction]]) -> None:
         """
             Parameters
             ----------
@@ -53,7 +57,7 @@ class Polynomial:
                 The coefficient of x^n is coefficient_list[n].
         """
 
-        self.coefficients = np.asarray(coefficient_list).astype(int, copy=False)
+        self.coefficients = np.asarray(coefficient_list).astype(Fraction, copy=False)
 
     @staticmethod
     def zero() -> 'Polynomial':
@@ -67,22 +71,6 @@ class Polynomial:
             Polynomial
         """
         return Polynomial([])
-
-    def copy(self) -> 'Polynomial':
-        """
-        copy(p)
-
-        Copies a polynomial.
-
-            Returns
-            -------
-            Polynomial
-        """
-
-        return Polynomial(self.coefficients.copy())
-
-    def __str__(self) -> str:
-        return str(self.coefficients)
 
     def simplify(self) -> 'Polynomial':
         """
@@ -104,6 +92,40 @@ class Polynomial:
                 if self.coefficients.size == 0:
                     break
         return self
+
+    @staticmethod
+    def new(coefficient_list: Union[List[Fraction], List[int], List[float]]) -> 'Polynomial':
+        """
+        new(List[Number])
+
+        Creates a quasi-polynomial using a list of coefficients.
+
+            Parameters
+            ----------
+            coefficient_list
+
+            Returns
+            -------
+            Polynomial
+        """
+
+        return Polynomial([Fraction(coeff) for coeff in coefficient_list]).simplify()
+
+    def copy(self) -> 'Polynomial':
+        """
+        copy(p)
+
+        Copies a polynomial.
+
+            Returns
+            -------
+            Polynomial
+        """
+
+        return Polynomial(self.coefficients.copy())
+
+    def __str__(self) -> str:
+        return str(self.coefficients)
 
     def pretty_print(self) -> str:
         """
@@ -148,7 +170,7 @@ class Polynomial:
 
         return np.array_equal(self.simplify().coefficients, other.simplify().coefficients)
 
-    def scalar_multiplication(self, scalar: int) -> 'Polynomial':
+    def scalar_multiplication(self, scalar: Union[Fraction, int, float]) -> 'Polynomial':
         """
         p.scalar_multiplication(int)
 
@@ -193,16 +215,16 @@ class Polynomial:
         right_size = other.coefficients.size
         if left_size > right_size:
             # Add zeros to the shorter polynomial to make them equally long.
-            output = np.concatenate((other.coefficients, np.zeros(left_size - right_size, dtype=int)))
+            output = np.concatenate((other.coefficients, np.zeros(left_size - right_size, dtype=Fraction)))
             return Polynomial(list(output + self.coefficients)).simplify()
         else:
             # Add zeros to the shorter polynomial to make them equally long.
-            output = np.concatenate((self.coefficients, np.zeros(right_size - left_size, dtype=int)))
+            output = np.concatenate((self.coefficients, np.zeros(right_size - left_size, dtype=Fraction)))
             return Polynomial(list(output + other.coefficients)).simplify()
 
-    def __mul__(self, other: Union['Polynomial', int]) -> 'Polynomial':
+    def __mul__(self, other: Union['Polynomial', Fraction, int, float]) -> 'Polynomial':
         """
-        p1 * p2 | p * int
+        p1 * p2 | p * scalar
 
         Multiplies two polynomials or a polynomial with a scalar.
 
@@ -217,20 +239,20 @@ class Polynomial:
             # Flip it such that all coefficients corresponding to the same x^n are part of the same diagonals.
             combinations = np.flipud(np.outer(self.coefficients, other.coefficients))
             # Sum over the diagonals to obtain the real coefficients.
-            output = [np.sum(combinations.diagonal(exponent), initial=0) for exponent in
+            output = [sum(combinations.diagonal(exponent), start=0) for exponent in
                       np.arange(- self.coefficients.size + 1, other.coefficients.size)]
             return Polynomial(output).simplify()
-        # Check whether the second object is an integer.
-        elif isinstance(other, int):
+        # Check whether the second object is a scalar and call scalar_multiplication.
+        elif isinstance(other, (Fraction, int, float)):
             return self.scalar_multiplication(other)
         # If the second polynomial is not a polynomial (but e.g. a quasi-polynomial) return NotImplemented to trigger
         # the function __rmul__ of the other class.
         else:
             return NotImplemented
 
-    def __rmul__(self, other: int) -> 'Polynomial':
+    def __rmul__(self, other: Union[Fraction, int, float]) -> 'Polynomial':
         """
-        int * p
+        scalar * p
 
         Multiplies a scalar with a polynomial.
 
@@ -324,9 +346,9 @@ class QuasiPolynomial:
         return self
 
     @staticmethod
-    def new(coefficient_list: List[List[int]]) -> 'QuasiPolynomial':
+    def new(coefficient_list: Union[List[List[Fraction]], List[List[int]], List[List[float]]]) -> 'QuasiPolynomial':
         """
-        new(List[List[int]])
+        new(List[List[scalar]])
 
         Creates a quasi-polynomial using a nested list of coefficients.
 
@@ -339,7 +361,7 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
-        polynomial_list = [Polynomial(coeff) for coeff in coefficient_list]
+        polynomial_list = [Polynomial.new(coeffs) for coeffs in coefficient_list]
         return QuasiPolynomial(polynomial_list).simplify()
 
     def copy(self) -> 'QuasiPolynomial':
@@ -419,7 +441,7 @@ class QuasiPolynomial:
 
         return np.array_equal(self.simplify().polynomials, other.simplify().polynomials)
 
-    def scalar_multiplication(self, scalar: int) -> 'QuasiPolynomial':
+    def scalar_multiplication(self, scalar: Union[Fraction, int, float]) -> 'QuasiPolynomial':
         """
         qp.scalar_multiplication(int)
 
@@ -438,7 +460,7 @@ class QuasiPolynomial:
 
     def __neg__(self) -> 'QuasiPolynomial':
         """
-        qp.negation(int)
+        -qp
 
         Multiplies a quasi-polynomial with -1.
 
@@ -487,12 +509,11 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
-        # TODO: Is this faster when defined without using add?
         return self + (-other)
 
-    def __mul__(self, other: Union['QuasiPolynomial', Polynomial, int]) -> 'QuasiPolynomial':
+    def __mul__(self, other: Union['QuasiPolynomial', Polynomial, Fraction, int, float]) -> 'QuasiPolynomial':
         """
-        qp1 * qp2 | qp * p | qp * int
+        qp1 * qp2 | qp * p | qp * scalar
 
         Multiplies two quasi-polynomials, a quasi-polynomial with a polynomial or a quasi-polynomial with a scalar.
 
@@ -508,21 +529,21 @@ class QuasiPolynomial:
             # diagonals.
             combinations = np.flipud(np.outer(self.polynomials, other.polynomials))
             # Sum over the diagonals to obtain the real coefficient polynomials.
-            output = [np.sum(combinations.diagonal(exponent), initial=Polynomial.zero()) for exponent in
+            output = [sum(combinations.diagonal(exponent), start=Polynomial.zero()) for exponent in
                       np.arange(- self.polynomials.size + 1, other.polynomials.size)]
             return QuasiPolynomial(output).simplify()
         # Check whether the second object is a polynomial and lift it to a quasi-polynomial.
         elif isinstance(other, Polynomial):
             return self * QuasiPolynomial([other])
-        # Check whether the second object is an integer and call scalar_multiplication.
-        if isinstance(other, int):
+        # Check whether the second object is a scalar and call scalar_multiplication.
+        if isinstance(other, (Fraction, int, float)):
             return self.scalar_multiplication(other)
         else:
             return NotImplemented
 
-    def __rmul__(self, other: Union[Polynomial, int]) -> 'QuasiPolynomial':
+    def __rmul__(self, other: Union[Polynomial, Fraction, int, float]) -> 'QuasiPolynomial':
         """
-        p * qp | int * qp
+        p * qp | scalar * qp
 
         Multiplies a polynomial with a quasi-polynomial or a scalar with a quasi-polynomial.
 
@@ -535,5 +556,4 @@ class QuasiPolynomial:
 
 
 def test_main():
-    print(Polynomial([1, 2]) * Polynomial([5, 1]))
-    print(Polynomial([5, 11, 2]))
+    print(Polynomial([Fraction(1, 2), 4]).pretty_print())

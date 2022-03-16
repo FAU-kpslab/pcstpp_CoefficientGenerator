@@ -1,3 +1,4 @@
+from fractions import Fraction
 from unittest import TestCase
 
 from quasiPolynomial import Polynomial as P
@@ -6,78 +7,94 @@ from quasiPolynomial import QuasiPolynomial as QP
 
 class TestPolynomial(TestCase):
 
-    def test_to_list(self):
-        self.assertEqual(P([2]).to_list(), [2])
+    def test_simplify(self):
+        self.assertEqual(print(P([Fraction(2), Fraction(4), Fraction(8), Fraction(0)]).simplify()),
+                         print(P([Fraction(2), Fraction(4), Fraction(8)])))
+        self.assertEqual(print(P([Fraction(2), Fraction(4), Fraction(0), Fraction(0)]).simplify()),
+                         print(P([Fraction(2), Fraction(4)])))
+        self.assertEqual(print(P([Fraction(0), Fraction(0), Fraction(0)]).simplify()), print(P([])))
+        self.assertEqual(print(P.zero().simplify()), print(P.zero()))
+        self.assertEqual(print(P([Fraction(10, 5)]).simplify()), print(P([Fraction(1, 2)])))
+        # TODO: Add a function that checks for equality without simplification.
+
+    def test_new(self):
+        self.assertEqual(P([Fraction(2)]), P.new([2]))
+        self.assertEqual(P([Fraction(1, 2)]), P.new([1/2]))
+        self.assertEqual(P([Fraction(1, 2)]), P.new([0.5]))
+        self.assertEqual(P.new([Fraction(1, 2)]), P.new([1/2]))
 
     def test_copy(self):
-        temp = P([2, 4, 8])
+        temp = P.new([2, 4, 8])
         self.assertNotEqual(id(temp), id(temp.copy()))
 
     def test_pretty_print(self):
         self.assertEqual(P.zero().pretty_print(), '0')
-        self.assertEqual(P([0]).pretty_print(), '0')
-        self.assertEqual(P([2]).pretty_print(), '2')
-        self.assertEqual(P([-2]).pretty_print(), '-2')
-        self.assertEqual(P([2, 4]).pretty_print(), '2+4x')
-        self.assertEqual(P([-2, -4]).pretty_print(), '-2-4x')
-        self.assertEqual(P([0, 4]).pretty_print(), '4x')
-        self.assertEqual(P([2, 4, 8]).pretty_print(), '2+4x+8x^2')
-        self.assertEqual(P([0, 4, 8, 0, 0]).pretty_print(), '4x+8x^2')
-        self.assertEqual(P([2, 4, 0, 100]).pretty_print(), '2+4x+100x^3')
-
-    def test_simplify(self):
-        self.assertEqual(print(P([2, 4, 8, 0]).simplify()), print(P([2, 4, 8])))
-        self.assertEqual(print(P([2, 4, 0, 0]).simplify()), print(P([2, 4])))
-        self.assertEqual(print(P([0, 0, 0]).simplify()), print(P([])))
-        self.assertEqual(print(P.zero().simplify()), print(P.zero()))
-        # TODO: Add a function that checks for equality without simplification.
+        self.assertEqual(P.new([0]).pretty_print(), '0')
+        self.assertEqual(P.new([2]).pretty_print(), '2')
+        self.assertEqual(P.new([-2]).pretty_print(), '-2')
+        self.assertEqual(P.new([2, 4]).pretty_print(), '2+4x')
+        self.assertEqual(P.new([Fraction(1, 2), 4]).pretty_print(), '1/2+4x')
+        self.assertEqual(P.new([1/2, 4]).pretty_print(), '1/2+4x')
+        self.assertEqual(P.new([0.5, 4]).pretty_print(), '1/2+4x')
+        self.assertEqual(P.new([-2, -4]).pretty_print(), '-2-4x')
+        self.assertEqual(P.new([0, 4]).pretty_print(), '4x')
+        self.assertEqual(P.new([2, 4, 8]).pretty_print(), '2+4x+8x^2')
+        self.assertEqual(P.new([0, 4, 8, 0, 0]).pretty_print(), '4x+8x^2')
+        self.assertEqual(P.new([2, 4, 0, 100]).pretty_print(), '2+4x+100x^3')
 
     def test_eq(self):
-        self.assertTrue(P([2, 4, 8]) == P([2, 4, 8]))
-        self.assertFalse(P([2, 8]) == P([2, 4, 8]))
-        self.assertFalse(P([2, 4, 8]) == P([2, 4]))
-        self.assertTrue(P([0]) == P.zero())
-        self.assertTrue(P([2, 4, 0, 0]) == P([2, 4]))
+        self.assertTrue(P.new([2, 4, 8]) == P.new([2, 4, 8]))
+        self.assertFalse(P.new([2, 8]) == P.new([2, 4, 8]))
+        self.assertFalse(P.new([2, 4, 8]) == P.new([2, 4]))
+        self.assertTrue(P.new([0]) == P.zero())
+        self.assertTrue(P.new([2, 4, 0, 0]) == P.new([2, 4]))
+        self.assertTrue(P.new([4/2, 4, 8]) == P.new([2, 4, 8]))
 
     def test_scalar_multiplication(self):
-        self.assertEqual(P([2, 4, 8]), P([1, 2, 4]).scalar_multiplication(2))
-        self.assertEqual(P.zero(), P([1, 2, 4]).scalar_multiplication(0))
+        self.assertEqual(P.new([2, 4, 8]), P.new([1, 2, 4]).scalar_multiplication(2))
+        self.assertEqual(P.zero(), P.new([1, 2, 4]).scalar_multiplication(0))
+        self.assertEqual(P.new([1, 3/2, 2]), P.new([2, 3, 4]).scalar_multiplication(Fraction(1, 2)))
+        self.assertEqual(P.new([1, 3/2, 2]), P.new([2, 3, 4]).scalar_multiplication(1/2))
+        self.assertEqual(P.new([1, 3 / 2, 2]), P.new([2, 3, 4]).scalar_multiplication(0.5))
 
     def test_negation(self):
-        self.assertEqual(-P([2, 4, 8]), P([-2, -4, -8]))
+        self.assertEqual(-P.new([2, 4, 8]), P.new([-2, -4, -8]))
 
     def test_addition(self):
-        self.assertEqual(P([2, 4, 8]) + P([1, 5, 70]), P([3, 9, 78]))
-        self.assertEqual(P([5]) + P([2, 4]), P([7, 4]))
-        self.assertEqual(P([2, 4]) + P([5]), P([7, 4]))
-        self.assertEqual(P([1]) + P([1]), P([2]))
-        self.assertEqual(P.zero() + P([2, 4]), P([2, 4]))
+        self.assertEqual(P.new([2, 4, 8]) + P.new([1, 5, 70]), P.new([3, 9, 78]))
+        self.assertEqual(P.new([5]) + P.new([2, 4]), P.new([7, 4]))
+        self.assertEqual(P.new([2, 4]) + P.new([5]), P.new([7, 4]))
+        self.assertEqual(P.new([1]) + P.new([1]), P.new([2]))
+        self.assertEqual(P.zero() + P.new([2, 4]), P.new([2, 4]))
         self.assertEqual(P.zero() + P.zero(), P.zero())
 
     def test_multiplication(self):
-        self.assertEqual(P([1, 2]) * P([5, 1]), P([5, 11, 2]))
-        self.assertEqual(P([1, 2, 3, 4]) * P([5, 1]), P([5, 11, 17, 23, 4]))
-        self.assertEqual(P([5, 1]) * P([1, 2, 3, 4]), P([5, 11, 17, 23, 4]))
-        self.assertEqual(P([1]) * P([1, 2, 3, 4]), P([1, 2, 3, 4]))
-        self.assertEqual(P([1, 2, 3, 4]) * P([1]), P([1, 2, 3, 4]))
-        self.assertEqual(P.zero() * P([1, 2, 3, 4]), P.zero())
-        self.assertEqual(P([1, 2, 3, 4]) * P.zero(), P.zero())
-        self.assertEqual(P([1, 2, 3, 4]) * 2, P([2, 4, 6, 8]))
-        self.assertEqual(2 * P([1, 2, 3, 4]), P([2, 4, 6, 8]))
+        self.assertEqual(P.new([1, 2]) * P.new([5, 1]), P.new([5, 11, 2]))
+        self.assertEqual(P.new([1, 2, 3, 4]) * P.new([5, 1]), P.new([5, 11, 17, 23, 4]))
+        self.assertEqual(P.new([5, 1]) * P.new([1, 2, 3, 4]), P.new([5, 11, 17, 23, 4]))
+        self.assertEqual(P.new([1]) * P.new([1, 2, 3, 4]), P.new([1, 2, 3, 4]))
+        self.assertEqual(P.new([1, 2, 3, 4]) * P.new([1]), P.new([1, 2, 3, 4]))
+        self.assertEqual(P.zero() * P.new([1, 2, 3, 4]), P.zero())
+        self.assertEqual(P.new([1, 2, 3, 4]) * P.zero(), P.zero())
+        self.assertEqual(P.new([1, 2, 3, 4]) * 2, P.new([2, 4, 6, 8]))
+        self.assertEqual(2 * P.new([1, 2, 3, 4]), P.new([2, 4, 6, 8]))
 
 
 class TestQuasiPolynomial(TestCase):
 
     def test_simplify(self):
-        self.assertEqual(print(QP([P([2, 4, 8, 0])]).simplify()), print(QP([P([2, 4, 8])])))
-        self.assertEqual(print(QP([P([2, 4, 0, 0])]).simplify()), print(QP([P([2, 4])])))
-        self.assertEqual(print(QP([P([0, 0, 0])]).simplify()), print(QP([])))
+        self.assertEqual(print(QP([P.new([2, 4, 8, 0])]).simplify()), print(QP([P.new([2, 4, 8])])))
+        self.assertEqual(print(QP([P.new([2, 4, 0, 0])]).simplify()), print(QP([P.new([2, 4])])))
+        self.assertEqual(print(QP([P.new([0, 0, 0])]).simplify()), print(QP([])))
         self.assertEqual(print(QP([]).simplify()), print(QP([])))
-        self.assertEqual(print(QP([P([2, 4, 8]), P([1, 5, 25]), P([0, 0])]).simplify()),
-                         print(QP([P([2, 4, 8]), P([1, 5, 25])])))
-        self.assertEqual(print(QP([P([2, 4, 8]), P([0, 0, 0]), P([3, 9])]).simplify()),
-                         print(QP([P([2, 4, 8]), P([]), P([3, 9])])))
-        self.assertEqual(print(QP([P([]), P([]), P([])]).simplify()), print(QP([])))
+        self.assertEqual(print(QP([P.new([2, 4, 8]), P.new([1, 5, 25]), P.new([0, 0])]).simplify()),
+                         print(QP([P.new([2, 4, 8]), P.new([1, 5, 25])])))
+        self.assertEqual(print(QP([P.new([2, 4, 8]), P.new([0, 0, 0]), P.new([3, 9])]).simplify()),
+                         print(QP([P.new([2, 4, 8]), P.zero(), P.new([3, 9])])))
+        self.assertEqual(print(QP([P.zero(), P.zero(), P.zero()]).simplify()), print(QP([])))
+
+    def test_new(self):
+        self.assertEqual(QP([P.new([2, 3, 4]), P.new([1])]), QP.new([[2, 3, 4], [1]]))
 
     def test_copy(self):
         temp = QP.new([[2, 4, 8], [0, 0, 0], [3, 9]])
@@ -132,8 +149,8 @@ class TestQuasiPolynomial(TestCase):
         self.assertEqual(QP.new([[2, 4, 8], [2, 10, 50]]) - QP.new([[1, 2, 4], [1, 5, 25]]),
                          QP.new([[1, 2, 4], [1, 5, 25]]))
         self.assertEqual(QP.new([[2, 4, 8], [2, 10, 50]]) - QP.new([[2, 4, 8], [2, 10, 50]]), QP.new([]))
-        #self.assertEqual(QP.new([[2, 4, 8]]) - QP.new([[2, 4, 8], [2, 10, 50]]), QP.new([[], [-2, -10, -50]]))
-        #self.assertEqual(QP.new([[2, 4, 8], [2, 10, 50]]) - QP.new([[2, 4, 8]]), QP.new([[], [2, 10, 50]]))
+        self.assertEqual(QP.new([[2, 4, 8]]) - QP.new([[2, 4, 8], [2, 10, 50]]), QP.new([[], [-2, -10, -50]]))
+        self.assertEqual(QP.new([[2, 4, 8], [2, 10, 50]]) - QP.new([[2, 4, 8]]), QP.new([[], [2, 10, 50]]))
 
     def test_multiplication(self):
         self.assertEqual(QP.new([[1, 2], [3, 4]]) * QP.new([[5, 6], [7, 8]]),
@@ -144,7 +161,9 @@ class TestQuasiPolynomial(TestCase):
         self.assertEqual(QP.new([[1, 2], [3, 4]]) * QP.new([[1]]), QP.new([[1, 2], [3, 4]]))
         self.assertEqual(QP.new([[]]) * QP.new([[1, 2], [3, 4]]), QP.new([[]]))
         self.assertEqual(QP.new([[1, 2], [3, 4]]) * QP.new([[]]), QP.new([[]]))
-        self.assertEqual(QP.new([[1, 2], [3, 4]]) * P([5, 6]), QP.new([[5, 16, 12], [15, 38, 24]]))
-        self.assertEqual(P([5, 6]) * QP.new([[1, 2], [3, 4]]), QP.new([[5, 16, 12], [15, 38, 24]]))
+        self.assertEqual(QP.new([[1, 2]]) * QP.new([[]]), QP.new([[]]))
+        self.assertEqual(QP.new([[]]) * QP.new([[]]), QP.new([[]]))
+        self.assertEqual(QP.new([[1, 2], [3, 4]]) * P.new([5, 6]), QP.new([[5, 16, 12], [15, 38, 24]]))
+        self.assertEqual(P.new([5, 6]) * QP.new([[1, 2], [3, 4]]), QP.new([[5, 16, 12], [15, 38, 24]]))
         self.assertEqual(QP.new([[1, 2], [3, 4]]) * 2, QP.new([[2, 4], [6, 8]]))
         self.assertEqual(2 * QP.new([[1, 2], [3, 4]]), QP.new([[2, 4], [6, 8]]))
