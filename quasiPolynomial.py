@@ -3,8 +3,6 @@ from typing import List, Union
 
 import numpy as np
 
-# __all__ = ['QuasiPolynomial']
-
 
 class Polynomial:
     """
@@ -15,13 +13,13 @@ class Polynomial:
         Parameters
         ----------
         coefficient_list : List[Fraction]
-            The list of __private_coefficients.
+            The list of coefficients.
             The coefficient of x^n is coefficient_array[n].
 
         Attributes
         ----------
         __private_coefficients : np.ndarray[Fraction]
-            The numpy array of __private_coefficients.
+            The numpy array of coefficients.
             The coefficient of x^n is __private_coefficients[n].
 
         Methods
@@ -61,7 +59,7 @@ class Polynomial:
             Parameters
             ----------
             coefficient_list : List[int]
-                The array of __private_coefficients.
+                The list of coefficients.
                 The coefficient of x^n is coefficient_list[n].
         """
 
@@ -344,7 +342,7 @@ class QuasiPolynomial:
         Attributes
         ----------
         polynomials : np.ndarray[Polynomial]
-            The array of polynomials.
+            The numpy array of polynomials.
             The coefficient polynomial of exp(- alpha x) is polynomials[alpha].
 
         Methods
@@ -670,7 +668,3 @@ class QuasiPolynomial:
                     constant = constant + resulting_constant
                     output.append(resulting_polynomial)
             return (QuasiPolynomial(output) + QuasiPolynomial.new([[constant]])).simplify()
-
-
-def test_main():
-    print(QuasiPolynomial.new([[], [], [1, 2, 0, 0, 5]]).integrate())
