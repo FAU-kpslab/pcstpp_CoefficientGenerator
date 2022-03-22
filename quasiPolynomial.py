@@ -336,8 +336,8 @@ class QuasiPolynomial:
         Parameters
         ----------
         polynomial_list : List[Polynomial]
-                The list of polynomials.
-                The coefficient polynomial of exp(- alpha x) is polynomial_list[alpha].
+            The list of polynomials.
+            The coefficient polynomial of exp(- alpha x) is polynomial_list[alpha].
 
         Attributes
         ----------
