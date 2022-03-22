@@ -1,11 +1,11 @@
-from fractions import Fraction
-from unittest import TestCase
+import unittest
 
+from fractions import Fraction
 from quasiPolynomial import Polynomial as P
 from quasiPolynomial import QuasiPolynomial as QP
 
 
-class TestPolynomial(TestCase):
+class TestPolynomial(unittest.TestCase):
 
     def test_simplify(self):
         self.assertEqual(print(P([Fraction(2), Fraction(4), Fraction(8), Fraction(0)]).simplify()),
@@ -89,7 +89,7 @@ class TestPolynomial(TestCase):
         self.assertEqual(P.new([5]).diff(), P.zero())
 
 
-class TestQuasiPolynomial(TestCase):
+class TestQuasiPolynomial(unittest.TestCase):
 
     def test_simplify(self):
         self.assertEqual(print(QP([P.new([2, 4, 8, 0])]).simplify()), print(QP([P.new([2, 4, 8])])))
@@ -183,3 +183,7 @@ class TestQuasiPolynomial(TestCase):
         self.assertEqual(QP.new([[], [], [1, 2, 0, 0, 5]]).integrate(), QP.new(
             [[Fraction(19, 4)], [], [Fraction(-19, 4), Fraction(-17, 2), Fraction(-15, 2), -5, Fraction(-5, 2)]]))
         self.assertEqual(QP.new([[]]).integrate(), QP.new([[]]))
+
+
+if __name__ == '__main__':
+    unittest.main()

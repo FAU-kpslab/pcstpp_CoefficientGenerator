@@ -1,5 +1,5 @@
 from quasiPolynomial import QuasiPolynomial
-from differentialEquation import differential_equation
+from helper import *
 from typing import Tuple, Dict
 
 
@@ -70,6 +70,12 @@ class CoefficientFunction:
 
         return sequence_to_indices(self.sequence())
 
+    def __str__(self) -> str:
+        return str(self.sequence()) + ': ' + str(self.function)
+
+    def pretty_print(self) -> str:
+        return str(self.sequence()) + ': ' + self.function.pretty_print()
+
 
 class FunctionCollection:
     """
@@ -89,7 +95,13 @@ class FunctionCollection:
         __setitem__ : None
             Saves the function f(ell; m).
         __getitem__ : CoefficientFunction
-            Returns for the operator sequence m the function f(ell; m) and computes it if necessary.
+            Returns for the operator sequence m the function f(ell; m).
+        keys :
+            Returns all calculated operator sequences m.
+        __str__ : str
+            Prints the collection.
+        pretty_print() : str
+            Transform the collection in a form suitable to be read by humans.
     """
 
     def __init__(self) -> None:
@@ -133,7 +145,7 @@ class FunctionCollection:
         """
         FunctionCollection[sequence]
 
-        Returns for the operator sequence m the function f(ell; m) and computes it if necessary.
+        Returns for the operator sequence m the function f(ell; m).
 
             Parameters
             ----------
@@ -149,8 +161,53 @@ class FunctionCollection:
             return CoefficientFunction(sequence, self.__private_collection[sequence_to_key(sequence)])
         else:
             # Calculate the function if it doesn't exist yet.
-            self[sequence] = differential_equation(sequence)
+            self[sequence] = differential_equation(sequence, self)
             return self[sequence]
+
+    def keys(self) -> List[Tuple]:
+        """
+        FunctionCollection.keys()
+
+        Returns all calculated operator sequences m.
+
+            Returns
+            -------
+            List[Tuple]
+        """
+
+        return [key_to_sequence(key) for key in self.__private_collection.keys()]
+
+    def __str__(self) -> str:
+        """
+        print(FunctionCollection)
+
+        Prints the collection.
+
+            Returns
+            -------
+            str
+        """
+
+        output = []
+        for key in self.keys():
+            output.append(str(self[key]))
+        return str(output)
+
+    def pretty_print(self) -> str:
+        """
+        FunctionCollection.pretty_print()
+
+        Transform the collection in a form suitable to be read by humans.
+
+            Returns
+            -------
+            str
+        """
+
+        output = str()
+        for key in self.keys():
+            output = output + self[key].pretty_print() + '\n'
+        return output
 
 
 def sequence_to_key(sequence: Tuple) -> int:
@@ -193,3 +250,29 @@ def sequence_to_indices(sequence: Tuple) -> Tuple:
     """
 
     return sequence
+
+
+def differential_equation(sequence: Tuple, collection: FunctionCollection) -> QuasiPolynomial:
+    """
+    differential_equation(sequence)
+
+    Calculates the function f(ell; m) corresponding to the operator sequence m.
+
+        Returns
+        -------
+        QuasiPolynomial
+    """
+
+    partition_list = partitions(sequence)
+    integrand = QuasiPolynomial.zero()
+    for partition in partition_list:
+        # Rename the operator sequences.
+        s1 = partition[0]
+        s2 = partition[1]
+        # Translate the operator sequences into its indices.
+        m = sequence_to_indices(sequence)
+        m1 = sequence_to_indices(s1)
+        m2 = sequence_to_indices(s2)
+        integrand = integrand + exponential(m, m1, m2) * signum(m1, m2) * collection[s1].function * collection[
+            s2].function
+    return integrand.integrate()

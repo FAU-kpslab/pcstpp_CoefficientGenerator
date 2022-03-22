@@ -34,10 +34,12 @@ class Polynomial:
             Creates a quasi-polynomial using a list of __private_coefficients.
         copy : Polynomial
             Copies a polynomial.
-        pretty_print : str
-            Transform a polynomial in the mathematical form suitable to be read by humans.
+        __str__ : str
+            Prints the coefficient array.
         __eq__ : bool
             Checks whether two polynomials are mathematically equal.
+        pretty_print : str
+            Transform a polynomial in the mathematical form suitable to be read by humans.
         scalar_multiplication : Polynomial
             Multiplies a polynomial with a scalar.
         __neg__ : Polynomial
@@ -145,6 +147,16 @@ class Polynomial:
         return Polynomial(self.__private_coefficients.copy())
 
     def __str__(self) -> str:
+        """
+        print(p)
+
+        Prints the coefficient array.
+
+            Returns
+            -------
+            str
+        """
+
         return str(self.__private_coefficients)
 
     def __eq__(self, other: 'Polynomial') -> bool:
@@ -183,11 +195,19 @@ class Polynomial:
             if self.__private_coefficients[0] != 0:
                 output.append(str(self.__private_coefficients[0]))
             if self.__private_coefficients[1] != 0:
-                output.append(str(self.__private_coefficients[1]) + 'x')
+                # Check whether the coefficient is 1 to leave that away.
+                if self.__private_coefficients[1] == 1:
+                    output.append('x')
+                else:
+                    output.append(str(self.__private_coefficients[1]) + 'x')
             for exponent, coefficient in list(enumerate(self.__private_coefficients))[2:]:
-                # Check for the remaining __private_coefficients whether they are zero to leave those away.
+                # Check for the remaining coefficients whether they are zero to leave those away.
                 if coefficient != 0:
-                    output.append(str(coefficient) + 'x^' + str(exponent))
+                    # Check for the remaining coefficients whether they are 1 to leave that away.
+                    if coefficient == 1:
+                        output.append('x^' + str(exponent))
+                    else:
+                        output.append(str(coefficient) + 'x^' + str(exponent))
             return '+'.join(output).replace('+-', '-')
 
     def scalar_multiplication(self, scalar: Union[Fraction, int, float]) -> 'Polynomial':
@@ -355,6 +375,8 @@ class QuasiPolynomial:
             Creates a quasi-polynomial using a nested list of __private_coefficients.
         copy : QuasiPolynomial
             Copies a quasi-polynomial.
+        __str__ : str
+            Prints the polynomial array.
         __eq__ : bool
             Checks whether two quasi-polynomials are mathematically equal.
         pretty_print : str
@@ -397,6 +419,7 @@ class QuasiPolynomial:
             -------
             QuasiPolynomial
         """
+
         return QuasiPolynomial([])
 
     def simplify(self) -> 'QuasiPolynomial':
@@ -458,6 +481,16 @@ class QuasiPolynomial:
         return QuasiPolynomial([p.copy().coefficients() for p in self.polynomials])
 
     def __str__(self) -> str:
+        """
+        print(qp)
+
+        Prints the polynomial array.
+
+            Returns
+            -------
+            str
+        """
+
         return str([p.coefficients().tolist() for p in self.polynomials])
 
     def __eq__(self, other: 'QuasiPolynomial') -> bool:
@@ -639,7 +672,7 @@ class QuasiPolynomial:
 
             Returns
             -------
-            Polynomial
+            QuasiPolynomial
         """
 
         # Check whether the quasi-polynomial is empty.
