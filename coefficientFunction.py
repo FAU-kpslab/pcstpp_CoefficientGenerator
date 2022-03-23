@@ -91,9 +91,10 @@ class FunctionCollection:
             Transform the collection in a form suitable to be read by humans.
     """
 
-    def __init__(self, translation: Dict) -> None:
+    def __init__(self, translation: Dict, max_energy: int) -> None:
         self.__private_collection = dict()
         self.translation = translation
+        self.max_energy = max_energy
 
     def __contains__(self, sequence: Tuple) -> bool:
         """
@@ -149,7 +150,7 @@ class FunctionCollection:
             return CoefficientFunction(sequence, self.__private_collection[sequence_to_key(sequence)])
         else:
             # Calculate the function if it doesn't exist yet.
-            self[sequence] = differential_equation(sequence, self, self.translation)
+            self[sequence] = differential_equation(sequence, self, self.translation, self.max_energy)
             return self[sequence]
 
     def keys(self) -> List[Tuple]:
@@ -240,7 +241,8 @@ def sequence_to_indices(sequence: Tuple, translation: Dict) -> List:
     return [translation[operator] for operator in sequence]
 
 
-def differential_equation(sequence: Tuple, collection: FunctionCollection, translation: Dict) -> QuasiPolynomial:
+def differential_equation(sequence: Tuple, collection: FunctionCollection, translation: Dict,
+                          max_energy: int) -> QuasiPolynomial:
     """
     differential_equation(sequence)
 
@@ -261,6 +263,8 @@ def differential_equation(sequence: Tuple, collection: FunctionCollection, trans
         m = sequence_to_indices(sequence, translation)
         m1 = sequence_to_indices(s1, translation)
         m2 = sequence_to_indices(s2, translation)
-        integrand = integrand + exponential(m, m1, m2) * signum(m1, m2) * collection[s1].function * collection[
-            s2].function
+        # Only calculate non-vanishing contributions to the integrand.
+        if abs(energy(m1)) <= max_energy & abs(energy(m2)) <= max_energy:
+            integrand = integrand + exponential(m, m1, m2) * signum(m1, m2) * collection[s1].function * collection[
+                s2].function
     return integrand.integrate()
