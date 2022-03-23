@@ -3,7 +3,7 @@ import numpy as np
 from typing import List, Tuple
 
 
-def energy(indices: Tuple) -> int:
+def energy(indices: List) -> int:
     """
     energy(indices)
 
@@ -17,7 +17,7 @@ def energy(indices: Tuple) -> int:
     return sum(indices)
 
 
-def signum(indices1: Tuple, indices2: Tuple) -> int:
+def signum(indices1: List, indices2: List) -> int:
     """
     signum(indices1, indices2)
 
@@ -31,7 +31,7 @@ def signum(indices1: Tuple, indices2: Tuple) -> int:
     return np.sign(energy(indices1)) - np.sign(energy(indices2))
 
 
-def exponential(indices: Tuple, indices1: Tuple, indices2: Tuple) -> QuasiPolynomial:
+def exponential(indices: List, indices1: List, indices2: List) -> QuasiPolynomial:
     """
     exponential(indices, indices1, indices2)
 
