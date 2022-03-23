@@ -6,7 +6,8 @@ from quasiPolynomial import QuasiPolynomial as qp
 
 class TestFunctionCollection(unittest.TestCase):
     def test_contains(self):
-        collection = FunctionCollection()
+        translation = dict([(-2, -2), (0, 0), (1, 1), (2, 2)])
+        collection = FunctionCollection(translation, max_energy=2)
         collection[(-2,)] = qp.new([[1]])
         collection[(0,)] = qp.new([[1]])
         collection[(2,)] = qp.new([[1]])
@@ -15,7 +16,8 @@ class TestFunctionCollection(unittest.TestCase):
         self.assertFalse((1,) in collection)
 
     def test_keys(self):
-        collection = FunctionCollection()
+        translation = dict([(-2, -2), (0, 0), (1, 1), (2, 2)])
+        collection = FunctionCollection(translation, max_energy=2)
         collection[(-2,)] = qp.new([[1]])
         collection[(0,)] = qp.new([[1]])
         collection[(2,)] = qp.new([[1]])
@@ -23,7 +25,8 @@ class TestFunctionCollection(unittest.TestCase):
         self.assertEqual(collection.keys(), [(-2,), (0,), (2,), (1, 0)])
 
     def test_pretty_print(self):
-        collection = FunctionCollection()
+        translation = dict([(-2, -2), (0, 0), (1, 1), (2, 2)])
+        collection = FunctionCollection(translation, max_energy=2)
         collection[(-2,)] = qp.new([[1]])
         collection[(2,)] = qp.new([[1]])
         collection[(1, 0)] = qp.zero()
@@ -32,7 +35,8 @@ class TestFunctionCollection(unittest.TestCase):
 
 class TestDifferentialEquation(unittest.TestCase):
     def test_differential_equation(self):
-        collection = FunctionCollection()
+        translation = dict([(-2, -2), (0, 0), (1, 1), (2, 2)])
+        collection = FunctionCollection(translation, max_energy=2)
         collection[(-2,)] = qp.new([[1]])
         collection[(0,)] = qp.new([[1]])
         collection[(2,)] = qp.new([[1]])
