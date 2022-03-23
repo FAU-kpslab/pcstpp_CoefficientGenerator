@@ -54,6 +54,10 @@ class Polynomial:
             Multiplies a scalar with a polynomial.
         integrate : Polynomial
             Integrate a polynomial with starting condition 0.
+        diff : Polynomial
+            Perform the derivative of a polynomial.
+        get_constant : Fraction
+            Returns the constant coefficient.
     """
 
     def __init__(self, coefficient_list: Union[List[Fraction]]) -> None:
@@ -195,17 +199,21 @@ class Polynomial:
             if self.__private_coefficients[0] != 0:
                 output.append(str(self.__private_coefficients[0]))
             if self.__private_coefficients[1] != 0:
-                # Check whether the coefficient is 1 to leave that away.
+                # Check whether the coefficient is 1 or -1 to leave that away.
                 if self.__private_coefficients[1] == 1:
                     output.append('x')
+                elif self.__private_coefficients[1] == -1:
+                    output.append('-x')
                 else:
                     output.append(str(self.__private_coefficients[1]) + 'x')
             for exponent, coefficient in list(enumerate(self.__private_coefficients))[2:]:
                 # Check for the remaining coefficients whether they are zero to leave those away.
                 if coefficient != 0:
-                    # Check for the remaining coefficients whether they are 1 to leave that away.
+                    # Check for the remaining coefficients whether they are 1 or -1 to leave that away.
                     if coefficient == 1:
                         output.append('x^' + str(exponent))
+                    elif coefficient == -1:
+                        output.append('-x^' + str(exponent))
                     else:
                         output.append(str(coefficient) + 'x^' + str(exponent))
             return '+'.join(output).replace('+-', '-')
@@ -346,6 +354,22 @@ class Polynomial:
         polynomial = self.__private_coefficients[1:].copy()
         return Polynomial((prefactors * polynomial).tolist())
 
+    def get_constant(self) -> Fraction:
+        """
+        p.get_constant()
+
+        Returns the constant coefficient.
+
+            Returns
+            -------
+            Fraction
+        """
+
+        if self == Polynomial.zero():
+            return Fraction(0)
+        else:
+            return self.coefficients()[0]
+
 
 class QuasiPolynomial:
     """
@@ -395,6 +419,8 @@ class QuasiPolynomial:
             Multiplies a polynomial with a quasi-polynomial or a scalar with a quasi-polynomial.
         integrate : QuasiPolynomial
             Integrate a quasi-polynomial with starting condition 0.
+        get_constant : Fraction
+            Returns the constant coefficient of the constant polynomial (alpha = 0).
     """
 
     def __init__(self, polynomial_list: List[Polynomial]) -> None:
@@ -701,3 +727,19 @@ class QuasiPolynomial:
                     constant = constant + resulting_constant
                     output.append(resulting_polynomial)
             return (QuasiPolynomial(output) + QuasiPolynomial.new([[constant]])).simplify()
+
+    def get_constant(self) -> Fraction:
+        """
+        qp.get_constant()
+
+        Returns the constant coefficient of the constant polynomial (alpha = 0).
+
+            Returns
+            -------
+            Fraction
+        """
+
+        if self == QuasiPolynomial.zero():
+            return Fraction(0)
+        else:
+            return self.polynomials[0].get_constant()

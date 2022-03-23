@@ -1,6 +1,6 @@
 import unittest
 
-from helper import *
+from mathematics import *
 from quasiPolynomial import QuasiPolynomial as qp
 
 

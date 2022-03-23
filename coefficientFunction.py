@@ -1,5 +1,5 @@
 from quasiPolynomial import QuasiPolynomial
-from helper import *
+from mathematics import *
 from typing import Tuple, Dict
 
 
@@ -210,7 +210,7 @@ class FunctionCollection:
         return output
 
 
-def sequence_to_key(sequence: Tuple) -> int:
+def sequence_to_key(sequence: Tuple) -> Tuple:  # TODO The key is supposed to be an integer.
     """
     vector_to_key(sequence)
 
@@ -218,13 +218,13 @@ def sequence_to_key(sequence: Tuple) -> int:
 
         Returns
         -------
-        int
+        Tuple
     """
 
     return sequence
 
 
-def key_to_sequence(key: int) -> Tuple:
+def key_to_sequence(key: Tuple) -> Tuple:  # TODO The key is supposed to be an integer.
     """
     key_to_sequence(key)
 
