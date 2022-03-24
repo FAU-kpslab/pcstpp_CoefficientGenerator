@@ -400,7 +400,7 @@ class QuasiPolynomial:
         copy : QuasiPolynomial
             Copies a quasi-polynomial.
         __str__ : str
-            Prints the polynomial array.
+            Prints the coefficient array.
         __eq__ : bool
             Checks whether two quasi-polynomials are mathematically equal.
         pretty_print : str
@@ -510,7 +510,7 @@ class QuasiPolynomial:
         """
         print(qp)
 
-        Prints the polynomial array.
+        Prints the coefficient array.
 
             Returns
             -------

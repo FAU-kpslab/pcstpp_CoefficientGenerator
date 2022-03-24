@@ -7,14 +7,14 @@ class CoefficientFunction:
     """
     CoefficientFunction(sequence, f)
 
-    A class used to define the coefficient functions f(ell; m), encoded by a list m denoting the operator sequence.
+    A class used to define the coefficient functions f(ell; m), encoded by a tuple m denoting the operator sequence.
 
         Parameters
         ----------
-        f : QuasiPolynomial
-            The coefficient function.
         sequence : Tuple
             The operator sequence m identifying the function f(ell; m).
+        function : QuasiPolynomial
+            The corresponding coefficient function f(ell; m).
 
         Attributes
         ----------
@@ -27,28 +27,31 @@ class CoefficientFunction:
         -------
         sequence : Tuple
             Gets the operator sequence m identifying the function f(ell; m).
-        #indices : List
-        #    Returns the indices in the operator sequence m.
+        __str__ : str
+            Prints the operator sequence m and the coefficient array of the corresponding coefficient function
+            f(ell; m).
+        pretty_print() : str
+            Prints the operator sequence m and corresponding coefficient function f(ell; m).
     """
 
-    def __init__(self, sequence: Tuple, f: QuasiPolynomial) -> None:
+    def __init__(self, sequence: Tuple, function: QuasiPolynomial) -> None:
         """
         Parameters
         ----------
-        f : QuasiPolynomial
-            The coefficient function.
         sequence : Tuple
             The operator sequence m identifying the function f(ell; m).
+        function : QuasiPolynomial
+            The corresponding coefficient function f(ell; m).
         """
 
         self.__private_key = sequence_to_key(sequence)
-        self.function = f
+        self.function = function
 
     def sequence(self) -> Tuple:
         """
         cf.vector()
 
-        Gets the vector sequence identifying the function f(ell; sequence).
+        Gets the operator sequence m identifying the function f(ell; m).
 
             Returns
             -------
@@ -58,9 +61,29 @@ class CoefficientFunction:
         return key_to_sequence(self.__private_key)
 
     def __str__(self) -> str:
+        """
+        print(cf)
+
+        Prints the operator sequence m and the coefficient array of the corresponding coefficient function f(ell; m).
+
+            Returns
+            -------
+            str
+        """
+
         return str(self.sequence()) + ': ' + str(self.function)
 
     def pretty_print(self) -> str:
+        """
+        cf.pretty_print()
+
+        Prints the operator sequence m and corresponding coefficient function f(ell; m).
+
+            Returns
+            -------
+            str
+        """
+
         return str(self.sequence()) + ': ' + self.function.pretty_print()
 
 
@@ -70,17 +93,28 @@ class FunctionCollection:
 
     A class used to store all calculated coefficient functions f(ell; m).
 
+        Parameters
+        ----------
+        translation : Dict
+            The dictionary assigning an index to every operator.
+        max_energy : int
+            The width of the band in band-diagonality.
+
         Attributes
         ----------
         __private_collection : Dict
             The dictionary storing keys sequence_to_key(m) and values f(ell; m).
+        translation : Dict
+            The dictionary assigning an index to every operator.
+        max_energy : int
+            The width of the band in band-diagonality.
 
         Methods
         -------
         __contains__ : bool
             Checks for the operator sequence m whether the function f(ell; m) is already calculated.
         __setitem__ : None
-            Saves the function f(ell; m).
+            Saves the function f(ell; m) if it is not already saved.
         __getitem__ : CoefficientFunction
             Returns for the operator sequence m the function f(ell; m).
         keys :
@@ -114,21 +148,22 @@ class FunctionCollection:
 
         return sequence_to_key(sequence) in self.__private_collection
 
-    def __setitem__(self, sequence: Tuple, f: QuasiPolynomial) -> None:
+    def __setitem__(self, sequence: Tuple, function: QuasiPolynomial) -> None:
         """
         FunctionCollection[sequence] = f
 
-        Saves the function f(ell; m).
+        Saves the function f(ell; m) if it is not already saved.
 
             Parameters
             ----------
             sequence : Tuple
                 The operator sequence m identifying the function f(ell; m).
-            f : QuasiPolynomial
+            function : QuasiPolynomial
                 The function f(ell; m).
         """
 
-        self.__private_collection[sequence_to_key(sequence)] = f
+        if sequence not in self:
+            self.__private_collection[sequence_to_key(sequence)] = function
 
     def __getitem__(self, sequence: Tuple) -> CoefficientFunction:
         """
