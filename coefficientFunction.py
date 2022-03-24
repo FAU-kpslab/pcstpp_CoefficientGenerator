@@ -5,27 +5,27 @@ from typing import Tuple, Dict
 
 class CoefficientFunction:
     """
-    CoefficientFunction(sequence, f)
+    CoefficientFunction(sequence, function)
 
     A class used to define the coefficient functions f(ell; m), encoded by a tuple m denoting the operator sequence.
 
         Parameters
         ----------
-        sequence : Tuple
+        sequence : Tuple[Tuple, Tuple]
             The operator sequence m identifying the function f(ell; m).
         function : QuasiPolynomial
             The corresponding coefficient function f(ell; m).
 
         Attributes
         ----------
-        __private_key : int
-            The number corresponding to the sequence vector.
+        __private_key : Tuple[int, int]
+            The number corresponding to the sequence of operators.
         function : QuasiPolynomial
             The corresponding coefficient function f(ell; m).
 
         Methods
         -------
-        sequence : Tuple
+        sequence : Tuple[Tuple, Tuple]
             Gets the operator sequence m identifying the function f(ell; m).
         __str__ : str
             Prints the operator sequence m and the coefficient array of the corresponding coefficient function
@@ -34,7 +34,7 @@ class CoefficientFunction:
             Prints the operator sequence m and corresponding coefficient function f(ell; m).
     """
 
-    def __init__(self, sequence: Tuple, function: QuasiPolynomial) -> None:
+    def __init__(self, sequence: Tuple[Tuple, Tuple], function: QuasiPolynomial) -> None:
         """
         Parameters
         ----------
@@ -47,15 +47,15 @@ class CoefficientFunction:
         self.__private_key = sequence_to_key(sequence)
         self.function = function
 
-    def sequence(self) -> Tuple:
+    def sequence(self) -> Tuple[Tuple, Tuple]:
         """
-        cf.vector()
+        cf.sequence()
 
         Gets the operator sequence m identifying the function f(ell; m).
 
             Returns
             -------
-            Tuple
+            Tuple[Tuple, Tuple]
         """
 
         return key_to_sequence(self.__private_key)
@@ -130,7 +130,7 @@ class FunctionCollection:
         self.translation = translation
         self.max_energy = max_energy
 
-    def __contains__(self, sequence: Tuple) -> bool:
+    def __contains__(self, sequence: Tuple[Tuple, Tuple]) -> bool:
         """
         sequence in FunctionCollection
 
@@ -138,7 +138,7 @@ class FunctionCollection:
 
             Parameters
             ----------
-            sequence : Tuple
+            sequence : Tuple[Tuple, Tuple]
                 The operator sequence m identifying the function f(ell; m).
 
             Returns
@@ -148,15 +148,15 @@ class FunctionCollection:
 
         return sequence_to_key(sequence) in self.__private_collection
 
-    def __setitem__(self, sequence: Tuple, function: QuasiPolynomial) -> None:
+    def __setitem__(self, sequence: Tuple[Tuple, Tuple], function: QuasiPolynomial) -> None:
         """
-        FunctionCollection[sequence] = f
+        FunctionCollection[sequence] = function
 
         Saves the function f(ell; m) if it is not already saved.
 
             Parameters
             ----------
-            sequence : Tuple
+            sequence : Tuple[Tuple, Tuple]
                 The operator sequence m identifying the function f(ell; m).
             function : QuasiPolynomial
                 The function f(ell; m).
@@ -165,7 +165,7 @@ class FunctionCollection:
         if sequence not in self:
             self.__private_collection[sequence_to_key(sequence)] = function
 
-    def __getitem__(self, sequence: Tuple) -> CoefficientFunction:
+    def __getitem__(self, sequence: Tuple[Tuple, Tuple]) -> CoefficientFunction:
         """
         FunctionCollection[sequence]
 
@@ -173,7 +173,7 @@ class FunctionCollection:
 
             Parameters
             ----------
-            sequence : Tuple
+            sequence : Tuple[Tuple, Tuple]
                 The operator sequence m.
 
             Returns
@@ -188,7 +188,7 @@ class FunctionCollection:
             self[sequence] = differential_equation(sequence, self, self.translation, self.max_energy)
             return self[sequence]
 
-    def keys(self) -> List[Tuple]:
+    def keys(self) -> List[Tuple[Tuple, Tuple]]:
         """
         FunctionCollection.keys()
 
@@ -196,7 +196,7 @@ class FunctionCollection:
 
             Returns
             -------
-            List[Tuple]
+            List[Tuple[Tuple, Tuple]]
         """
 
         return [key_to_sequence(key) for key in self.__private_collection.keys()]
@@ -234,7 +234,7 @@ class FunctionCollection:
         return output
 
 
-def sequence_to_key(sequence: Tuple) -> Tuple:  # TODO The key is supposed to be an integer.
+def sequence_to_key(sequence: Tuple[Tuple, Tuple]) -> Tuple[Tuple, Tuple]:  # TODO The key is supposed to be an integer.
     """
     vector_to_key(sequence)
 
@@ -242,13 +242,13 @@ def sequence_to_key(sequence: Tuple) -> Tuple:  # TODO The key is supposed to be
 
         Returns
         -------
-        Tuple
+        Tuple[Tuple, Tuple]
     """
 
     return sequence
 
 
-def key_to_sequence(key: Tuple) -> Tuple:  # TODO The key is supposed to be an integer.
+def key_to_sequence(key: Tuple[Tuple, Tuple]) -> Tuple[Tuple, Tuple]:  # TODO The key is supposed to be an integer.
     """
     key_to_sequence(key)
 
@@ -256,13 +256,13 @@ def key_to_sequence(key: Tuple) -> Tuple:  # TODO The key is supposed to be an i
 
         Returns
         -------
-        Tuple
+        Tuple[Tuple, Tuple]
     """
 
     return key
 
 
-def sequence_to_indices(sequence: Tuple, translation: Dict) -> List:
+def sequence_to_indices(sequence: Tuple[Tuple, Tuple], translation: Dict) -> Tuple[List, List]:
     """
     sequence_to_indices(key)
 
@@ -270,13 +270,15 @@ def sequence_to_indices(sequence: Tuple, translation: Dict) -> List:
 
         Returns
         -------
-        List
+        Tuple[List, List]
     """
 
-    return [translation[operator] for operator in sequence]
+    sequence_left = [translation[operator_left] for operator_left in sequence[0]]
+    sequence_right = [translation[operator_right] for operator_right in sequence[1]]
+    return sequence_left, sequence_right
 
 
-def differential_equation(sequence: Tuple, collection: FunctionCollection, translation: Dict,
+def differential_equation(sequence: Tuple[Tuple, Tuple], collection: FunctionCollection, translation: Dict,
                           max_energy: int) -> QuasiPolynomial:
     """
     differential_equation(sequence)
@@ -299,7 +301,7 @@ def differential_equation(sequence: Tuple, collection: FunctionCollection, trans
         m1 = sequence_to_indices(s1, translation)
         m2 = sequence_to_indices(s2, translation)
         # Only calculate non-vanishing contributions to the integrand.
-        if abs(energy(m1)) <= max_energy & abs(energy(m2)) <= max_energy:
+        if (abs(energy(m1)) <= max_energy) & (abs(energy(m2)) <= max_energy):
             integrand = integrand + exponential(m, m1, m2) * signum(m1, m2) * collection[s1].function * collection[
                 s2].function
     return integrand.integrate()

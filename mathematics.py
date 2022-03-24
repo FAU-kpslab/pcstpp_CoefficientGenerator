@@ -1,9 +1,11 @@
+from itertools import product, combinations
+
 from quasiPolynomial import QuasiPolynomial
 import numpy as np
 from typing import List, Tuple
 
 
-def energy(indices: List) -> int:
+def energy(indices: Tuple[List, List]) -> int:
     """
     energy(indices)
 
@@ -14,10 +16,12 @@ def energy(indices: List) -> int:
         int
     """
 
-    return sum(indices)
+    indices_left = indices[0]
+    indices_right = indices[1]
+    return sum(indices_left) + sum(indices_right)
 
 
-def signum(indices1: List, indices2: List) -> int:
+def signum(indices1: Tuple[List, List], indices2: Tuple[List, List]) -> int:
     """
     signum(indices1, indices2)
 
@@ -31,7 +35,7 @@ def signum(indices1: List, indices2: List) -> int:
     return np.sign(energy(indices1)) - np.sign(energy(indices2))
 
 
-def exponential(indices: List, indices1: List, indices2: List) -> QuasiPolynomial:
+def exponential(indices: Tuple[List, List], indices1: Tuple[List, List], indices2: Tuple[List, List]) -> QuasiPolynomial:
     """
     exponential(indices, indices1, indices2)
 
@@ -48,15 +52,20 @@ def exponential(indices: List, indices1: List, indices2: List) -> QuasiPolynomia
     return QuasiPolynomial.new(coefficient_list)
 
 
-def partitions(m: Tuple) -> List[Tuple[Tuple, Tuple]]:
+def partitions(sequence: Tuple[Tuple, Tuple]) -> List[Tuple[Tuple[Tuple, Tuple], Tuple[Tuple, Tuple]]]:
     """
     partitions(sequence)
 
-    Returns all partitions of the operator sequence m into (m1, m2).
+    Returns all partitions of the operator sequence (m, n) into ((m1, n1), (m2, n2)).
 
         Returns
         -------
-        List[Tuple[Tuple, Tuple]]
+        List[Tuple[Tuple[Tuple, Tuple], Tuple[Tuple, Tuple]]]
     """
 
-    return [(m[:i+1], m[i+1:]) for i in range(len(m) - 1)]
+    sequence_left = sequence[0]
+    sequence_right = sequence[1]
+    partition_left = [(sequence_left[:i], sequence_left[i:]) for i in range(len(sequence_left) + 1)]
+    partition_right = [(sequence_right[:i], sequence_right[i:]) for i in range(len(sequence_right) + 1)]
+    return [((left1, right1), (left2, right2)) for left1, left2 in partition_left for right1, right2 in partition_right
+            if (((left1, right1) != ((), ())) & ((left2, right2) != ((), ())))]
