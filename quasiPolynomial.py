@@ -161,7 +161,7 @@ class Polynomial:
             str
         """
 
-        return str(self.__private_coefficients)
+        return str([str(coeff) for coeff in self.__private_coefficients])
 
     def __eq__(self, other: 'Polynomial') -> bool:
         """
@@ -517,7 +517,7 @@ class QuasiPolynomial:
             str
         """
 
-        return str([p.coefficients().tolist() for p in self.polynomials])
+        return str([[str(coeff) for coeff in p.coefficients()] for p in self.polynomials])
 
     def __eq__(self, other: 'QuasiPolynomial') -> bool:
         """
