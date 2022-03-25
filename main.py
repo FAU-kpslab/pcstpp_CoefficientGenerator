@@ -42,7 +42,7 @@ def main():
     collection[((), (19, 21))] = qp.new([[-1/2]])
 
     # TODO: The fractions data type overflows in max_order 8.
-    max_order = 7
+    max_order = 8
     for order in range(max_order + 1):
         print('Starting calculations for order ' + str(order) + '.')
         for order_left in range(order + 1):
@@ -61,7 +61,7 @@ def main():
     # print(collection.pretty_print())
     print('Starting writing process.')
     # Print the block-diagonal operator sequences yielding the effective operator.
-    with open("TCDissipationO7.txt", "w") as result:
+    with open("result.txt", "w") as result:
         for sequence in collection.keys():
             if energy(coefficientFunction.sequence_to_indices(sequence, translation)) == 0:
                 resulting_constant = collection[sequence].function.get_constant()
