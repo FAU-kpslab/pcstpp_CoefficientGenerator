@@ -8,47 +8,48 @@ from itertools import product
 
 
 def main():
-    # Enter the total order.
-    max_order = 2
+    config = input("Do you want to use a config file? (y/n) ")
 
-    # Give a unique name to every operator, so that you can distinguish them. You can take the operator index as its
-    # name, provided that they are unique. The list 'operators_left' contains all operators on the left side of the
-    # tensor product and the list 'operators_right' all operators on the right side of the tensor product.
-    operators_left = (8, 9, 10, 11, 12)
-    operators_right = (18, 19, 20, 21, 22)
-
-    # Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the operators. In
-    # Lea's case, enter the indices of the operators prior to transposition.
-    translation = {
-        8: -2,
-        9: -1,
-        10: 0,
-        11: 1,
-        12: 2,
-        18: -2,
-        19: -1,
-        20: 0,
-        21: 1,
-        22: 2
-    }
-
-    # Manually insert the solution for the coefficient functions with non-vanishing starting condition.
-    starting_conditions = {'((8,), ())': [[1]], '((10,), ())': [[1]], '((12,), ())': [[1]], '((), (18,))': [[-1]],
-                           '((), (20,))': [[-1]], '((), (22,))': [[-1]], '((9,), (21,))': [[1]],
-                           '((11, 9), ())': [[-1/2]], '((), (19, 21))': [[-1/2]]}
-
-    # Introduce band-diagonality, i.e., write down the largest sum of indices occurring in the starting conditions.
-    max_energy = 2
-
-    config_file = open("config.yml", "r")
-    config = yaml.load(config_file, Loader=SafeLoader)
-    max_order = config['max_order']
-    operators_left = tuple(config['operators_left'])
-    operators_right = tuple(config['operators_right'])
-    translation = config['indices']
-    starting_conditions = config['starting_conditions']
-    max_energy = config['max_energy']
-    config_file.close()
+    if config == "y":
+        print("You have decided to use a config file, titled 'config.yml'.")
+        config_file = open("config.yml", "r")
+        config = yaml.load(config_file, Loader=SafeLoader)
+        max_order = config['max_order']
+        operators_left = tuple(config['operators_left'])
+        operators_right = tuple(config['operators_right'])
+        translation = config['indices']
+        starting_conditions = config['starting_conditions']
+        max_energy = config['max_energy']
+        config_file.close()
+    else:
+        print("You have decided to use the hard-coded config values.")
+        # Enter the total order.
+        max_order = 2
+        # Give a unique name to every operator, so that you can distinguish them. You can take the operator index as its
+        # name, provided that they are unique. The list 'operators_left' contains all operators on the left side of the
+        # tensor product and the list 'operators_right' all operators on the right side of the tensor product.
+        operators_left = (8, 9, 10, 11, 12)
+        operators_right = (18, 19, 20, 21, 22)
+        # Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the operators.
+        # In Lea's case, enter the indices of the operators prior to transposition.
+        translation = {
+            8: -2,
+            9: -1,
+            10: 0,
+            11: 1,
+            12: 2,
+            18: -2,
+            19: -1,
+            20: 0,
+            21: 1,
+            22: 2
+        }
+        # Manually insert the solution for the coefficient functions with non-vanishing starting condition.
+        starting_conditions = {'((8,), ())': [[1]], '((10,), ())': [[1]], '((12,), ())': [[1]], '((), (18,))': [[-1]],
+                               '((), (20,))': [[-1]], '((), (22,))': [[-1]], '((9,), (21,))': [[1]],
+                               '((11, 9), ())': [[-1/2]], '((), (19, 21))': [[-1/2]]}
+        # Introduce band-diagonality, i.e., write down the largest sum of indices occurring in the starting conditions.
+        max_energy = 2
 
     # Prepare the coefficient function storage.
     collection = coefficientFunction.FunctionCollection(translation, max_energy)
@@ -80,7 +81,7 @@ def main():
                 resulting_constant = collection[sequence].function.get_constant()
                 # Only return the non-vanishing operator sequences.
                 if resulting_constant != 0:
-                    # Invert the operator sequences, because the Solver thinks from left to right.
+                    # Reverse the operator sequences, because the Solver thinks from left to right.
                     inverted_sequence = [str(operator) for operator in sequence[0][::-1]] + [str(operator) for operator
                                                                                              in sequence[1][::-1]]
                     # Return 'order' 'sequence' 'numerator' 'denominator'.
@@ -122,7 +123,9 @@ def main():
     print('...', file=config_file)
     config_file.close()
 
-    print('Done.')
+    print("The calculations are done. Your coefficient file is 'result.txt'. If you want to keep it, store it under a "
+          "different name before executing the program again.")
+    print("The used configuration is found in 'config.yml', you can store that together with the results.")
 
 
 if __name__ == '__main__':
