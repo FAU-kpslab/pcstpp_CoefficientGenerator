@@ -3,7 +3,7 @@
 # in the file 'main.py'; the program will then generate the correct config file.
 
 # Enter the total order.
-max_order: 4
+max_order: 2
 # Give a unique name to every operator, so that you can distinguish them. You can take the operator index as its name,
 # provided that they are unique. The list 'operators_left' contains all operators on the left side of the tensor product
 # and the list 'operators_right' all operators on the right side of the tensor product.
@@ -22,17 +22,17 @@ indices:
   20: 0
   21: 1
   22: 2
-# Manually insert the solution for the coefficient functions with non-vanishing starting condition.
+# Manually insert the solution for the coefficient functions with non-vanishing starting condition as strings.
 starting_conditions:
-  ((8,), ()): [['1']]
-  ((10,), ()): [['1']]
-  ((12,), ()): [['1']]
-  ((), (18,)): [['-1']]
-  ((), (20,)): [['-1']]
-  ((), (22,)): [['-1']]
-  ((9,), (21,)): [['1']]
-  ((11, 9), ()): [['-1/2']]
-  ((), (19, 21)): [['-1/2']]
+  ((8,), ()): '1'
+  ((10,), ()): '1'
+  ((12,), ()): '1'
+  ((), (18,)): '-1'
+  ((), (20,)): '-1'
+  ((), (22,)): '-1'
+  ((9,), (21,)): '1'
+  ((11, 9), ()): '-1/2'
+  ((), (19, 21)): '-1/2'
 # Introduce band-diagonality, i.e., write down the largest sum of indices occurring in the starting conditions.
 max_energy: 2
 ...

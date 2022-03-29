@@ -120,9 +120,9 @@ class Polynomial:
         return self
 
     @staticmethod
-    def new(coefficient_list: Union[List[Fraction], List[int], List[float]]) -> 'Polynomial':
+    def new(coefficient_list: Union[List[Fraction], List[int], List[float], List[str]]) -> 'Polynomial':
         """
-        new(List[Number])
+        new(List[scalar])
 
         Creates a quasi-polynomial using a list of __private_coefficients.
 
@@ -475,7 +475,8 @@ class QuasiPolynomial:
         return self
 
     @staticmethod
-    def new(coefficient_list: Union[List[List[Fraction]], List[List[int]], List[List[float]]]) -> 'QuasiPolynomial':
+    def new(coefficient_list: Union[List[List[Fraction]], List[List[int]], List[List[float]], List[List[str]]]) -> \
+            'QuasiPolynomial':
         """
         new(List[List[scalar]])
 

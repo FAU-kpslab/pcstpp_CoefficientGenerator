@@ -44,17 +44,24 @@ def main():
             21: 1,
             22: 2
         }
-        # Manually insert the solution for the coefficient functions with non-vanishing starting condition.
-        starting_conditions = {'((8,), ())': [[1]], '((10,), ())': [[1]], '((12,), ())': [[1]], '((), (18,))': [[-1]],
-                               '((), (20,))': [[-1]], '((), (22,))': [[-1]], '((9,), (21,))': [[1]],
-                               '((11, 9), ())': [[-1/2]], '((), (19, 21))': [[-1/2]]}
+        # Manually insert the solution for the coefficient functions with non-vanishing starting condition as strings.
+        starting_conditions = {
+            '((8,), ())': '1',
+            '((10,), ())': '1',
+            '((12,), ())': '1',
+            '((), (18,))': '-1',
+            '((), (20,))': '-1',
+            '((), (22,))': '-1',
+            '((9,), (21,))': '1',
+            '((11, 9), ())': '-1/2',
+            '((), (19, 21))': '-1/2'}
         # Introduce band-diagonality, i.e., write down the largest sum of indices occurring in the starting conditions.
         max_energy = 2
 
     # Prepare the coefficient function storage.
     collection = coefficientFunction.FunctionCollection(translation, max_energy)
     for sequence in starting_conditions:
-        collection[eval(sequence)] = qp.new(starting_conditions[sequence])
+        collection[eval(sequence)] = qp.new([[starting_conditions[sequence]]])
 
     for order in range(max_order + 1):
         print('Starting calculations for order ' + str(order) + '.')
@@ -112,13 +119,14 @@ def main():
     print('indices:', file=config_file)
     for key in translation.keys():
         print('  ' + str(key) + ': ' + str(translation[key]), file=config_file)
-    print("# Manually insert the solution for the coefficient functions with non-vanishing starting condition.",
+    print("# Manually insert the solution for the coefficient functions with non-vanishing starting condition as "
+          "strings.",
           file=config_file)
     print('starting_conditions:', file=config_file)
     for sequence in starting_conditions:
-        print('  ' + sequence + ': ' + str(collection[eval(sequence)].function), file=config_file)
-    print("# Introduce band-diagonality, i.e., write down the largest sum of indices occurring in the starting"
-          " conditions.", file=config_file)
+        print('  ' + sequence + ": '" + str(starting_conditions[sequence] + "'"), file=config_file)
+    print("# Introduce band-diagonality, i.e., write down the largest sum of indices occurring in the starting "
+          "conditions.", file=config_file)
     print('max_energy: ' + str(max_energy), file=config_file)
     print('...', file=config_file)
     config_file.close()
