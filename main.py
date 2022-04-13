@@ -1,6 +1,8 @@
 import yaml
 from yaml.loader import SafeLoader
 
+import argparse
+
 import coefficientFunction
 from quasiPolynomial import QuasiPolynomial as qp
 from mathematics import energy
@@ -8,10 +10,18 @@ from itertools import product
 
 
 def main():
-    config = input("Do you want to use a config file? (y/n) ")
+    my_parser = argparse.ArgumentParser(description='Use pCUT to block-diagonalize a Lindbladian or a Hamiltonian with '
+                                                    'two particle types')
+    my_parser.add_argument('-t', '--trafo', action='store_true', help='calculate the transformation directly')
+    my_config = my_parser.add_mutually_exclusive_group()
+    my_config.add_argument('-f', '--file', action='store_true',
+                           help='pass configuration using the config file "config.yml"')
+    my_config.add_argument('-i', '--interactive', action='store_true',
+                           help='pass configuration step by step in the command line')
+    args = my_parser.parse_args()
 
-    if config == "y":
-        print("You have decided to use a config file, titled 'config.yml'.")
+    if args.file:
+        print('You have decided to use a config file, titled "config.yml".')
         config_file = open("config.yml", "r")
         config = yaml.load(config_file, Loader=SafeLoader)
         max_order = config['max_order']
@@ -21,8 +31,36 @@ def main():
         starting_conditions = config['starting_conditions']
         max_energy = config['max_energy']
         config_file.close()
+    elif args.interactive:
+        max_order = int(input("Enter the total order: "))
+        print("Give a unique name (integer) to every operator, so that you can distinguish them. You can take the"
+              " operator index as its name, provided that they are unique.")
+        operators_left = tuple(
+            [int(sequence) for sequence in input("Operators to the left of the tensor product: ").split()])
+        operators_right = tuple(
+            [int(sequence) for sequence in input("Operators to the right of the tensor product: ").split()])
+        print("# Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the "
+              "operators. In Lea's case, enter the indices of the operators prior to transposition.")
+        translation = dict()
+        for sequence in operators_left:
+            translation[sequence] = int(input("Index of operator " + str(sequence) + ": "))
+        for sequence in operators_right:
+            translation[sequence] = int(input("Index of operator " + str(sequence) + ": "))
+        print("Insert the solution for the coefficient functions with non-vanishing starting condition. For every term "
+              "enter:")
+        print("1. The operators to the left of the tensor product.")
+        print("2. The operators to the right of the tensor product.")
+        print("3. The prefactor")
+        starting_conditions = dict()
+        terms = int(input("Enter the number of non-vanishing terms: "))
+        for term in range(terms):
+            sequence = str((tuple([int(op) for op in input("Left: ").split()]),
+                            tuple([int(op) for op in input("Right: ").split()])))
+            starting_conditions[sequence] = input("Prefactor: ")
+        max_energy = int(input("Introduce band-diagonality, i.e., write down the largest sum of indices occurring in "
+                               "the starting conditions: "))
     else:
-        print("You have decided to use the hard-coded config values.")
+        print("You have decided to use the default config values.")
         # Enter the total order.
         max_order = 2
         # Give a unique name to every operator, so that you can distinguish them. You can take the operator index as its
@@ -101,16 +139,17 @@ def main():
     config_file = open("config.yml", "w")
     print('---', file=config_file)
     print("# This is an exemplary config file. If you use this program for the first time, you can also "
-          "specify everything directly\n"
-          "# in the file 'main.py'; the program will then generate the correct config file.\n",
+          "specify everything step\n"
+          "# by step in the command line; the program will then generate the correct config file.\n",
           file=config_file)
     print("# Enter the total order.", file=config_file)
     print('max_order: ' + str(max_order), file=config_file)
-    print("# Give a unique name to every operator, so that you can distinguish them. You can take the operator index"
-          " as its name,\n"
-          "# provided that they are unique. The list 'operators_left' contains all operators on the left side of the "
-          "tensor product\n"
-          "# and the list 'operators_right' all operators on the right side of the tensor product.", file=config_file)
+    print("# Give a unique name (integer) to every operator, so that you can distinguish them. You can take the "
+          "operator index as\n"
+          "# its name, provided that they are unique. The list 'operators_left' contains all operators on the left "
+          "side of the\n"
+          "# tensor product and the list 'operators_right' all operators on the right side of the tensor product.",
+          file=config_file)
     print('operators_left: ' + str(list(operators_left)), file=config_file)
     print('operators_right: ' + str(list(operators_right)), file=config_file)
     print("# Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the "
@@ -131,9 +170,9 @@ def main():
     print('...', file=config_file)
     config_file.close()
 
-    print("The calculations are done. Your coefficient file is 'result.txt'. If you want to keep it, store it under a "
-          "different name before executing the program again.")
-    print("The used configuration is found in 'config.yml', you can store that together with the results.")
+    print('The calculations are done. Your coefficient file is "result.txt". If you want to keep it, store it under a '
+          'different name before executing the program again.')
+    print('The used configuration is found in "config.yml", you can store that together with the results.')
 
 
 if __name__ == '__main__':
