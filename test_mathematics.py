@@ -20,6 +20,9 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(signum(([2], [2]), ([2], [2])), 0)
         self.assertEqual(signum(([2, 2], [2]), ([2], [2, 2])), 0)
         self.assertEqual(signum(([], [2]), ([2], [2, 2])), 0)
+        self.assertEqual(signum(([], []), ([], [])), 0)
+        self.assertEqual(signum(([], []), ([2], [])), -1)
+        self.assertEqual(signum(([], []), ([], [2])), -1)
 
     def test_exponential(self):
         self.assertEqual(exponential(([2, -2], []), ([2], []), ([-2], [])), qp.new([[], [], [], [], [1]]))
