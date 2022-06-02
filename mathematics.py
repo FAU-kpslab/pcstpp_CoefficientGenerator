@@ -1,11 +1,13 @@
+from functools import reduce
 from itertools import product, combinations
+import operator
 
 from quasiPolynomial import QuasiPolynomial
 import numpy as np
 from typing import List, Tuple
 
 
-def energy(indices: Tuple[List, List]) -> int:
+def energy(indices: List[List]) -> int:
     """
     energy(indices)
 
@@ -15,13 +17,10 @@ def energy(indices: Tuple[List, List]) -> int:
         -------
         int
     """
-
-    indices_left = indices[0]
-    indices_right = indices[1]
-    return sum(indices_left) + sum(indices_right)
+    return sum(reduce(operator.add, indices))
 
 
-def signum(indices1: Tuple[List, List], indices2: Tuple[List, List]) -> int:
+def signum(indices1: List[List], indices2: List[List]) -> int:
     """
     signum(indices1, indices2)
 
@@ -35,7 +34,7 @@ def signum(indices1: Tuple[List, List], indices2: Tuple[List, List]) -> int:
     return np.sign(energy(indices1)) - np.sign(energy(indices2))
 
 
-def exponential(indices: Tuple[List, List], indices1: Tuple[List, List], indices2: Tuple[List, List]) -> QuasiPolynomial:
+def exponential(indices: List[List], indices1: List[List], indices2: List[List]) -> QuasiPolynomial:
     """
     exponential(indices, indices1, indices2)
 
@@ -52,20 +51,19 @@ def exponential(indices: Tuple[List, List], indices1: Tuple[List, List], indices
     return QuasiPolynomial.new(coefficient_list)
 
 
-def partitions(sequence: Tuple[Tuple, Tuple]) -> List[Tuple[Tuple[Tuple, Tuple], Tuple[Tuple, Tuple]]]:
+def partitions(sequence: List[Tuple]) -> List[Tuple[List[Tuple],List[Tuple]]]:
     """
     partitions(sequence)
 
-    Returns all partitions of the operator sequence (m, n) into ((m1, n1), (m2, n2)).
+    Returns all partitions of the operator sequence [m, n, o, ...] into ([m1, n1, o1, ...], [m2, n2, o2, ...]).
 
         Returns
         -------
-        List[Tuple[Tuple[Tuple, Tuple], Tuple[Tuple, Tuple]]]
+        List[Tuple[List[Tuple],List[Tuple]]]
     """
-
-    sequence_left = sequence[0]
-    sequence_right = sequence[1]
-    partition_left = [(sequence_left[:i], sequence_left[i:]) for i in range(len(sequence_left) + 1)]
-    partition_right = [(sequence_right[:i], sequence_right[i:]) for i in range(len(sequence_right) + 1)]
-    return [((left1, right1), (left2, right2)) for left1, left2 in partition_left for right1, right2 in partition_right
-            if (((left1, right1) != ((), ())) & ((left2, right2) != ((), ())))]
+    # TODO: Why we have to look at all possible partitions, especially those where
+    # we have different amount of terms on the left side for commuting Hilbert spaces?
+    # Should this depend on the starting conditions e.g. is this needed for the Dicke model?
+    partitions = [[(s[:i],s[i:]) for i in range(len(s) + 1)] for s in sequence]
+    valid_partitions = list(product(*partitions))[1:-1]
+    return [([l[0] for l in pr],[r[1] for r in pr]) for pr in valid_partitions]
