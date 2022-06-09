@@ -33,8 +33,11 @@ class TestFunctionCollection(unittest.TestCase):
 
 class TestDifferentialEquation(unittest.TestCase):
     def test_differential_equation(self):
-        self.assertEqual(collection[(('2.id', '-2.id'), ())].function, qp.new([[1/2], [], [], [], [-1/2]]))
-        self.assertEqual(collection[(('0.id',), ('id.-2',))].function, qp.zero())
+        self.assertEqual(collection[(('2.id',), ())].function, qp.new([[1]]))
+        self.assertEqual(collection[((), ('id.-2',))].function, qp.new([[-1]]))
+        with self.assertRaises(AttributeError):
+            # As the item is not in 'collection' a 'NoneType' object is returned 
+            collection[(('0.id',), ('id.-2',))].function
 
 
 if __name__ == '__main__':
