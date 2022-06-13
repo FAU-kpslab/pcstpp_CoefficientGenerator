@@ -1,5 +1,5 @@
 from fractions import Fraction
-from typing import List, Union
+from typing import List, Union, Tuple
 
 import numpy as np
 
@@ -379,7 +379,7 @@ class QuasiPolynomial:
 
         Parameters
         ----------
-        polynomial_list : List[Polynomial]
+        polynomial_list : List[Tuple[int, Polynomial]]
             The list of polynomials.
             The coefficient polynomial of exp(- alpha x) is polynomial_list[alpha].
 
@@ -387,10 +387,12 @@ class QuasiPolynomial:
         ----------
         polynomials : np.ndarray[Polynomial]
             The numpy array of polynomials.
-            The coefficient polynomial of exp(- alpha x) is polynomials[alpha].
+            The coefficient polynomial of exp(- alpha x) is stored as (alpha, polynomial).
 
         Methods
         -------
+        __str__ : str
+            Prints the coefficient array.
         zero : QuasiPolynomial
             Creates an empty quasi-polynomial.
         simplify : QuasiPolynomial
@@ -399,8 +401,6 @@ class QuasiPolynomial:
             Creates a quasi-polynomial using a nested list of __private_coefficients.
         copy : QuasiPolynomial
             Copies a quasi-polynomial.
-        __str__ : str
-            Prints the coefficient array.
         __eq__ : bool
             Checks whether two quasi-polynomials are mathematically equal.
         pretty_print : str
@@ -423,16 +423,29 @@ class QuasiPolynomial:
             Returns the constant coefficient of the constant polynomial (alpha = 0).
     """
 
-    def __init__(self, polynomial_list: List[Polynomial]) -> None:
+    def __init__(self, polynomial_list: List[Tuple[int, Polynomial]]) -> None:
         """
             Parameters
             ----------
-            polynomial_list : List[Polynomial]
+            polynomial_list : List[Tuple[int, Polynomial]]
                 The list of polynomials.
-                The coefficient polynomial of exp(- alpha x) is polynomial_list[alpha].
+                The coefficient polynomial of exp(- alpha x) is stored as (alpha, polynomial).
         """
 
-        self.polynomials = np.asarray(polynomial_list, dtype=Polynomial)
+        self.polynomials = polynomial_list
+
+    def __str__(self) -> str:
+        """
+            print(qp)
+
+            Prints the coefficient array.
+
+                Returns
+                -------
+                str
+        """
+
+        return str([[str(coeff) for coeff in p[1].coefficients()] for p in self.polynomials])  # TODO: Print alpha
 
     @staticmethod
     def zero() -> 'QuasiPolynomial':
@@ -461,16 +474,16 @@ class QuasiPolynomial:
 
         # Simplify the remaining polynomials.
         for polynomial in self.polynomials:
-            polynomial.simplify()
+            polynomial[1].simplify()
             # Check whether the quasi-polynomial is empty.
-        if self.polynomials.size == 0:
+        if len(self.polynomials) == 0:
             return QuasiPolynomial.zero()
         else:
             # Check whether the last polynomial is empty to remove it.
-            while self.polynomials[-1] == Polynomial.zero():
+            while self.polynomials[-1][1] == Polynomial.zero():
                 self.polynomials = self.polynomials[:-1].copy()
                 # Recheck whether the quasi-polynomial is empty.
-                if self.polynomials.size == 0:
+                if len(self.polynomials) == 0:
                     return QuasiPolynomial.zero()
         return self
 
@@ -491,7 +504,7 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
-        polynomial_list = [Polynomial.new(coeffs) for coeffs in coefficient_list]
+        polynomial_list = [(alpha, Polynomial.new(coefficient_list[alpha])) for alpha in range(len(coefficient_list))]
         return QuasiPolynomial(polynomial_list).simplify()
 
     def copy(self) -> 'QuasiPolynomial':
@@ -505,20 +518,7 @@ class QuasiPolynomial:
             quasi-Polynomial
         """
 
-        return QuasiPolynomial([p.copy().coefficients() for p in self.polynomials])
-
-    def __str__(self) -> str:
-        """
-        print(qp)
-
-        Prints the coefficient array.
-
-            Returns
-            -------
-            str
-        """
-
-        return str([[str(coeff) for coeff in p.coefficients()] for p in self.polynomials])
+        return QuasiPolynomial([(alpha, self.polynomials[alpha][1].copy()) for alpha in range(len(self.polynomials))])
 
     def __eq__(self, other: 'QuasiPolynomial') -> bool:
         """
@@ -547,35 +547,35 @@ class QuasiPolynomial:
         if self == QuasiPolynomial.zero():
             return '0'
         # Check whether the quasi-polynomial contains only the first polynomial.
-        if self.polynomials.size == 1:
-            return self.polynomials[0].pretty_print()
+        if len(self.polynomials) == 1:
+            return self.polynomials[0][1].pretty_print()
         else:
             output = []
-            if self.polynomials[0] != Polynomial.zero():
-                output.append(self.polynomials[0].pretty_print())
-            if self.polynomials[1] != Polynomial.zero():
+            if self.polynomials[0][1] != Polynomial.zero():
+                output.append(self.polynomials[0][1].pretty_print())
+            if self.polynomials[1][1] != Polynomial.zero():
                 # Check whether the polynomial contains only the constant term to leave away the brackets.
-                if self.polynomials[1].coefficients().size == 1:
+                if self.polynomials[1][1].coefficients().size == 1:
                     # Check whether the polynomial contains only 1 to leave that away.
-                    if self.polynomials[1].coefficients()[0] == 1:
+                    if self.polynomials[1][1].coefficients()[0] == 1:
                         output.append('exp(-x)')
                     else:
-                        output.append(self.polynomials[1].pretty_print() + 'exp(-x)')
+                        output.append(self.polynomials[1][1].pretty_print() + 'exp(-x)')
                 else:
-                    output.append('(' + self.polynomials[1].pretty_print() + ')exp(-x)')
-            for exponent, polynomial in list(enumerate(self.polynomials))[2:]:
+                    output.append('(' + self.polynomials[1][1].pretty_print() + ')exp(-x)')
+            for alpha in range(2, len(self.polynomials)):
                 # Check for the remaining polynomials whether they are zero to leave those away.
-                if polynomial != Polynomial.zero():
+                if self.polynomials[alpha][1] != Polynomial.zero():
                     # Check for the remaining polynomials whether they contain only the constant term to leave away the
                     # brackets.
-                    if polynomial.coefficients().size == 1:
+                    if len(self.polynomials[alpha][1].coefficients()) == 1:
                         # Check for the remaining polynomials whether they contain only 1 to leave that away.
-                        if polynomial.coefficients()[0] == 1:
-                            output.append('exp(-' + str(exponent) + 'x)')
+                        if self.polynomials[alpha][1].coefficients()[0] == 1:
+                            output.append('exp(-' + str(alpha) + 'x)')
                         else:
-                            output.append(polynomial.pretty_print() + 'exp(-' + str(exponent) + 'x)')
+                            output.append(self.polynomials[alpha][1].pretty_print() + 'exp(-' + str(alpha) + 'x)')
                     else:
-                        output.append('(' + polynomial.pretty_print() + ')exp(-' + str(exponent) + 'x)')
+                        output.append('(' + self.polynomials[alpha][1].pretty_print() + ')exp(-' + str(alpha) + 'x)')
             return '+'.join(output).replace('+-', '-')
 
     def scalar_multiplication(self, scalar: Union[Fraction, int, float]) -> 'QuasiPolynomial':
@@ -593,7 +593,8 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
-        return QuasiPolynomial(scalar * self.polynomials).simplify()
+        return QuasiPolynomial(
+            [(alpha, scalar * self.polynomials[alpha][1]) for alpha in range(len(self.polynomials))]).simplify()
 
     def __neg__(self) -> 'QuasiPolynomial':
         """
@@ -619,20 +620,15 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
-        left_size = self.polynomials.size
-        right_size = other.polynomials.size
-        if left_size > right_size:
-            # Add empty polynomials to the shorter quasi-polynomial to make them equally long.
-            new_other = np.concatenate(
-                (other.polynomials,
-                 np.array([Polynomial.zero()] * (left_size - right_size))))
-            output = new_other + self.polynomials
+        self_size = len(self.polynomials)
+        other_size = len(other.polynomials)
+        if self_size > other_size:
+            output = [(alpha, self.polynomials[alpha][1] + other.polynomials[alpha][1]) for alpha in
+                      range(other_size)] + self.polynomials[other_size:]
         else:
-            # Add empty polynomials to the shorter quasi-polynomial to make them equally long.
-            new_self = np.concatenate(
-                (self.polynomials,
-                 np.array([Polynomial.zero()] * (right_size - left_size))))
-            output = new_self + other.polynomials
+            output = [(alpha, self.polynomials[alpha][1] + other.polynomials[alpha][1]) for alpha in
+                      range(self_size)] + other.polynomials[self_size:]
+        print(QuasiPolynomial(output).simplify())
         return QuasiPolynomial(output).simplify()
 
     def __sub__(self, other: 'QuasiPolynomial') -> 'QuasiPolynomial':
