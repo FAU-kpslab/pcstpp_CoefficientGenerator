@@ -25,8 +25,7 @@ def main():
         config_file = open("config.yml", "r")
         config = yaml.load(config_file, Loader=SafeLoader)
         max_order = config['max_order']
-        operators_left = tuple(config['operators_left'])
-        operators_right = tuple(config['operators_right'])
+        operators = list(config['operators'])
         translation = config['indices']
         starting_conditions = config['starting_conditions']
         max_energy = config['max_energy']
@@ -39,6 +38,8 @@ def main():
             [int(sequence) for sequence in input("Operators to the left of the tensor product: ").split()])
         operators_right = tuple(
             [int(sequence) for sequence in input("Operators to the right of the tensor product: ").split()])
+        # TODO: This could be generalized to arbitrary many Hilbert spaces
+        operators = [operators_left, operators_right]
         print("# Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the "
               "operators. In Lea's case, enter the indices of the operators prior to transposition.")
         translation = dict()
@@ -64,11 +65,9 @@ def main():
         # Enter the total order.
         max_order = 4
         # Give a unique name (integer) to every operator, so that you can distinguish them. You can take the operator
-        # index as its name, provided that they are unique. The list 'operators_left' contains all operators on the left
-        # side of the tensor product and the list 'operators_right' all operators on the right side of the tensor
-        # product.
-        operators_left = (-1, -2, -3, -4, -5)
-        operators_right = (1, 2, 3, 4, 5)
+        # index as its name, provided that they are unique. The operators can separated in arbitrarily different lists 
+        # which marks them as groups whose operators commute pairwise with those of other groups.
+        operators = [[-1, -2, -3, -4, -5], [1, 2, 3, 4, 5]]
         # Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the operators.
         # In Lea's case, enter the indices of the operators prior to transposition.
         translation = {
@@ -102,16 +101,15 @@ def main():
     for sequence in starting_conditions:
         collection[eval(sequence)] = qp.new([[starting_conditions[sequence]]])
 
-    # TODO: Only temporary, move 'operators' to the input forms
-    operators = operators_left + operators_right
-    operators_sorted = [operators_left, operators_right]
+    operators_all = [operator for operator_space in operators for operator in operator_space]
+
     if not args.trafo:
         for order in range(max_order + 1):
             print('Starting calculations for order ' + str(order) + '.')
             # TODO: This version is slower as needed as we do not use the arbitrary order of the commuting operators
-            sequences = set(product(operators, repeat=order))
+            sequences = set(product(operators_all, repeat=order))
             for sequence in sequences:
-                sequence_sorted = [tuple([s for s in sequence if s in o_s]) for o_s in operators_sorted]
+                sequence_sorted = [tuple([s for s in sequence if s in o_s]) for o_s in operators]
                 indices = coefficientFunction.sequence_to_indices(sequence_sorted, translation)
                 # Make use of block diagonality.
                 if energy(indices) == 0:
@@ -137,14 +135,13 @@ def main():
     if args.trafo:
         # Prepare the trafo coefficient function storage.
         trafo_collection = coefficientFunction.FunctionCollection(translation)
-        # TODO: Das hier noch ändern
-        trafo_collection[((), ())] = qp.new([['1']])
+        trafo_collection[tuple([()]*len(operators))] = qp.new([['1']])
 
         for order in range(max_order + 1):
             print('Starting calculations for order ' + str(order) + '.')
-            sequences = set(product(operators, repeat=order))
+            sequences = set(product(operators_all, repeat=order))
             for sequence in sequences:
-                sequence_sorted = [tuple([s for s in sequence if s in o_s]) for o_s in operators_sorted]
+                sequence_sorted = [tuple([s for s in sequence if s in o_s]) for o_s in operators]
                 coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation, max_energy)
         # print(collection.pretty_print())
         print('Starting writing process.')
@@ -173,12 +170,11 @@ def main():
     print('max_order: ' + str(max_order), file=config_file)
     print("# Give a unique name (integer) to every operator, so that you can distinguish them. You can take the "
           "operator index as\n"
-          "# its name, provided that they are unique. The list 'operators_left' contains all operators on the left "
-          "side of the\n"
-          "# tensor product and the list 'operators_right' all operators on the right side of the tensor product.",
+          "# its name, provided that they are unique. The operators can separated in arbitrarily different lists "
+          "which marks them\n" 
+          "# as groups whose operators commute pairwise with those of other groups. ",
           file=config_file)
-    print('operators_left: ' + str(list(operators_left)), file=config_file)
-    print('operators_right: ' + str(list(operators_right)), file=config_file)
+    print('operators: ' + str(list(operators)), file=config_file)
     print("# Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the "
           "operators. In Lea's\n"
           "# case, enter the indices of the operators prior to transposition.", file=config_file)
