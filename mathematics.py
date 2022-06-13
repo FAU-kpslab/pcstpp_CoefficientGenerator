@@ -65,5 +65,6 @@ def partitions(sequence: List[Tuple]) -> List[Tuple[List[Tuple],List[Tuple]]]:
     # we have different amount of terms on the left side for commuting Hilbert spaces?
     # Should this depend on the starting conditions e.g. is this needed for the Dicke model?
     partitions = [[(s[:i],s[i:]) for i in range(len(s) + 1)] for s in sequence]
+    # skip edge cases of completely empty left or right side
     valid_partitions = list(product(*partitions))[1:-1]
     return [([l[0] for l in pr],[r[1] for r in pr]) for pr in valid_partitions]
