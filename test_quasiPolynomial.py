@@ -92,16 +92,24 @@ class TestPolynomial(unittest.TestCase):
 class TestQuasiPolynomial(unittest.TestCase):
 
     def test_simplify(self):
-        self.assertEqual(print(QP([(0, P.new([2, 4, 8, 0]))]).simplify()), print(QP([(0, P.new([2, 4, 8]), )])))
-        self.assertEqual(print(QP([(0, P.new([2, 4, 0, 0]))]).simplify()), print(QP([(0, P.new([2, 4]))])))
-        self.assertEqual(print(QP([(0, P.new([0, 0, 0]))]).simplify()), print(QP([])))
-        self.assertEqual(print(QP([]).simplify()), print(QP([])))
-        self.assertEqual(print(QP([(0, P.new([2, 4, 8])), (1, P.new([1, 5, 25])), (2, P.new([0, 0]))]).simplify()),
-                         print(QP([(0, P.new([2, 4, 8])), (1, P.new([1, 5, 25]))])))
-        self.assertEqual(print(QP([(0, P.new([2, 4, 8])), (1, P.new([0, 0, 0])), (2, P.new([3, 9]))]).simplify()),
-                         print(QP([(0, P.new([2, 4, 8])), (1, P.zero()), (2, P.new([3, 9]))])))  # TODO: Remove P.zero()
-        self.assertEqual(print(QP([(0, P.zero()), (1, P.zero()), (2, P.zero())]).simplify()), print(QP([])))
-        # TODO: Shuffle tuples
+        self.assertEqual(str(QP([(0, P.new([2, 4, 8, 0]))]).simplify()), str(QP([(0, P.new([2, 4, 8]), )])))
+        self.assertEqual(str(QP([(0, P.new([2, 4, 0, 0]))]).simplify()), str(QP([(0, P.new([2, 4]))])))
+        self.assertEqual(str(QP([(0, P.new([0, 0, 0]))]).simplify()), str(QP([])))
+        self.assertEqual(str(QP([]).simplify()), str(QP([])))
+        self.assertEqual(str(QP([(0, P.new([2, 4, 8])), (1, P.new([1, 5, 25])), (2, P.new([0, 0]))]).simplify()),
+                         str(QP([(0, P.new([2, 4, 8])), (1, P.new([1, 5, 25]))])))
+        self.assertEqual(str(QP([(0, P.new([2, 4, 8])), (1, P.new([0, 0, 0])), (2, P.new([3, 9]))]).simplify()),
+                         str(QP([(0, P.new([2, 4, 8])), (1, P.zero()), (2, P.new([3, 9]))])))  # TODO: Remove P.zero()
+        self.assertEqual(str(QP([(0, P.zero()), (1, P.zero()), (2, P.zero())]).simplify()), str(QP([])))
+        self.assertEqual(str(QP([(0, P.new([])), (1, P.new([7, 22, 16])), (1, P.new([15, 38, 24]))]).simplify()),
+                         str(QP([(0, P.new([])), (1, P.new([22, 60, 40]))])))
+        self.assertEqual(str(QP([(0, P.new([5, 16, 12])), (1, P.new([7, 22, 16])), (1, P.new([15, 38, 24])),
+                                 (2, P.new([21, 52, 32]))]).simplify()), str(QP(
+            [(0, P.new([5, 16, 12])), (1, P.new([22, 60, 40])), (2, P.new([21, 52, 32]))]).simplify()))
+
+    def test_sort(self):
+        self.assertEqual(str(QP([(2, P.new([2, 4, 8])), (1, P.new([1, 5, 25])), (0, P.new([1]))]).sort()),
+                         str(QP([(0, P.new([1])), (1, P.new([1, 5, 25])), (2, P.new([2, 4, 8]))])))
 
     def test_new(self):
         self.assertEqual(QP([(0, P.new([2, 3, 4])), (1, P.new([1]))]), QP.new([[2, 3, 4], [1]]))

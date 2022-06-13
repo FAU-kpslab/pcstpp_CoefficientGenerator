@@ -116,7 +116,7 @@ class Polynomial:
                 self.__private_coefficients = self.__private_coefficients[:-1].copy()
                 # Check whether the polynomial is empty.
                 if self.__private_coefficients.size == 0:
-                    break
+                    return Polynomial.zero()
         return self
 
     @staticmethod
@@ -396,7 +396,9 @@ class QuasiPolynomial:
         zero : QuasiPolynomial
             Creates an empty quasi-polynomial.
         simplify : QuasiPolynomial
-            Simplifies a quasi-polynomial by *removing* zero polynomials.
+            Simplifies a quasi-polynomial by *removing* zero polynomials and adding polynomials with same exponent.
+        sort : QuasiPolynomial
+            Sorts a quasi-polynomial by exponential alpha.
         new : QuasiPolynomial
             Creates a quasi-polynomial using a nested list of __private_coefficients.
         copy : QuasiPolynomial
@@ -445,7 +447,7 @@ class QuasiPolynomial:
                 str
         """
 
-        return str([[str(coeff) for coeff in p[1].coefficients()] for p in self.polynomials])  # TODO: Print alpha
+        return str([(p[0], [str(coeff) for coeff in p[1].coefficients()]) for p in self.polynomials])  # TODO: Print alpha
 
     @staticmethod
     def zero() -> 'QuasiPolynomial':
@@ -465,26 +467,46 @@ class QuasiPolynomial:
         """
         qp.simplify()
 
-        Simplifies a quasi-polynomial by *removing* zero polynomials.
+        Simplifies a quasi-polynomial by *removing* zero polynomials and adding polynomials with same exponent.
 
             Returns
             -------
             QuasiPolynomial
         """
 
-        # Simplify the remaining polynomials.
         for polynomial in self.polynomials:
             polynomial[1].simplify()
-            # Check whether the quasi-polynomial is empty.
+        # Check whether the quasi-polynomial is empty.
         if len(self.polynomials) == 0:
             return QuasiPolynomial.zero()
         else:
+            output = [self.polynomials[0]]
+            for p in self.polynomials[1:]:
+                if p[0] == output[-1][0]:
+                    output[-1] = (output[-1][0], output[-1][1] + p[1])
+                else:
+                    output.append(p)
+            # TODO: Remove empty polynomials in the middle.
             # Check whether the last polynomial is empty to remove it.
-            while self.polynomials[-1][1] == Polynomial.zero():
-                self.polynomials = self.polynomials[:-1].copy()
+            while output[-1][1] == Polynomial.zero():
+                output.pop(-1)
                 # Recheck whether the quasi-polynomial is empty.
-                if len(self.polynomials) == 0:
+                if len(output) == 0:
                     return QuasiPolynomial.zero()
+            return QuasiPolynomial(output)
+
+    def sort(self) -> 'QuasiPolynomial':
+        """
+        qp.sort()
+
+        Sorts a quasi-polynomial by exponential alpha.
+
+            Returns
+            -------
+            QuasiPolynomial
+        """
+
+        self.polynomials.sort(key=lambda p: p[0])
         return self
 
     @staticmethod
@@ -657,17 +679,11 @@ class QuasiPolynomial:
 
         # Check whether the second object is a quasi-polynomial.
         if isinstance(other, QuasiPolynomial):
-            # Calculate the matrix containing all combinations of coefficient polynomials of both quasi-polynomials.
-            # Flip it such that all coefficient polynomials corresponding to the same exp(-nx) are part of the same
-            # diagonals.
-            combinations = np.flipud(np.outer(self.polynomials, other.polynomials))
-            # Sum over the diagonals to obtain the real coefficient polynomials.
-            output = [sum(combinations.diagonal(exponent), start=Polynomial.zero()) for exponent in
-                      np.arange(- self.polynomials.size + 1, other.polynomials.size)]
-            return QuasiPolynomial(output).simplify()
+            output = [(p1[0] + p2[0], p1[1] * p2[1]) for p1 in self.polynomials for p2 in other.polynomials]
+            return QuasiPolynomial(output).sort().simplify()
         # Check whether the second object is a polynomial and lift it to a quasi-polynomial.
         elif isinstance(other, Polynomial):
-            return self * QuasiPolynomial([other])
+            return self * QuasiPolynomial([(0, other)])
         # Check whether the second object is a scalar and call scalar_multiplication.
         if isinstance(other, (Fraction, int, float)):
             return self.scalar_multiplication(other)
@@ -705,24 +721,24 @@ class QuasiPolynomial:
             # Initiate the constant of integration.
             constant = Fraction(0)
             # Integrate the first polynomial (that has no exp).
-            output = [self.polynomials[0].integrate()]
+            output = [(0, self.polynomials[0][1].integrate())]
             # Loop over all other polynomials to integrate them one at a time.
-            for alpha in np.arange(1, self.polynomials.size):
-                if self.polynomials[alpha] == Polynomial.zero():
-                    output.append(Polynomial.zero())
+            for alpha in np.arange(1, len(self.polynomials)):
+                if self.polynomials[alpha][1] == Polynomial.zero():
+                    output.append((alpha, Polynomial.zero()))
                 else:
                     # Give the polynomial a name to be able to differentiate it multiple times.
-                    temp_polynomial = self.polynomials[alpha]
+                    temp_polynomial = self.polynomials[alpha][1]
                     resulting_polynomial = -temp_polynomial * Fraction(1, alpha)
                     # Give the respective integration constant a name.
                     resulting_constant = temp_polynomial.coefficients()[0] * Fraction(1, alpha)
                     # Perform partial integration multiple times.
-                    for n in np.arange(1, self.polynomials[alpha].coefficients().size):
+                    for n in np.arange(1, self.polynomials[alpha][1].coefficients().size):
                         temp_polynomial = temp_polynomial.diff()
                         resulting_polynomial = resulting_polynomial - (temp_polynomial * Fraction(1, alpha**(n + 1)))
                         resulting_constant = resulting_constant + temp_polynomial.coefficients()[0] * Fraction(1, alpha ** (n + 1))
                     constant = constant + resulting_constant
-                    output.append(resulting_polynomial)
+                    output.append((alpha, resulting_polynomial))
             return (QuasiPolynomial(output) + QuasiPolynomial.new([[constant]])).simplify()
 
     def get_constant(self) -> Fraction:
@@ -739,4 +755,4 @@ class QuasiPolynomial:
         if self == QuasiPolynomial.zero():
             return Fraction(0)
         else:
-            return self.polynomials[0].get_constant()
+            return self.polynomials[0][1].get_constant()
