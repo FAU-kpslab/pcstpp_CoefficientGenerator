@@ -227,7 +227,7 @@ class FunctionCollection:
         return output
 
 
-def sequence_to_key(sequence: List[Tuple]) -> Tuple[Tuple, Tuple]:  # TODO The key is supposed to be an integer.
+def sequence_to_key(sequence: List[Tuple]) -> Tuple[Tuple]:  # TODO The key is supposed to be an integer.
     """
     vector_to_key(sequence)
 
@@ -265,7 +265,7 @@ def sequence_to_indices(sequence: List[Tuple], translation: Dict) -> Tuple[List[
         -------
         Tuple[List[List]]
     """
-    return Tuple([[translation[e] for e in s]for s in sequence])
+    return tuple([[translation[e] for e in s]for s in sequence])
 
 
 def calc(sequence: List[Tuple], collection: FunctionCollection, translation: Dict,
