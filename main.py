@@ -62,7 +62,7 @@ def main():
     else:
         print("You have decided to use the default config values.")
         # Enter the total order.
-        max_order = 2
+        max_order = 4
         # Give a unique name (integer) to every operator, so that you can distinguish them. You can take the operator
         # index as its name, provided that they are unique. The list 'operators_left' contains all operators on the left
         # side of the tensor product and the list 'operators_right' all operators on the right side of the tensor
@@ -102,22 +102,20 @@ def main():
     for sequence in starting_conditions:
         collection[eval(sequence)] = qp.new([[starting_conditions[sequence]]])
 
+    # TODO: Only temporary, move 'operators' to the input forms
+    operators = operators_left + operators_right
+    operators_sorted = [operators_left, operators_right]
     if not args.trafo:
         for order in range(max_order + 1):
             print('Starting calculations for order ' + str(order) + '.')
-            for order_left in range(order + 1):
-                order_right = order - order_left
-                # Calculate all possible operator sequences with 'order_left' operators on the left of the tensor
-                # product.
-                sequences_left = set(product(operators_left, repeat=order_left))
-                sequences_right = set(product(operators_right, repeat=order_right))
-                for sequence_left in sequences_left:
-                    for sequence_right in sequences_right:
-                        sequence = (sequence_left, sequence_right)
-                        indices = coefficientFunction.sequence_to_indices(sequence, translation)
-                        # Make use of block diagonality.
-                        if energy(indices) == 0:
-                            coefficientFunction.calc(sequence, collection, translation, max_energy)
+            # TODO: This version is slower as needed as we do not use the arbitrary order of the commuting operators
+            sequences = set(product(operators, repeat=order))
+            for sequence in sequences:
+                sequence_sorted = [tuple([s for s in sequence if s in o_s]) for o_s in operators_sorted]
+                indices = coefficientFunction.sequence_to_indices(sequence_sorted, translation)
+                # Make use of block diagonality.
+                if energy(indices) == 0:
+                    coefficientFunction.calc(sequence_sorted, collection, translation, max_energy)
         # print(collection.pretty_print())
         print('Starting writing process.')
         # Write the results in a file.
@@ -129,11 +127,9 @@ def main():
                     # Only return the non-vanishing operator sequences.
                     if resulting_constant != 0:
                         # Reverse the operator sequences, because the Solver thinks from left to right.
-                        inverted_sequence = [str(operator) for operator in sequence[0][::-1]] + [str(operator) for
-                                                                                                 operator
-                                                                                                 in sequence[1][::-1]]
+                        inverted_sequence = [str(operator) for s in sequence for operator in s[::-1]]
                         # Return 'order' 'sequence' 'numerator' 'denominator'.
-                        output = [str(len(sequence[0]) + len(sequence[1]))] + inverted_sequence + [
+                        output = [str(sum([len(seq) for seq in sequence]))] + inverted_sequence + [
                             str(resulting_constant.numerator), str(resulting_constant.denominator)]
                         print(' '.join(output), file=result)
             result.close()
@@ -141,21 +137,15 @@ def main():
     if args.trafo:
         # Prepare the trafo coefficient function storage.
         trafo_collection = coefficientFunction.FunctionCollection(translation)
+        # TODO: Das hier noch ändern
         trafo_collection[((), ())] = qp.new([['1']])
 
         for order in range(max_order + 1):
             print('Starting calculations for order ' + str(order) + '.')
-            for order_left in range(order + 1):
-                order_right = order - order_left
-                # Calculate all possible operator sequences with 'order_left' operators on the left of the tensor
-                # product.
-                sequences_left = set(product(operators_left, repeat=order_left))
-                sequences_right = set(product(operators_right, repeat=order_right))
-                for sequence_left in sequences_left:
-                    for sequence_right in sequences_right:
-                        sequence = (sequence_left, sequence_right)
-                        coefficientFunction.trafo_calc(sequence, trafo_collection, collection, translation, max_energy)
-
+            sequences = set(product(operators, repeat=order))
+            for sequence in sequences:
+                sequence_sorted = [tuple([s for s in sequence if s in o_s]) for o_s in operators_sorted]
+                coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation, max_energy)
         # print(collection.pretty_print())
         print('Starting writing process.')
         # Write the results in a file.
@@ -165,10 +155,9 @@ def main():
                 # Only return the non-vanishing operator sequences.
                 if resulting_constant != 0:
                     # Reverse the operator sequences, because the Solver thinks from left to right.
-                    inverted_sequence = [str(operator) for operator in sequence[0][::-1]] + [str(operator) for operator
-                                                                                             in sequence[1][::-1]]
+                    inverted_sequence = [str(operator) for s in sequence for operator in s[::-1]]
                     # Return 'order' 'sequence' 'numerator' 'denominator'.
-                    output = [str(len(sequence[0]) + len(sequence[1]))] + inverted_sequence + [
+                    output = [str(sum([len(seq) for seq in sequence]))] + inverted_sequence + [
                         str(resulting_constant.numerator), str(resulting_constant.denominator)]
                     print(' '.join(output), file=result)
             result.close()
