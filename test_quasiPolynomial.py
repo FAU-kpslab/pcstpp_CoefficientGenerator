@@ -119,6 +119,7 @@ class TestQuasiPolynomial(unittest.TestCase):
         temp_copy = temp.copy()
         self.assertNotEqual(id(temp), id(temp_copy))
         self.assertNotEqual(id(temp.polynomials[0][1]), id(temp_copy.polynomials[0][1]))
+        self.assertEqual(temp, temp_copy)
         temp2 = QP.new([[]])
         self.assertNotEqual(id(temp2), id(temp2.copy()))
 
@@ -199,6 +200,11 @@ class TestQuasiPolynomial(unittest.TestCase):
         self.assertEqual(QP.new([[], [], [1, 2, 0, 0, 5]]).integrate(), QP.new(
             [[Fraction(19, 4)], [], [Fraction(-19, 4), Fraction(-17, 2), Fraction(-15, 2), -5, Fraction(-5, 2)]]))
         self.assertEqual(QP.new([[]]).integrate(), QP.new([[]]))
+
+    def test_get_constant(self):
+        self.assertEqual(QP.new([[5, 5, 7]]).get_constant(), Fraction(5))
+        self.assertEqual(QP.zero().get_constant(), Fraction(0))
+        self.assertEqual(QP.new([[], [], [1, 2, 0, 0, 5]]).get_constant(), Fraction(0))
 
 
 if __name__ == '__main__':
