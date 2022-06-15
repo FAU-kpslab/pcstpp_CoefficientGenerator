@@ -255,7 +255,7 @@ def key_to_sequence(key: Tuple[Tuple]) -> List[Tuple]:  # TODO The key is suppos
     return list(key)
 
 
-def sequence_to_indices(sequence: List[Tuple], translation: Dict) -> Tuple[List[List]]:
+def sequence_to_indices(sequence: List[Tuple], translation: Dict) -> List[List]:
     """
     sequence_to_indices(key)
 
@@ -263,9 +263,9 @@ def sequence_to_indices(sequence: List[Tuple], translation: Dict) -> Tuple[List[
 
         Returns
         -------
-        Tuple[List[List]]
+        List[List]
     """
-    return tuple([[translation[e] for e in s]for s in sequence])
+    return [[translation[e] for e in s]for s in sequence]
 
 
 def calc(sequence: List[Tuple], collection: FunctionCollection, translation: Dict,
