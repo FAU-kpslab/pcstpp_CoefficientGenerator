@@ -25,10 +25,10 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(signum(((), ()), ((), (2,))), -1)
 
     def test_exponential(self):
-        self.assertEqual(exponential(((2, -2), ()), ((2,), ()), ((-2,), ())), qp.new(((), (), (), (), (1,))))
-        self.assertEqual(exponential(((1, -1),), ((1,),), ((-1,),)), qp.new(((), (), (1,))))
-        self.assertEqual(exponential(((0, 0), ()), ((0,), ()), ((0,), ())), qp.new(((1,),)))
-        self.assertEqual(exponential(((0, 0), (),(1,-1)), ((0,), (),(1,)), ((0,), (),(-1,))), qp.new(((),(),(1,))))
+        self.assertEqual(exponential(((2, -2), ()), ((2,), ()), ((-2,), ())), qp.new([[], [], [], [], [1]]))
+        self.assertEqual(exponential(((1, -1),), ((1,),), ((-1,),)), qp.new([[], [], [1]]))
+        self.assertEqual(exponential(((0, 0), ()), ((0,), ()), ((0,), ())), qp.new([[1]]))
+        self.assertEqual(exponential(((0, 0), (),(1,-1)), ((0,), (),(1,)), ((0,), (),(-1,))), qp.new([[],[],[1]]))
 
     def test_partitions(self):
         self.assertEqual(partitions(((2,), ())), [])
