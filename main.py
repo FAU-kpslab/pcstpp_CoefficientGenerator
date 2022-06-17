@@ -25,6 +25,7 @@ def main():
         config_file = open("config.yml", "r")
         config = yaml.load(config_file, Loader=SafeLoader)
         max_order = config['max_order']
+        #TODO: Should operators also be of type Tuple[Tuple]?
         operators = list(config['operators'])
         translation = config['indices']
         starting_conditions = config['starting_conditions']
@@ -109,7 +110,7 @@ def main():
             # TODO: This version is slower as needed as we do not use the arbitrary order of the commuting operators
             sequences = set(product(operators_all, repeat=order))
             for sequence in sequences:
-                sequence_sorted = [tuple([s for s in sequence if s in o_s]) for o_s in operators]
+                sequence_sorted = tuple(tuple([s for s in sequence if s in o_s]) for o_s in operators)
                 indices = coefficientFunction.sequence_to_indices(sequence_sorted, translation)
                 # Make use of block diagonality.
                 if energy(indices) == 0:
@@ -141,7 +142,7 @@ def main():
             print('Starting calculations for order ' + str(order) + '.')
             sequences = set(product(operators_all, repeat=order))
             for sequence in sequences:
-                sequence_sorted = [tuple([s for s in sequence if s in o_s]) for o_s in operators]
+                sequence_sorted = tuple(tuple([s for s in sequence if s in o_s]) for o_s in operators)
                 coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation, max_energy)
         # print(collection.pretty_print())
         print('Starting writing process.')

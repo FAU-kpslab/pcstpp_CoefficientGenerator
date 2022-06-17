@@ -11,7 +11,7 @@ class CoefficientFunction:
 
         Parameters
         ----------
-        sequence : List[Tuple]
+        sequence : Tuple[Tuple]
             The operator sequence m identifying the function f(ell; m).
         function : QuasiPolynomial
             The corresponding coefficient function f(ell; m).
@@ -34,7 +34,7 @@ class CoefficientFunction:
             Prints the operator sequence m and corresponding coefficient function f(ell; m).
     """
 
-    def __init__(self, sequence: List[Tuple], function: QuasiPolynomial) -> None:
+    def __init__(self, sequence: Tuple[Tuple], function: QuasiPolynomial) -> None:
         """
         Parameters
         ----------
@@ -47,7 +47,7 @@ class CoefficientFunction:
         self.__private_key = sequence_to_key(sequence)
         self.function = function
 
-    def sequence(self) -> List[Tuple]:
+    def sequence(self) -> Tuple[Tuple]:
         """
         cf.sequence()
 
@@ -55,7 +55,7 @@ class CoefficientFunction:
 
             Returns
             -------
-            List[Tuple]
+            Tuple[Tuple]
         """
 
         return key_to_sequence(self.__private_key)
@@ -125,7 +125,7 @@ class FunctionCollection:
         self.__private_collection = dict()
         self.translation = translation
 
-    def __contains__(self, sequence: List[Tuple]) -> bool:
+    def __contains__(self, sequence: Tuple[Tuple]) -> bool:
         """
         sequence in FunctionCollection
 
@@ -133,7 +133,7 @@ class FunctionCollection:
 
             Parameters
             ----------
-            sequence : List[Tuple]
+            sequence : Tuple[Tuple]
                 The operator sequence m identifying the function f(ell; m).
 
             Returns
@@ -143,7 +143,7 @@ class FunctionCollection:
 
         return sequence_to_key(sequence) in self.__private_collection
 
-    def __setitem__(self, sequence: List[Tuple], function: QuasiPolynomial) -> None:
+    def __setitem__(self, sequence: Tuple[Tuple], function: QuasiPolynomial) -> None:
         """
         FunctionCollection[sequence] = function
 
@@ -151,7 +151,7 @@ class FunctionCollection:
 
             Parameters
             ----------
-            sequence : List[Tuple]
+            sequence : Tuple[Tuple]
                 The operator sequence m identifying the function f(ell; m).
             function : QuasiPolynomial
                 The function f(ell; m).
@@ -160,7 +160,7 @@ class FunctionCollection:
         if sequence not in self:
             self.__private_collection[sequence_to_key(sequence)] = function
 
-    def __getitem__(self, sequence: List[Tuple]) -> Optional[CoefficientFunction]:
+    def __getitem__(self, sequence: Tuple[Tuple]) -> Optional[CoefficientFunction]:
         """
         FunctionCollection[sequence]
 
@@ -168,7 +168,7 @@ class FunctionCollection:
 
             Parameters
             ----------
-            sequence : List[Tuple]
+            sequence : Tuple[Tuple]
                 The operator sequence m.
 
             Returns
@@ -181,7 +181,7 @@ class FunctionCollection:
         else:
             return None
 
-    def keys(self) -> List[List[Tuple]]:
+    def keys(self) -> List[Tuple[Tuple]]:
         """
         FunctionCollection.keys()
 
@@ -189,7 +189,7 @@ class FunctionCollection:
 
             Returns
             -------
-            List[List[Tuple]]
+            List[Tuple[Tuple]]
         """
 
         return [key_to_sequence(key) for key in self.__private_collection.keys()]
@@ -227,7 +227,7 @@ class FunctionCollection:
         return output
 
 
-def sequence_to_key(sequence: List[Tuple]) -> Tuple[Tuple]:  # TODO The key is supposed to be an integer.
+def sequence_to_key(sequence: Tuple[Tuple]) -> Tuple[Tuple]:  # TODO The key is supposed to be an integer.
     """
     vector_to_key(sequence)
 
@@ -238,10 +238,10 @@ def sequence_to_key(sequence: List[Tuple]) -> Tuple[Tuple]:  # TODO The key is s
         Tuple[Tuple]
     """
 
-    return tuple(sequence)
+    return sequence
 
 
-def key_to_sequence(key: Tuple[Tuple]) -> List[Tuple]:  # TODO The key is supposed to be an integer.
+def key_to_sequence(key: Tuple[Tuple]) -> Tuple[Tuple]:  # TODO The key is supposed to be an integer.
     """
     key_to_sequence(key)
 
@@ -249,13 +249,13 @@ def key_to_sequence(key: Tuple[Tuple]) -> List[Tuple]:  # TODO The key is suppos
 
         Returns
         -------
-        Tuple[Tuple, Tuple]
+        Tuple[Tuple]
     """
 
-    return list(key)
+    return key
 
 
-def sequence_to_indices(sequence: List[Tuple], translation: Dict) -> List[List]:
+def sequence_to_indices(sequence: Tuple[Tuple], translation: Dict) -> Tuple[Tuple]:
     """
     sequence_to_indices(key)
 
@@ -263,12 +263,12 @@ def sequence_to_indices(sequence: List[Tuple], translation: Dict) -> List[List]:
 
         Returns
         -------
-        List[List]
+        Tuple[Tuple]
     """
-    return [[translation[e] for e in s]for s in sequence]
+    return tuple(tuple(translation[e] for e in s) for s in sequence)
 
 
-def calc(sequence: List[Tuple], collection: FunctionCollection, translation: Dict,
+def calc(sequence: Tuple[Tuple], collection: FunctionCollection, translation: Dict,
          max_energy: int) -> QuasiPolynomial:
     """
     calc(sequence)
@@ -306,7 +306,7 @@ def calc(sequence: List[Tuple], collection: FunctionCollection, translation: Dic
         return result
 
 
-def trafo_calc(sequence: List[Tuple], trafo_collection: FunctionCollection, collection: FunctionCollection,
+def trafo_calc(sequence: Tuple[Tuple], trafo_collection: FunctionCollection, collection: FunctionCollection,
                translation: Dict, max_energy: int) -> QuasiPolynomial:
     """
     trafo_calc(sequence)

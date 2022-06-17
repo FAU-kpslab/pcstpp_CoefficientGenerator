@@ -7,7 +7,7 @@ import numpy as np
 from typing import List, Tuple
 
 
-def energy(indices: List[List]) -> int:
+def energy(indices: Tuple[Tuple]) -> int:
     """
     energy(indices)
 
@@ -20,7 +20,7 @@ def energy(indices: List[List]) -> int:
     return sum(reduce(operator.add, indices))
 
 
-def signum(indices1: List[List], indices2: List[List]) -> int:
+def signum(indices1: Tuple[Tuple], indices2: Tuple[Tuple]) -> int:
     """
     signum(indices1, indices2)
 
@@ -34,7 +34,7 @@ def signum(indices1: List[List], indices2: List[List]) -> int:
     return np.sign(energy(indices1)) - np.sign(energy(indices2))
 
 
-def exponential(indices: List[List], indices1: List[List], indices2: List[List]) -> QuasiPolynomial:
+def exponential(indices: Tuple[Tuple], indices1: Tuple[Tuple], indices2: Tuple[Tuple]) -> QuasiPolynomial:
     """
     exponential(indices, indices1, indices2)
 
@@ -51,15 +51,15 @@ def exponential(indices: List[List], indices1: List[List], indices2: List[List])
     return QuasiPolynomial.new(coefficient_list)
 
 
-def partitions(sequence: List[Tuple]) -> List[Tuple[List[Tuple],List[Tuple]]]:
+def partitions(sequence: Tuple[Tuple]) -> List[Tuple[Tuple[Tuple],Tuple[Tuple]]]:
     """
     partitions(sequence)
 
-    Returns all partitions of the operator sequence [m, n, o, ...] into ([m1, n1, o1, ...], [m2, n2, o2, ...]).
+    Returns all partitions of the operator sequence (m, n, o, ...) into ((m1, n1, o1, ...), (m2, n2, o2, ...)).
 
         Returns
         -------
-        List[Tuple[List[Tuple],List[Tuple]]]
+        List[Tuple[Tuple[Tuple],Tuple[Tuple]]]
     """
     # TODO: Why we have to look at all possible partitions, especially those where
     # we have different amount of terms on the left side for commuting Hilbert spaces?
@@ -67,4 +67,4 @@ def partitions(sequence: List[Tuple]) -> List[Tuple[List[Tuple],List[Tuple]]]:
     partitions = [[(s[:i],s[i:]) for i in range(len(s) + 1)] for s in sequence]
     # skip edge cases of completely empty left or right side
     valid_partitions = list(product(*partitions))[1:-1]
-    return [([l[0] for l in pr],[r[1] for r in pr]) for pr in valid_partitions]
+    return [(tuple(l[0] for l in pr),tuple(r[1] for r in pr)) for pr in valid_partitions]

@@ -7,12 +7,12 @@ from coefficientFunction import *
 
 translation = dict([('-2.id', -2), ('0.id', 0), ('2.id', 2), ('id.-2', -2), ('id.0', 0), ('id.2', 2)])
 collection = FunctionCollection(translation)
-collection[[('-2.id',), ()]] = qp.new([[1]])
-collection[[('0.id',), ()]] = qp.new([[1]])
-collection[[('2.id',), ()]] = qp.new([[1]])
-collection[[(), ('id.-2',)]] = qp.new([[-1]])
-collection[[(), ('id.0',)]] = qp.new([[-1]])
-collection[[(), ('id.2',)]] = qp.new([[-1]])
+collection[(('-2.id',), ())] = qp.new([[1]])
+collection[(('0.id',), ())] = qp.new([[1]])
+collection[(('2.id',), ())] = qp.new([[1]])
+collection[((), ('id.-2',))] = qp.new([[-1]])
+collection[((), ('id.0',))] = qp.new([[-1]])
+collection[((), ('id.2',))] = qp.new([[-1]])
 
 # Classes and methods are tested in the order of alphabet 
 # https://stackoverflow.com/questions/30286268/order-of-tests-in-python-unittest
@@ -24,14 +24,14 @@ class Test_A_FunctionCollection(unittest.TestCase):
 
     def test_keys(self):
         self.assertEqual(collection.keys(),
-                         [[('-2.id',), ()], [('0.id',), ()], [('2.id',), ()], [(), ('id.-2',)], [(), ('id.0',)],
-                          [(), ('id.2',)]])
+                         [(('-2.id',), ()), (('0.id',), ()), (('2.id',), ()), ((), ('id.-2',)), ((), ('id.0',)),
+                          ((), ('id.2',))])
 
     def test_print(self):
         self.assertEqual(str(collection),
-                         str(["[('-2.id',), ()]: [['1']]", "[('0.id',), ()]: [['1']]",
-                              "[('2.id',), ()]: [['1']]", "[(), ('id.-2',)]: [['-1']]",
-                              "[(), ('id.0',)]: [['-1']]", "[(), ('id.2',)]: [['-1']]"]))
+                         str(["(('-2.id',), ()): [['1']]", "(('0.id',), ()): [['1']]",
+                              "(('2.id',), ()): [['1']]", "((), ('id.-2',)): [['-1']]",
+                              "((), ('id.0',)): [['-1']]", "((), ('id.2',)): [['-1']]"]))
 
 
 class Test_B_DifferentialEquation(unittest.TestCase):
@@ -47,8 +47,8 @@ class Test_B_DifferentialEquation(unittest.TestCase):
         self.assertEqual(key_to_sequence((('0.id',), ())),collection.keys()[1])
 
     def test_calc(self):
-        self.assertEqual(calc([('0.id','0.id'),tuple()],collection,translation,2),QuasiPolynomial.zero())
-        self.assertEqual(calc([('-2.id','2.id'),tuple()],collection,translation,2),
+        self.assertEqual(calc((('0.id','0.id'),tuple()),collection,translation,2),QuasiPolynomial.zero())
+        self.assertEqual(calc((('-2.id','2.id'),tuple()),collection,translation,2),
                 QuasiPolynomial([Polynomial([Fraction("-1/2")]),Polynomial([]),Polynomial([]),
                                 Polynomial([]),Polynomial([Fraction("1/2")])]))
 if __name__ == '__main__':
