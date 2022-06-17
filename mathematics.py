@@ -35,6 +35,21 @@ def signum(indices1: Tuple[Tuple[Union[int,float,Fraction],...],...],
     # TODO: Maybe change to math.copysign https://stackoverflow.com/questions/1986152/why-doesnt-python-have-a-sign-function
     return np.sign(energy(indices1)) - np.sign(energy(indices2))
 
+def signum_broad(indices1: Tuple[Tuple[int,...],...], indices2: Tuple[Tuple[int,...],...], delta:int) -> int:
+    """
+    signum_broad(indices1, indices2, delta)
+
+    Returns the prefactor sgn_`delta`(M(m1)) - sgn_`delta`(M(m2)), where sgn_d is
+    the broadened signum function with sgn_d (x) = 0 for |x| <= d and sgn_d (x)=sgn (x),
+    otherwise.
+
+        Returns
+        -------
+        int
+    """
+    # np.int64(.) as np.heaviside outputs floating value
+    return (np.sign(energy(indices1))*np.int64(np.heaviside(np.abs(energy(indices1))-delta,0)) 
+            - np.sign(energy(indices2))*np.int64(np.heaviside(np.abs(energy(indices2))-delta,0)))
 
 def exponential(indices: Tuple[Tuple[Union[int,float,Fraction],...],...], 
                 indices1: Tuple[Tuple[Union[int,float,Fraction],...],...], 

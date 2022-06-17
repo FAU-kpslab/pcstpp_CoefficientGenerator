@@ -33,6 +33,14 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(signum(((Fraction(1,10),),), ((Fraction(-10,23),),)), 2)
         self.assertEqual(signum(((Fraction(1,2),), (-0.5,)), ((Fraction(1,2),), ())), -1.)
 
+    def test_signum_broad(self):
+        self.assertEqual(signum_broad(((2,),), ((-2,),),delta=1), 2)
+        self.assertEqual(signum_broad(((2,),), ((-2,),),delta=3), 0)
+        self.assertEqual(signum_broad(((-1,), (), (1,)), ((2,), (),(-1,)),delta=1), 0)
+        self.assertEqual(signum_broad(((), (2,)), ((2,), (2, 2)),delta=0), 0)
+        self.assertEqual(signum_broad(((), (-1,)), ((2,), ()),delta=1), -1)
+        self.assertIsInstance(signum_broad(((2,),), ((-2,),),delta=1), np.int64)
+
     def test_exponential(self):
         self.assertEqual(exponential(((2, -2), ()), ((2,), ()), ((-2,), ())), qp.new_integer([[], [], [], [], [1]]))
         self.assertEqual(exponential(((1, -1),), ((1,),), ((-1,),)), qp.new_integer([[], [], [1]]))
