@@ -1,5 +1,5 @@
 from fractions import Fraction
-
+from numpy import sign
 import yaml
 from yaml.loader import SafeLoader
 
@@ -7,7 +7,7 @@ import argparse
 
 import coefficientFunction
 from quasiPolynomial import QuasiPolynomial as qp
-from mathematics import energy
+from mathematics import energy, signum, signum_broad
 from itertools import product, chain
 
 
@@ -22,6 +22,8 @@ def main():
     my_config.add_argument('-c', '--config', action='store_true',
                            help='Writes an exemplary config file to "config.yml" without performing '
                                 'any calculations.')
+    my_parser.add_argument('-g','--generator', choices=["sgn","broad_sgn"],default="sgn",
+                           help='generator that is used for calculation')
     args = my_parser.parse_args()
 
     if args.file != None:
@@ -105,7 +107,9 @@ def main():
             trafo_collection[tuple([()]*len(operators))] = qp.new_integer([['1']])
 
         operators_all = [operator for operator_space in operators for operator in operator_space]
-    
+        # TODO: delta has to be set by the user-input (in file, in interactive format)
+        signum_func = signum if args.generator == "sgn" else lambda l,r: signum_broad(l,r,delta=0)
+        
         for order in range(max_order + 1):
             print('Starting calculations for order ' + str(order) + '.')
             # TODO: This version is slower as needed as we do not use the arbitrary order of the commuting operators
@@ -116,9 +120,9 @@ def main():
                     indices = coefficientFunction.sequence_to_indices(sequence_sorted, translation)
                     # Make use of block diagonality.
                     if energy(indices) == 0:
-                        coefficientFunction.calc(sequence_sorted, collection, translation, max_energy)
+                        coefficientFunction.calc(sequence_sorted, collection, translation, max_energy, signum_func)
                 else:
-                    coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation, max_energy)
+                    coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation, max_energy, signum_func)
         # print(collection.pretty_print())
         print('Starting writing process.')
         # Write the results in a file.

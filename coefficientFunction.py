@@ -1,6 +1,6 @@
 from quasiPolynomial import QuasiPolynomial
 from mathematics import *
-from typing import Tuple, Dict, Optional
+from typing import Tuple, Dict, Optional, Callable
 
 
 class CoefficientFunction:
@@ -269,7 +269,7 @@ def sequence_to_indices(sequence: Tuple[Tuple[int,...],...], translation: Dict) 
 
 
 def calc(sequence: Tuple[Tuple[int,...],...], collection: FunctionCollection, translation: Dict,
-         max_energy: int) -> QuasiPolynomial:
+         max_energy: int, signum_func:Callable[[Tuple[Tuple[int,...],...], Tuple[Tuple[int,...],...]],int]) -> QuasiPolynomial:
     """
     calc(sequence)
 
@@ -291,15 +291,15 @@ def calc(sequence: Tuple[Tuple[int,...],...], collection: FunctionCollection, tr
             s1 = partition[0]
             s2 = partition[1]
             # Check whether the required functions are already calculated.
-            f1 = calc(partition[0], collection, translation, max_energy)
-            f2 = calc(partition[1], collection, translation, max_energy)
+            f1 = calc(partition[0], collection, translation, max_energy,signum_func)
+            f2 = calc(partition[1], collection, translation, max_energy,signum_func)
             # Translate the operator sequences into its indices.
             m = sequence_to_indices(sequence, translation)
             m1 = sequence_to_indices(s1, translation)
             m2 = sequence_to_indices(s2, translation)
             # Only calculate non-vanishing contributions to the integrand.
             if (abs(energy(m1)) <= max_energy) & (abs(energy(m2)) <= max_energy):
-                integrand = integrand + exponential(m, m1, m2) * signum(m1, m2) * f1 * f2
+                integrand = integrand + exponential(m, m1, m2) * signum_func(m1, m2) * f1 * f2
         result = integrand.integrate()
         # Insert the result into the collection.
         collection[sequence] = result
@@ -307,7 +307,8 @@ def calc(sequence: Tuple[Tuple[int,...],...], collection: FunctionCollection, tr
 
 
 def trafo_calc(sequence: Tuple[Tuple[int,...],...], trafo_collection: FunctionCollection, collection: FunctionCollection,
-               translation: Dict, max_energy: int) -> QuasiPolynomial:
+               translation: Dict, max_energy: int, 
+               signum_func:Callable[[Tuple[Tuple[int,...],...], Tuple[Tuple[int,...],...]],int]) -> QuasiPolynomial:
     """
     trafo_calc(sequence)
 
@@ -323,20 +324,20 @@ def trafo_calc(sequence: Tuple[Tuple[int,...],...], trafo_collection: FunctionCo
         return trafo_collection[sequence].function
     else:
         m = sequence_to_indices(sequence, translation)
-        integrand = exponential(((), ()), ((), ()), m) * signum(((), ()), m) * calc(sequence, collection, translation, max_energy)
+        integrand = exponential(((), ()), ((), ()), m) * signum_func(((), ()), m) * calc(sequence, collection, translation, max_energy, signum_func)
         partition_list = partitions(sequence)
         for partition in partition_list:
             # Rename the operator sequences.
             s1 = partition[0]
             s2 = partition[1]
             # Check whether the required functions are already calculated.
-            g1 = trafo_calc(partition[0], trafo_collection, collection, translation, max_energy)
-            f2 = calc(partition[1], collection, translation, max_energy)
+            g1 = trafo_calc(partition[0], trafo_collection, collection, translation, max_energy, signum_func)
+            f2 = calc(partition[1], collection, translation, max_energy, signum_func)
             # Translate the operator sequences into its indices.
             m1 = sequence_to_indices(s1, translation)
             m2 = sequence_to_indices(s2, translation)
             # Calculate the contributions to the integrand.
-            integrand = integrand + exponential(((), ()), ((), ()), m2) * signum(((), ()), m2) * g1 * f2
+            integrand = integrand + exponential(((), ()), ((), ()), m2) * signum_func(((), ()), m2) * g1 * f2
         result = integrand.integrate()
         # Insert the result into the collection.
         trafo_collection[sequence] = result
