@@ -7,7 +7,7 @@ import numpy as np
 from typing import List, Tuple
 
 
-def energy(indices: Tuple[Tuple,...]) -> int:
+def energy(indices: Tuple[Tuple[int,...],...]) -> int:
     """
     energy(indices)
 
@@ -20,7 +20,7 @@ def energy(indices: Tuple[Tuple,...]) -> int:
     return sum(reduce(operator.add, indices))
 
 
-def signum(indices1: Tuple[Tuple,...], indices2: Tuple[Tuple,...]) -> int:
+def signum(indices1: Tuple[Tuple[int,...],...], indices2: Tuple[Tuple[int,...],...]) -> int:
     """
     signum(indices1, indices2)
 
@@ -34,7 +34,7 @@ def signum(indices1: Tuple[Tuple,...], indices2: Tuple[Tuple,...]) -> int:
     return np.sign(energy(indices1)) - np.sign(energy(indices2))
 
 
-def exponential(indices: Tuple[Tuple,...], indices1: Tuple[Tuple,...], indices2: Tuple[Tuple,...]) -> QuasiPolynomial:
+def exponential(indices: Tuple[Tuple[int,...],...], indices1: Tuple[Tuple[int,...],...], indices2: Tuple[Tuple[int,...],...]) -> QuasiPolynomial:
     """
     exponential(indices, indices1, indices2)
 
@@ -51,7 +51,7 @@ def exponential(indices: Tuple[Tuple,...], indices1: Tuple[Tuple,...], indices2:
     return QuasiPolynomial.new(coefficient_list)
 
 
-def partitions(sequence: Tuple[Tuple,...]) -> List[Tuple[Tuple[Tuple,...],Tuple[Tuple,...]]]:
+def partitions(sequence: Tuple[Tuple[int,...],...]) -> List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]:
     """
     partitions(sequence)
 
@@ -59,7 +59,7 @@ def partitions(sequence: Tuple[Tuple,...]) -> List[Tuple[Tuple[Tuple,...],Tuple[
 
         Returns
         -------
-        List[Tuple[Tuple[Tuple],Tuple[Tuple]]]
+        List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]
     """
     # TODO: Why we have to look at all possible partitions, especially those where
     # we have different amount of terms on the left side for commuting Hilbert spaces?
