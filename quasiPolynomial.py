@@ -60,11 +60,11 @@ class Polynomial:
             Returns the constant coefficient.
     """
 
-    def __init__(self, coefficient_list: Union[List[Fraction]]) -> None:
+    def __init__(self, coefficient_list: List[Fraction]) -> None:
         """
             Parameters
             ----------
-            coefficient_list : List[int]
+            coefficient_list : List[Fraction]
                 The list of coefficients.
                 The coefficient of x^n is coefficient_list[n].
         """
