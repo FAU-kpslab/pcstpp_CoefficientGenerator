@@ -25,7 +25,6 @@ def main():
         config_file = open("config.yml", "r")
         config = yaml.load(config_file, Loader=SafeLoader)
         max_order = config['max_order']
-        #TODO: Should operators also be of type Tuple[Tuple]?
         operators = list(config['operators'])
         translation = config['indices']
         starting_conditions = config['starting_conditions']

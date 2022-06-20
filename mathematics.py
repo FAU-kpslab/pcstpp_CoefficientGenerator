@@ -64,6 +64,7 @@ def partitions(sequence: Tuple[Tuple[int,...],...]) -> List[Tuple[Tuple[Tuple[in
     # TODO: Why we have to look at all possible partitions, especially those where
     # we have different amount of terms on the left side for commuting Hilbert spaces?
     # Should this depend on the starting conditions e.g. is this needed for the Dicke model?
+    # -> Maybe add an option to restrict partitions depending on the model
     partitions = [[(s[:i],s[i:]) for i in range(len(s) + 1)] for s in sequence]
     # skip edge cases of completely empty left or right side
     valid_partitions = list(product(*partitions))[1:-1]
