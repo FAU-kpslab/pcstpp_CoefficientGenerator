@@ -60,11 +60,11 @@ class Polynomial:
             Returns the constant coefficient.
     """
 
-    def __init__(self, coefficient_list: Union[List[Fraction]]) -> None:
+    def __init__(self, coefficient_list: List[Fraction]) -> None:
         """
             Parameters
             ----------
-            coefficient_list : List[int]
+            coefficient_list : List[Fraction]
                 The list of coefficients.
                 The coefficient of x^n is coefficient_list[n].
         """
@@ -120,7 +120,7 @@ class Polynomial:
         return self
 
     @staticmethod
-    def new(coefficient_list: Union[List[Fraction], List[int], List[float], List[str]]) -> 'Polynomial':
+    def new(coefficient_list: List[Union[Fraction, int, float, str]]) -> 'Polynomial':
         """
         new(List[scalar])
 
@@ -475,7 +475,7 @@ class QuasiPolynomial:
         return self
 
     @staticmethod
-    def new(coefficient_list: Union[List[List[Fraction]], List[List[int]], List[List[float]], List[List[str]]]) -> \
+    def new(coefficient_list: List[List[Union[Fraction, int, float, str]]]) -> \
             'QuasiPolynomial':
         """
         new(List[List[scalar]])
