@@ -7,7 +7,7 @@ import argparse
 
 import coefficientFunction
 from quasiPolynomial import QuasiPolynomial as qp
-from mathematics import energy, signum, signum_broad
+from mathematics import energy, signum, signum_broad, signum_complex
 from itertools import product, chain
 
 
@@ -108,8 +108,13 @@ def main():
 
         operators_all = [operator for operator_space in operators for operator in operator_space]
         # TODO: delta has to be set by the user-input (in file, in interactive format)
-        signum_func = signum if args.generator == "sgn" else lambda l,r: signum_broad(l,r,delta=0)
-        
+        if args.generator == "broad_sgn":
+            signum_func = lambda l,r: signum_broad(l,r,delta=0)
+        elif args.generator == "complex_sgn":
+            signum_func = signum_complex
+        else:
+            signum_func = signum
+
         for order in range(max_order + 1):
             print('Starting calculations for order ' + str(order) + '.')
             # TODO: This version is slower as needed as we do not use the arbitrary order of the commuting operators

@@ -267,7 +267,7 @@ def sequence_to_indices(sequence: Tuple[Tuple[int,...],...], translation: Dict) 
     """
     return tuple(tuple(translation[e] for e in s) for s in sequence)
 
-
+# TODO: The signum_func also now accepts complex arguments
 def calc(sequence: Tuple[Tuple[int,...],...], collection: FunctionCollection, translation: Dict,
          max_energy: int, signum_func:Callable[[Tuple[Tuple[int,...],...], Tuple[Tuple[int,...],...]],int]) -> QuasiPolynomial:
     """

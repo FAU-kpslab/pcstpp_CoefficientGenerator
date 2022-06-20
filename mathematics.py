@@ -51,6 +51,25 @@ def signum_broad(indices1: Tuple[Tuple[int,...],...], indices2: Tuple[Tuple[int,
     return (np.sign(energy(indices1))*np.int64(np.heaviside(np.abs(energy(indices1))-delta,0)) 
             - np.sign(energy(indices2))*np.int64(np.heaviside(np.abs(energy(indices2))-delta,0)))
 
+
+def signum_complex(indices1: Tuple[Tuple[complex,...],...], indices2: Tuple[Tuple[complex,...],...]) -> complex:
+    """
+    signum_complex(indices1, indices2)
+
+    Returns the prefactor sgn(M(m1)) - sgn(M(m2)) with the definition sgn(z) = z / |z|
+    as used in the Ferkinghoff, Uhrig paper.
+
+        Returns
+        -------
+        complex
+    """
+    # TODO: Generalization needed: `energy` has to be able to output 
+    # `complex`-typed variables (also in typing)
+    # TODO: Problem that floating point precision is used. This leads to round-off
+    # errors when comparing to the normal signum function
+    complex_sgn = lambda z: 0 if np.abs(z) == 0 else z/np.abs(z)
+    return complex_sgn(energy(indices1)) - complex_sgn(energy(indices2))
+
 def exponential(indices: Tuple[Tuple[Union[int,float,Fraction],...],...], 
                 indices1: Tuple[Tuple[Union[int,float,Fraction],...],...], 
                 indices2: Tuple[Tuple[Union[int,float,Fraction],...],...]) -> QuasiPolynomial:
