@@ -14,15 +14,16 @@ def main():
                                                     'two particle types')
     my_parser.add_argument('-t', '--trafo', action='store_true', help='calculate the transformation directly')
     my_config = my_parser.add_mutually_exclusive_group()
-    my_config.add_argument('-f', '--file', action='store_true',
-                           help='pass configuration using the config file "config.yml"')
+    my_config.add_argument('-f', '--file', nargs='?', const='config.yml', default=None,
+                           help='pass configuration using the config file "config.yml" '
+                                'or a custom one given as an argument')
     my_config.add_argument('-i', '--interactive', action='store_true',
                            help='pass configuration step by step in the command line')
     args = my_parser.parse_args()
 
-    if args.file:
-        print('You have decided to use a config file, titled "config.yml".')
-        config_file = open("config.yml", "r")
+    if args.file != None:
+        print('You have decided to use a config file, titled "{}".'.format(args.file))
+        config_file = open(args.file, "r")
         config = yaml.load(config_file, Loader=SafeLoader)
         max_order = config['max_order']
         operators = list(config['operators'])
