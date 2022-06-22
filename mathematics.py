@@ -67,7 +67,7 @@ def signum_complex(indices1: Tuple[Tuple[complex,...],...], indices2: Tuple[Tupl
     # `complex`-typed variables (also in typing)
     # TODO: Problem that floating point precision is used. This leads to round-off
     # errors when comparing to the normal signum function
-    complex_sgn = lambda z: 0 if np.abs(z) == 0 else z/np.abs(z)
+    complex_sgn = lambda z: 0 if np.abs(z) == 0 else np.conj(z)/np.abs(z)
     return complex_sgn(energy(indices1)) - complex_sgn(energy(indices2))
 
 def exponential(indices: Tuple[Tuple[Union[int,float,Fraction],...],...], 
