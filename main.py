@@ -1,5 +1,5 @@
 from fractions import Fraction
-from numpy import sign
+from numpy import sign, iscomplex
 import yaml
 from yaml.loader import SafeLoader
 
@@ -22,8 +22,6 @@ def main():
     my_config.add_argument('-c', '--config', action='store_true',
                            help='Writes an exemplary config file to "config.yml" without performing '
                                 'any calculations.')
-    my_parser.add_argument('-g','--generator', choices=["sgn","broad_sgn"],default="sgn",
-                           help='generator that is used for calculation')
     args = my_parser.parse_args()
 
     if args.file != None:
@@ -35,11 +33,16 @@ def main():
         translation = config['indices']
         starting_conditions = config['starting_conditions']
         max_energy = config['max_energy']
+        delta = config['delta'] if 'delta' in config else 0
         config_file.close()
         # postprocessing of complex values in starting_conditions 
         for (k,v) in starting_conditions.items():
             if isinstance(v,str) and "j" in v:
                 starting_conditions[k] = complex(v)
+        # postprocessing of complex values in translation 
+        for (k,v) in translation.items():
+            if isinstance(v,str):
+                translation[k] = complex(v)
     else:
         print("You have decided to use the default config values.")
         # Enter the total order.
@@ -75,6 +78,7 @@ def main():
             '((), (2, 4))': '-1/2'}
         # Introduce band-diagonality, i.e., write down the largest sum of indices occurring in the starting conditions.
         max_energy = 2
+        delta = 0
     
     if not args.config:
         # If needed, convert all starting_conditions to the same type
@@ -107,12 +111,16 @@ def main():
             trafo_collection[tuple([()]*len(operators))] = qp.new_integer([['1']])
 
         operators_all = [operator for operator_space in operators for operator in operator_space]
-        # TODO: delta has to be set by the user-input (in file, in interactive format)
-        if args.generator == "broad_sgn":
-            signum_func = lambda l,r: signum_broad(l,r,delta=0)
-        elif args.generator == "complex_sgn":
+        
+        if delta>0:
+            print("Using the broad signum function.")
+            signum_func = lambda l,r: signum_broad(l,r,delta=delta)
+        # check if any translation value has a non-vanishing imaginary part
+        elif len([v for v in translation.values() if iscomplex(v)])>0:
+            print("Using the complex signum function.")
             signum_func = signum_complex
         else:
+            print("Using the standard signum function.")
             signum_func = signum
 
         for order in range(max_order + 1):
@@ -187,6 +195,9 @@ def main():
     print("# Introduce band-diagonality, i.e., write down the largest sum of indices occurring in the starting "
           "conditions.", file=config_file)
     print('max_energy: ' + str(max_energy), file=config_file)
+    print("# Optionally, specify the delta value for the 'broad signum' function, i.e., half of the width of "
+          "the 0 level.", file=config_file)
+    print('delta: ' + str(delta), file=config_file)
     print('...', file=config_file)
     config_file.close()
 
