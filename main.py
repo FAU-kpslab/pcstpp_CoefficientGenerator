@@ -13,12 +13,9 @@ def main():
     my_parser = argparse.ArgumentParser(description='Use pCUT to block-diagonalize a Lindbladian or a Hamiltonian with '
                                                     'two particle types')
     my_parser.add_argument('-t', '--trafo', action='store_true', help='calculate the transformation directly')
-    my_config = my_parser.add_mutually_exclusive_group()
-    my_config.add_argument('-f', '--file', nargs='?', const='config.yml', default=None,
+    my_parser.add_argument('-f', '--file', nargs='?', const='config.yml', default=None,
                            help='pass configuration using the config file "config.yml" '
                                 'or a custom one given as an argument')
-    my_config.add_argument('-i', '--interactive', action='store_true',
-                           help='pass configuration step by step in the command line')
     args = my_parser.parse_args()
 
     if args.file != None:
@@ -31,36 +28,6 @@ def main():
         starting_conditions = config['starting_conditions']
         max_energy = config['max_energy']
         config_file.close()
-    elif args.interactive:
-        max_order = int(input("Enter the total order: "))
-        print("Give a unique name (integer) to every operator, so that you can distinguish them. You can take the"
-              " operator index as its name, provided that they are unique.")
-        operators_left = tuple(
-            [int(sequence) for sequence in input("Operators to the left of the tensor product: ").split()])
-        operators_right = tuple(
-            [int(sequence) for sequence in input("Operators to the right of the tensor product: ").split()])
-        # TODO: This could be generalized to arbitrary many Hilbert spaces
-        operators = [operators_left, operators_right]
-        print("# Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the "
-              "operators. In Lea's case, enter the indices of the operators prior to transposition.")
-        translation = dict()
-        for sequence in operators_left:
-            translation[sequence] = int(input("Index of operator " + str(sequence) + ": "))
-        for sequence in operators_right:
-            translation[sequence] = int(input("Index of operator " + str(sequence) + ": "))
-        print("Insert the solution for the coefficient functions with non-vanishing starting condition. For every term "
-              "enter:")
-        print("1. The operators to the left of the tensor product.")
-        print("2. The operators to the right of the tensor product.")
-        print("3. The prefactor")
-        starting_conditions = dict()
-        terms = int(input("Enter the number of non-vanishing terms: "))
-        for term in range(terms):
-            sequence = str((tuple([int(op) for op in input("Left: ").split()]),
-                            tuple([int(op) for op in input("Right: ").split()])))
-            starting_conditions[sequence] = input("Prefactor: ")
-        max_energy = int(input("Introduce band-diagonality, i.e., write down the largest sum of indices occurring in "
-                               "the starting conditions: "))
     else:
         print("You have decided to use the default config values.")
         # Enter the total order.
