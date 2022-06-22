@@ -107,13 +107,8 @@ class TestQuasiPolynomial(unittest.TestCase):
         self.assertEqual(str(QP({0: P.new([2, 4, 8]), 1: P.new([1, 5, 25]), 2: P.new([0, 0])}).simplify()),
                          str(QP({0: P.new([2, 4, 8]), 1: P.new([1, 5, 25])})))
         self.assertEqual(str(QP({0: P.new([2, 4, 8]), 1: P.new([0, 0, 0]), 2: P.new([3, 9])}).simplify()),
-                         str(QP({0: P.new([2, 4, 8]), 2: P.new([3, 9])})))  # TODO: Remove P.zero()
+                         str(QP({0: P.new([2, 4, 8]), 2: P.new([3, 9])})))
         self.assertEqual(str(QP({0: P.zero(), 1: P.zero(), 2: P.zero()}).simplify()), str(QP({})))
-
-    def test_sort(self):
-        self.assertEqual(str(QP({2: P.new([2, 4, 8]), 1: P.new([1, 5, 25]), 0: P.new([1])}).sort()),
-                         str(QP({0: P.new([1]), 1: P.new([1, 5, 25]), 2: P.new([2, 4, 8])})))
-
     def test_new(self):
         self.assertEqual(QP({0: P.new([2, 3, 4]), 1: P.new([1])}), QP.new([[2, 3, 4], [1]]))
 

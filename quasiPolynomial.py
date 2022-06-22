@@ -300,7 +300,7 @@ class Polynomial:
             # Flip it such that all __private_coefficients corresponding to the same x^n are part of the same diagonals.
             combinations = np.flipud(np.outer(self.__private_coefficients, other.__private_coefficients))
             # Sum over the diagonals to obtain the real __private_coefficients.
-            output = [sum(combinations.diagonal(exponent), start=Fraction(0)) for exponent in
+            output = [sum(combinations.diagonal(exponent), Fraction(0)) for exponent in
                       np.arange(- self.__private_coefficients.size + 1, other.__private_coefficients.size)]
             return Polynomial(output).simplify()
         # Check whether the second object is a scalar and call scalar_multiplication.
@@ -379,9 +379,9 @@ class QuasiPolynomial:
 
         Parameters
         ----------
-        polynomial_list : Dict[int, Polynomial]
+        polynomial_dict : Dict[int, Polynomial]
             The dictionary containing all polynomials.
-            The coefficient polynomial of exp(- alpha x) is polynomial_list[alpha].
+            The coefficient polynomial of exp(- alpha x) is polynomial_dict[alpha].
 
         Attributes
         ----------
@@ -427,17 +427,17 @@ class QuasiPolynomial:
             Returns the constant coefficient of the constant polynomial (alpha = 0).
     """
 
-    def __init__(self, polynomial_list: Dict[int, Polynomial]) -> None:
+    def __init__(self, polynomial_dict: Dict[int, Polynomial]) -> None:
         """
             Parameters
             ----------
-            polynomial_list : Dict[int, Polynomial]
+            polynomial_dict : Dict[int, Polynomial]
                 The dictionary containing all polynomials.
-                The coefficient polynomial of exp(- alpha x) is polynomial_list[alpha].
+                The coefficient polynomial of exp(- alpha x) is polynomial_dict[alpha].
         """
 
-        self.polynomial_dict = polynomial_list
-        self.polynomials = polynomial_list.items()
+        self.polynomial_dict = polynomial_dict
+        self.polynomials = polynomial_dict.items()
 
     def __str__(self) -> str:
         """
@@ -538,7 +538,8 @@ class QuasiPolynomial:
             bool
         """
 
-        return self.sort().polynomials == other.sort().polynomials
+        #return self.sort().polynomials == other.sort().polynomials
+        return self.polynomials == other.polynomials
 
     def pretty_print(self) -> str:
         """
@@ -555,7 +556,8 @@ class QuasiPolynomial:
             return '0'
         else:
             output = []
-            for e, p in self.sort().simplify().polynomials:
+            #for e, p in self.sort().simplify().polynomials:
+            for e, p in self.simplify().polynomials:
                 if e == 0:
                     exponent = ''
                     polynomial = p.pretty_print()
@@ -653,7 +655,8 @@ class QuasiPolynomial:
             for e1, p1 in self.polynomials:
                 for e2, p2 in other.polynomials:
                     output = output + QuasiPolynomial({e1 + e2: p1 * p2})
-            return output.sort().simplify()
+            #return output.sort().simplify()
+            return output.simplify()
         # Check whether the second object is a polynomial and lift it to a quasi-polynomial.
         elif isinstance(other, Polynomial):
             return self * QuasiPolynomial({0: other})
@@ -725,7 +728,4 @@ class QuasiPolynomial:
             Fraction
         """
 
-        if self == QuasiPolynomial.zero():
-            return Fraction(0)
-        else:
-            return self.polynomial_dict.get(0, Polynomial.zero()).get_constant()
+        return self.polynomial_dict.get(0, Polynomial.zero()).get_constant()
