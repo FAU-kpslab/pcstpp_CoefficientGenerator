@@ -72,12 +72,12 @@ def main():
         # Prepare the coefficient function storage.
         collection = coefficientFunction.FunctionCollection(translation)
         for sequence in starting_conditions:
-            collection[eval(sequence)] = qp.new([[starting_conditions[sequence]]])
+            collection[eval(sequence)] = qp.new_integer([[starting_conditions[sequence]]])
 
         # Prepare the trafo coefficient function storage.
         if args.trafo:
             trafo_collection = coefficientFunction.FunctionCollection(translation)
-            trafo_collection[tuple([()]*len(operators))] = qp.new([['1']])
+            trafo_collection[tuple([()]*len(operators))] = qp.new_integer([['1']])
 
         operators_all = [operator for operator_space in operators for operator in operator_space]
     

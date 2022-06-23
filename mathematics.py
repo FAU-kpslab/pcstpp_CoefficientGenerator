@@ -48,7 +48,7 @@ def exponential(indices: Tuple[Tuple[int,...],...], indices1: Tuple[Tuple[int,..
     alpha = abs(energy(indices)) - abs(energy(indices1)) - abs(energy(indices2))
     coefficient_list = [[] for _ in range(- alpha)]
     coefficient_list.append([1])
-    return QuasiPolynomial.new(coefficient_list)
+    return QuasiPolynomial.new_integer(coefficient_list)
 
 
 def partitions(sequence: Tuple[Tuple[int,...],...]) -> List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]:

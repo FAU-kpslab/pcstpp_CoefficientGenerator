@@ -6,7 +6,7 @@ import numpy as np
 
 class Polynomial:
     """
-    Polynomial(coefficient_list)
+    Polynomial(coefficient_dict)
 
     A class used to represent a polynomial.
 
@@ -66,7 +66,7 @@ class Polynomial:
             ----------
             coefficient_list : List[Fraction]
                 The list of coefficients.
-                The coefficient of x^n is coefficient_list[n].
+                The coefficient of x^n is coefficient_dict[n].
         """
 
         self.__private_coefficients = np.asarray(coefficient_list).astype(Fraction, copy=False)
@@ -373,22 +373,22 @@ class Polynomial:
 
 class QuasiPolynomial:
     """
-    QuasiPolynomial(coefficient_list)
+    QuasiPolynomial(coefficient_dict)
 
     A class used to represent a quasi-polynomial.
 
         Parameters
         ----------
-        polynomial_dict : Dict[int, Polynomial]
+        polynomial_dict : Dict[int or Fraction, Polynomial]
             The dictionary containing all polynomials.
             The coefficient polynomial of exp(- alpha x) is polynomial_dict[alpha].
 
         Attributes
         ----------
-        polynomial_dict : Dict[int, Polynomial]
+        polynomial_dict : Dict[int or Fraction, Polynomial]
             The dictionary containing all polynomials.
             The coefficient polynomial of exp(- alpha x) is polynomial[alpha].
-        polynomials : List[Tuple[int, Polynomial]]
+        polynomials : List[Tuple[int or Fraction, Polynomial]]
             The list containing tuples of all exponents and their polynomials.
 
         Methods
@@ -401,8 +401,10 @@ class QuasiPolynomial:
             Simplifies a quasi-polynomial by *removing* zero polynomials.
         sort : QuasiPolynomial
             Sorts a quasi-polynomial by exponent alpha.
-        new : QuasiPolynomial
-            Creates a quasi-polynomial using a nested list of __private_coefficients.
+        new_integer : QuasiPolynomial
+            Creates a quasi-polynomial with integer exponents using a nested list of __private_coefficients.
+        new: QuasiPolynomial
+            Creates a quasi-polynomial using a nested list of (exponential, __private_coefficients).
         copy : QuasiPolynomial
             Copies a quasi-polynomial.
         __eq__ : bool
@@ -427,11 +429,11 @@ class QuasiPolynomial:
             Returns the constant coefficient of the constant polynomial (alpha = 0).
     """
 
-    def __init__(self, polynomial_dict: Dict[int, Polynomial]) -> None:
+    def __init__(self, polynomial_dict: Dict[int or Fraction, Polynomial]) -> None:
         """
             Parameters
             ----------
-            polynomial_dict : Dict[int, Polynomial]
+            polynomial_dict : Dict[int or Fraction, Polynomial]
                 The dictionary containing all polynomials.
                 The coefficient polynomial of exp(- alpha x) is polynomial_dict[alpha].
         """
@@ -494,12 +496,11 @@ class QuasiPolynomial:
         return QuasiPolynomial({e: p for e, p in sorted(self.polynomials)})
 
     @staticmethod
-    def new(coefficient_list: List[List[Union[Fraction, int, float, str]]]) -> \
-            'QuasiPolynomial':
+    def new_integer(coefficient_list: List[List[Fraction or int or float or str]]) -> 'QuasiPolynomial':
         """
-        new(List[List[scalar]])
+        new_integer(List[List[scalar]])
 
-        Creates a quasi-polynomial using a nested list of __private_coefficients.
+        Creates a quasi-polynomial with integer exponents using a nested list of __private_coefficients.
 
             Parameters
             ----------
@@ -510,9 +511,27 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
-        polynomial_list = {alpha: Polynomial.new(coefficient_list[alpha]) for alpha in
-                           range(len(coefficient_list))}  # TODO: This only works with integer exponents.
+        polynomial_list = {alpha: Polynomial.new(coefficient_list[alpha]) for alpha in range(len(coefficient_list))}
         return QuasiPolynomial(polynomial_list).simplify()
+
+    @staticmethod
+    def new(coefficient_dict: Dict[int or Fraction, List[Fraction or int or float or str]]) -> 'QuasiPolynomial':
+        """
+        new(Dict[scalar, List[scalar]])
+
+        Creates a quasi-polynomial using a nested list of (exponential, __private_coefficients).
+
+            Parameters
+            ----------
+            coefficient_dict
+
+            Returns
+            -------
+            QuasiPolynomial
+        """
+
+        polynomial_dict = {e: Polynomial.new(p) for e, p in coefficient_dict.items()}
+        return QuasiPolynomial(polynomial_dict).simplify()
 
     def copy(self) -> 'QuasiPolynomial':
         """
@@ -708,11 +727,12 @@ class QuasiPolynomial:
                     for n in np.arange(1, p.coefficients().size):
                         temp_polynomial = temp_polynomial.diff()
                         resulting_polynomial = resulting_polynomial - (
-                                    temp_polynomial * Fraction(1, e ** (n + 1)))
-                        resulting_constant = resulting_constant + temp_polynomial.coefficients()[0] * Fraction(1, e ** (n + 1))
+                                temp_polynomial * Fraction(1, e ** (n + 1)))
+                        resulting_constant = resulting_constant + temp_polynomial.coefficients()[0] * Fraction(1, e ** (
+                                n + 1))
                     constant = constant + resulting_constant
                     output[e] = resulting_polynomial
-            return (QuasiPolynomial(output) + QuasiPolynomial.new([[constant]])).simplify()
+            return (QuasiPolynomial(output) + QuasiPolynomial.new_integer([[constant]])).simplify()
 
     def get_constant(self) -> Fraction:
         """

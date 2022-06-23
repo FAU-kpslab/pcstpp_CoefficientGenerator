@@ -98,14 +98,16 @@ class TestQuasiPolynomial(unittest.TestCase):
                          "[(0, ['2', '4', '8']), (1, ['1', '5', '25']), (2, ['3', '9'])]")
         self.assertEqual(str(QP({0: P.new([2, 4, 8]), 2: P.new([3, 9]), 1: P.new([1, 5, 25])})),
                          "[(0, ['2', '4', '8']), (1, ['1', '5', '25']), (2, ['3', '9'])]")
+        self.assertEqual(str(QP({0: P.new([2, 4, 8]), Fraction(1, 2): P.new([3, 9]), 1: P.new([1, 5, 25])})),
+                         "[(0, ['2', '4', '8']), (Fraction(1, 2), ['3', '9']), (1, ['1', '5', '25'])]")
 
     def test_simplify(self):
         self.assertEqual(str(QP({0: P.new([2, 4, 8, 0])}).simplify()), str(QP({0: P.new([2, 4, 8])})))
         self.assertEqual(str(QP({0: P.new([2, 4, 0, 0])}).simplify()), str(QP({0: P.new([2, 4])})))
         self.assertEqual(str(QP({0: P.new([0, 0, 0])}).simplify()), str(QP({})))
         self.assertEqual(str(QP({}).simplify()), str(QP({})))
-        self.assertEqual(str(QP({0: P.new([2, 4, 8]), 1: P.new([1, 5, 25]), 2: P.new([0, 0])}).simplify()),
-                         str(QP({0: P.new([2, 4, 8]), 1: P.new([1, 5, 25])})))
+        self.assertEqual(str(QP({0: P.new([2, 4, 8]), Fraction(1, 2): P.new([1, 5, 25]), 2: P.new([0, 0])}).simplify()),
+                         str(QP({0: P.new([2, 4, 8]), Fraction(1, 2): P.new([1, 5, 25])})))
         self.assertEqual(str(QP({0: P.new([2, 4, 8]), 1: P.new([0, 0, 0]), 2: P.new([3, 9])}).simplify()),
                          str(QP({0: P.new([2, 4, 8]), 2: P.new([3, 9])})))
         self.assertEqual(str(QP({0: P.zero(), 1: P.zero(), 2: P.zero()}).simplify()), str(QP({})))
@@ -113,105 +115,139 @@ class TestQuasiPolynomial(unittest.TestCase):
     def test_sort(self):
         self.assertEqual(str(QP({2: P.new([2, 4, 8]), 1: P.new([1, 5, 25]), 0: P.new([1])}).sort()),
                          str(QP({0: P.new([1]), 1: P.new([1, 5, 25]), 2: P.new([2, 4, 8])})))
+        self.assertEqual(str(QP({Fraction(1, 2): P.new([2, 4, 8]), 1: P.new([1, 5, 25]), 0: P.new([1])}).sort()),
+                         str(QP({0: P.new([1]), Fraction(1, 2): P.new([2, 4, 8]), 1: P.new([1, 5, 25])})))
+
+    def test_new_integer(self):
+        self.assertEqual(QP({0: P.new([2, 3, 4]), 1: P.new([1])}), QP.new_integer([[2, 3, 4], [1]]))
 
     def test_new(self):
-        self.assertEqual(QP({0: P.new([2, 3, 4]), 1: P.new([1])}), QP.new([[2, 3, 4], [1]]))
+        self.assertEqual(QP.new({0: [2, 3, 4], 1: [1]}), QP.new_integer([[2, 3, 4], [1]]))
+        self.assertEqual(QP.new({0: [2, 3, 4], Fraction(1, 2): [1]}),
+                         QP({0: P.new([2, 3, 4]), Fraction(1, 2): P.new([1])}))
 
     def test_copy(self):
-        temp = QP.new([[2, 4, 8], [0, 0, 0], [3, 9]])
+        temp = QP.new_integer([[2, 4, 8], [0, 0, 0], [3, 9]])
         temp_copy = temp.copy()
         self.assertNotEqual(id(temp), id(temp_copy))
         self.assertNotEqual(id(temp.polynomial_dict[0]), id(temp_copy.polynomial_dict[0]))
         self.assertEqual(temp, temp_copy)
-        temp2 = QP.new([[]])
+        temp2 = QP.new_integer([[]])
         self.assertNotEqual(id(temp2), id(temp2.copy()))
 
     def test_eq(self):
-        self.assertTrue(QP.new([[2, 4, 8]]) == QP.new([[2, 4, 8]]))
-        self.assertFalse(QP.new([[2, 4]]) == QP.new([[2, 4, 8]]))
-        self.assertTrue(QP.new([]) == QP.new([[]]))
-        self.assertFalse(QP.new([[2, 4], [3]]) == QP.new([[2, 4]]))
-        self.assertTrue(QP.new([[2, 4], [3]]) == QP({1: P.new([3]), 0: P.new([2, 4])}))
-        self.assertTrue(QP.new([[2, 4], []]) == QP.new([[2, 4]]))
-        self.assertTrue(QP.new([[0, 0], [2]]) == QP.new([[], [2]]))
-        self.assertFalse(QP.new([[1]]) == QP.new([[2]]))
+        self.assertTrue(QP.new_integer([[2, 4, 8]]) == QP.new_integer([[2, 4, 8]]))
+        self.assertFalse(QP.new_integer([[2, 4]]) == QP.new_integer([[2, 4, 8]]))
+        self.assertTrue(QP.new_integer([]) == QP.new_integer([[]]))
+        self.assertFalse(QP.new_integer([[2, 4], [3]]) == QP.new_integer([[2, 4]]))
+        self.assertTrue(QP.new_integer([[2, 4], [3]]) == QP({1: P.new([3]), 0: P.new([2, 4])}))
+        self.assertTrue(QP.new_integer([[2, 4], []]) == QP.new_integer([[2, 4]]))
+        self.assertTrue(QP.new_integer([[0, 0], [2]]) == QP.new_integer([[], [2]]))
+        self.assertFalse(QP.new_integer([[1]]) == QP.new_integer([[2]]))
+        self.assertTrue(QP.new({Fraction(1, 3): [2, 4], Fraction(1, 2): [3]}) == QP.new(
+            {Fraction(1, 3): [2, 4], Fraction(1, 2): [3]}))
+        self.assertTrue(
+            QP.new({Fraction(1, 3): [2, 4], Fraction(2, 1): [3]}) == QP.new({Fraction(1, 3): [2, 4], 2: [3]}))
+        self.assertTrue(QP.new_integer([[], [2, 4, 8]]), QP.new({Fraction(1, 1): [2, 4, 8]}))
 
     def test_pretty_print(self):
-        self.assertEqual(QP.new([]).pretty_print(), '0')
-        self.assertEqual(QP.new([[0]]).pretty_print(), '0')
-        self.assertEqual(QP.new([[2, 4, 8]]).pretty_print(), '2+4x+8x^2')
-        self.assertEqual(QP.new([[2, 4, 8], [1, 5, 25]]).pretty_print(), '2+4x+8x^2+(1+5x+25x^2)exp(-x)')
-        self.assertEqual(QP.new([[2, 4, 8], [1, 5, 25], [3, 9]]).pretty_print(),
+        self.assertEqual(QP.new_integer([]).pretty_print(), '0')
+        self.assertEqual(QP.new_integer([[0]]).pretty_print(), '0')
+        self.assertEqual(QP.new_integer([[2, 4, 8]]).pretty_print(), '2+4x+8x^2')
+        self.assertEqual(QP.new_integer([[2, 4, 8], [1, 5, 25]]).pretty_print(), '2+4x+8x^2+(1+5x+25x^2)exp(-x)')
+        self.assertEqual(QP.new_integer([[2, 4, 8], [1, 5, 25], [3, 9]]).pretty_print(),
                          '2+4x+8x^2+(1+5x+25x^2)exp(-x)+(3+9x)exp(-2x)')
-        self.assertEqual(QP.new([[2], [3], [4]]).pretty_print(), '2+3exp(-x)+4exp(-2x)')
-        self.assertEqual(QP.new([[0], [3], [4]]).pretty_print(), '3exp(-x)+4exp(-2x)')
-        self.assertEqual(QP.new([[2], [0], [4]]).pretty_print(), '2+4exp(-2x)')
-        self.assertEqual(QP.new([[2], [3], [0]]).pretty_print(), '2+3exp(-x)')
-        self.assertEqual(QP.new([[], [3], [4]]).pretty_print(), '3exp(-x)+4exp(-2x)')
-        self.assertEqual(QP.new([[2], [], [4]]).pretty_print(), '2+4exp(-2x)')
-        self.assertEqual(QP.new([[2], [3], []]).pretty_print(), '2+3exp(-x)')
-        self.assertEqual(QP.new([[2], [1], [4]]).pretty_print(), '2+exp(-x)+4exp(-2x)')
-        self.assertEqual(QP.new([[2], [3], [1]]).pretty_print(), '2+3exp(-x)+exp(-2x)')
-        self.assertEqual(QP.new([[-2], [-3]]).pretty_print(), '-2-3exp(-x)')
-        self.assertEqual(QP.new([[-2], [-3], [-4]]).pretty_print(), '-2-3exp(-x)-4exp(-2x)')
+        self.assertEqual(QP.new_integer([[2], [3], [4]]).pretty_print(), '2+3exp(-x)+4exp(-2x)')
+        self.assertEqual(QP.new_integer([[0], [3], [4]]).pretty_print(), '3exp(-x)+4exp(-2x)')
+        self.assertEqual(QP.new_integer([[2], [0], [4]]).pretty_print(), '2+4exp(-2x)')
+        self.assertEqual(QP.new_integer([[2], [3], [0]]).pretty_print(), '2+3exp(-x)')
+        self.assertEqual(QP.new_integer([[], [3], [4]]).pretty_print(), '3exp(-x)+4exp(-2x)')
+        self.assertEqual(QP.new_integer([[2], [], [4]]).pretty_print(), '2+4exp(-2x)')
+        self.assertEqual(QP.new_integer([[2], [3], []]).pretty_print(), '2+3exp(-x)')
+        self.assertEqual(QP.new_integer([[2], [1], [4]]).pretty_print(), '2+exp(-x)+4exp(-2x)')
+        self.assertEqual(QP.new_integer([[2], [3], [1]]).pretty_print(), '2+3exp(-x)+exp(-2x)')
+        self.assertEqual(QP.new_integer([[-2], [-3]]).pretty_print(), '-2-3exp(-x)')
+        self.assertEqual(QP.new_integer([[-2], [-3], [-4]]).pretty_print(), '-2-3exp(-x)-4exp(-2x)')
+        self.assertEqual(QP.new({0: [2], Fraction(1, 2): [4]}).pretty_print(), '2+4exp(-1/2x)')
 
     def test_scalar_multiplication(self):
-        self.assertEqual(QP.new([[2, 4, 8], [2, 10, 50]]), QP.new([[1, 2, 4], [1, 5, 25]]).scalar_multiplication(2))
-        self.assertEqual(QP.new([]), QP.new([[2, 4, 8], [1, 5, 25]]).scalar_multiplication(0))
-        self.assertEqual(QP.new([]), QP.new([]).scalar_multiplication(2))
-        temp = QP.new([[2, 4, 8], [0, 0, 0], [3, 9]])
+        self.assertEqual(QP.new_integer([[2, 4, 8], [2, 10, 50]]),
+                         QP.new_integer([[1, 2, 4], [1, 5, 25]]).scalar_multiplication(2))
+        self.assertEqual(QP.new({0: [4], Fraction(1, 2): [8]}),
+                         QP.new({0: [2], Fraction(1, 2): [4]}).scalar_multiplication(2))
+        self.assertEqual(QP.new_integer([]), QP.new_integer([[2, 4, 8], [1, 5, 25]]).scalar_multiplication(0))
+        self.assertEqual(QP.new_integer([]), QP.new_integer([]).scalar_multiplication(2))
+        temp = QP.new_integer([[2, 4, 8], [0, 0, 0], [3, 9]])
         temp_times_1 = 1 * temp
         self.assertNotEqual(id(temp), id(temp_times_1))
         self.assertNotEqual(id(temp.polynomial_dict[0]), id(temp_times_1.polynomial_dict[0]))
 
     def test_negation(self):
-        self.assertEqual(-QP.new([[2, 4, 8], [2, 10, 50]]), QP.new([[-2, -4, -8], [-2, -10, -50]]))
+        self.assertEqual(-QP.new_integer([[2, 4, 8], [2, 10, 50]]), QP.new_integer([[-2, -4, -8], [-2, -10, -50]]))
 
     def test_add(self):
-        self.assertEqual(QP.new([[2, 4, 8], [2, 10, 50]]) + QP.new([[2, 4, 8], [2, 10, 50]]),
-                         QP.new([[4, 8, 16], [4, 20, 100]]))
-        self.assertEqual(QP.new([[2, 4, 8], [2, 10, 50]]) + QP({1: P.new([2, 10, 50]), 0: P.new([2, 4, 8])}),
-                         QP.new([[4, 8, 16], [4, 20, 100]]))
-        self.assertEqual(QP.new([[2, 4, 8]]) + QP.new([[2, 4, 8], [2, 10, 50]]), QP.new([[4, 8, 16], [2, 10, 50]]))
-        self.assertEqual(QP.new([[2, 4, 8], [2, 10, 50]]) + QP.new([[2, 4, 8]]), QP.new([[4, 8, 16], [2, 10, 50]]))
-        self.assertEqual(QP.new([[2, 4, 8], [2, 10, 50]]) + QP.zero(), QP.new([[2, 4, 8], [2, 10, 50]]))
-        self.assertEqual(QP.new([[2, 4, 8], [2, 10, 50]]) + QP.new([]), QP.new([[2, 4, 8], [2, 10, 50]]))
-        self.assertEqual(QP.new([[1, 2], [3, 4]]) + QP.new([[-1, -2], [-3, -4]]), QP.new([]))
+        self.assertEqual(QP.new_integer([[2, 4, 8], [2, 10, 50]]) + QP.new_integer([[2, 4, 8], [2, 10, 50]]),
+                         QP.new_integer([[4, 8, 16], [4, 20, 100]]))
+        self.assertEqual(QP.new_integer([[2, 4, 8], [2, 10, 50]]) + QP({1: P.new([2, 10, 50]), 0: P.new([2, 4, 8])}),
+                         QP.new_integer([[4, 8, 16], [4, 20, 100]]))
+        self.assertEqual(QP.new_integer([[2, 4, 8]]) + QP.new_integer([[2, 4, 8], [2, 10, 50]]),
+                         QP.new_integer([[4, 8, 16], [2, 10, 50]]))
+        self.assertEqual(QP.new_integer([[2, 4, 8], [2, 10, 50]]) + QP.new_integer([[2, 4, 8]]),
+                         QP.new_integer([[4, 8, 16], [2, 10, 50]]))
+        self.assertEqual(QP.new_integer([[2, 4, 8], [2, 10, 50]]) + QP.zero(), QP.new_integer([[2, 4, 8], [2, 10, 50]]))
+        self.assertEqual(QP.new_integer([[2, 4, 8], [2, 10, 50]]) + QP.new_integer([]),
+                         QP.new_integer([[2, 4, 8], [2, 10, 50]]))
+        self.assertEqual(QP.new_integer([[1, 2], [3, 4]]) + QP.new_integer([[-1, -2], [-3, -4]]), QP.new_integer([]))
+        self.assertEqual(QP.new({0: [2, 4, 8], Fraction(1, 2): [2, 10, 50]}) + QP.new_integer([[2, 4, 8], [2, 10, 50]]),
+                         QP.new({0: [4, 8, 16], Fraction(1, 2): [2, 10, 50], 1: [2, 10, 50]}))
 
     def test_sub(self):
-        self.assertEqual(QP.new([[2, 4, 8], [2, 10, 50]]) - QP.new([[1, 2, 4], [1, 5, 25]]),
-                         QP.new([[1, 2, 4], [1, 5, 25]]))
-        self.assertEqual(QP.new([[2, 4, 8], [2, 10, 50]]) - QP.new([[2, 4, 8], [2, 10, 50]]), QP.new([]))
-        self.assertEqual(QP.new([[2, 4, 8]]) - QP.new([[2, 4, 8], [2, 10, 50]]), QP.new([[], [-2, -10, -50]]))
-        self.assertEqual(QP.new([[2, 4, 8], [2, 10, 50]]) - QP.new([[2, 4, 8]]), QP.new([[], [2, 10, 50]]))
+        self.assertEqual(QP.new_integer([[2, 4, 8], [2, 10, 50]]) - QP.new_integer([[1, 2, 4], [1, 5, 25]]),
+                         QP.new_integer([[1, 2, 4], [1, 5, 25]]))
+        self.assertEqual(QP.new_integer([[2, 4, 8], [2, 10, 50]]) - QP.new_integer([[2, 4, 8], [2, 10, 50]]),
+                         QP.new_integer([]))
+        self.assertEqual(QP.new_integer([[2, 4, 8]]) - QP.new_integer([[2, 4, 8], [2, 10, 50]]),
+                         QP.new_integer([[], [-2, -10, -50]]))
+        self.assertEqual(QP.new_integer([[2, 4, 8], [2, 10, 50]]) - QP.new_integer([[2, 4, 8]]),
+                         QP.new_integer([[], [2, 10, 50]]))
 
     def test_multiplication(self):
-        self.assertEqual(QP.new([[1, 2], [3, 4]]) * QP.new([[5, 6], [7, 8]]),
-                         QP.new([[5, 16, 12], [22, 60, 40], [21, 52, 32]]))
-        self.assertEqual(QP.new([[1, 2], [3, 4]]) * QP.new([[5, 6]]), QP.new([[5, 16, 12], [15, 38, 24]]))
-        self.assertEqual(QP.new([[5, 6]]) * QP.new([[1, 2], [3, 4]]), QP.new([[5, 16, 12], [15, 38, 24]]))
-        self.assertEqual(QP.new([[1]]) * QP.new([[1, 2], [3, 4]]), QP.new([[1, 2], [3, 4]]))
-        self.assertEqual(QP.new([[1, 2], [3, 4]]) * QP.new([[1]]), QP.new([[1, 2], [3, 4]]))
-        self.assertEqual(QP.new([[]]) * QP.new([[1, 2], [3, 4]]), QP.new([[]]))
-        self.assertEqual(QP.new([[1, 2], [3, 4]]) * QP.new([[]]), QP.new([[]]))
-        self.assertEqual(QP.new([[1, 2]]) * QP.new([[]]), QP.new([[]]))
-        self.assertEqual(QP.new([[]]) * QP.new([[]]), QP.new([[]]))
-        self.assertEqual(QP.new([[1, 2], [3, 4]]) * P.new([5, 6]), QP.new([[5, 16, 12], [15, 38, 24]]))
-        self.assertEqual(P.new([5, 6]) * QP.new([[1, 2], [3, 4]]), QP.new([[5, 16, 12], [15, 38, 24]]))
-        self.assertEqual(QP.new([[1, 2], [3, 4]]) * 2, QP.new([[2, 4], [6, 8]]))
-        self.assertEqual(2 * QP.new([[1, 2], [3, 4]]), QP.new([[2, 4], [6, 8]]))
+        self.assertEqual(QP.new_integer([[1, 2], [3, 4]]) * QP.new_integer([[5, 6], [7, 8]]),
+                         QP.new_integer([[5, 16, 12], [22, 60, 40], [21, 52, 32]]))
+        self.assertEqual(QP.new_integer([[1, 2], [3, 4]]) * QP.new_integer([[5, 6]]),
+                         QP.new_integer([[5, 16, 12], [15, 38, 24]]))
+        self.assertEqual(QP.new_integer([[5, 6]]) * QP.new_integer([[1, 2], [3, 4]]),
+                         QP.new_integer([[5, 16, 12], [15, 38, 24]]))
+        self.assertEqual(QP.new_integer([[1]]) * QP.new_integer([[1, 2], [3, 4]]), QP.new_integer([[1, 2], [3, 4]]))
+        self.assertEqual(QP.new_integer([[1, 2], [3, 4]]) * QP.new_integer([[1]]), QP.new_integer([[1, 2], [3, 4]]))
+        self.assertEqual(QP.new_integer([[]]) * QP.new_integer([[1, 2], [3, 4]]), QP.new_integer([[]]))
+        self.assertEqual(QP.new_integer([[1, 2], [3, 4]]) * QP.new_integer([[]]), QP.new_integer([[]]))
+        self.assertEqual(QP.new_integer([[1, 2]]) * QP.new_integer([[]]), QP.new_integer([[]]))
+        self.assertEqual(QP.new_integer([[]]) * QP.new_integer([[]]), QP.new_integer([[]]))
+        self.assertEqual(QP.new_integer([[1, 2], [3, 4]]) * P.new([5, 6]), QP.new_integer([[5, 16, 12], [15, 38, 24]]))
+        self.assertEqual(P.new([5, 6]) * QP.new_integer([[1, 2], [3, 4]]), QP.new_integer([[5, 16, 12], [15, 38, 24]]))
+        self.assertEqual(QP.new_integer([[1, 2], [3, 4]]) * 2, QP.new_integer([[2, 4], [6, 8]]))
+        self.assertEqual(2 * QP.new_integer([[1, 2], [3, 4]]), QP.new_integer([[2, 4], [6, 8]]))
+        self.assertEqual(QP.new_integer([[1, 2], [3, 4]]) * QP.new({Fraction(1, 2): [5, 6]}),
+                         QP.new({Fraction(1, 2): [5, 16, 12], Fraction(3, 2): [15, 38, 24]}))
 
     def test_integrate(self):
-        self.assertEqual(QP.new([[5, 5, 7]]).integrate(), QP.new([[0, 5, Fraction(5, 2), Fraction(7, 3)]]))
-        self.assertEqual(QP.new([[1, 2], [3, 4], [5, 6]]).integrate(), QP.new([[11, 1, 1], [-7, -4], [-4, -3]]))
-        self.assertEqual(QP.new([[], [], [1, 2, 0, 0, 5]]).integrate(), QP.new(
+        self.assertEqual(QP.new_integer([[5, 5, 7]]).integrate(),
+                         QP.new_integer([[0, 5, Fraction(5, 2), Fraction(7, 3)]]))
+        self.assertEqual(QP.new_integer([[1, 2], [3, 4], [5, 6]]).integrate(),
+                         QP.new_integer([[11, 1, 1], [-7, -4], [-4, -3]]))
+        self.assertEqual(QP.new_integer([[], [], [1, 2, 0, 0, 5]]).integrate(), QP.new_integer(
             [[Fraction(19, 4)], [], [Fraction(-19, 4), Fraction(-17, 2), Fraction(-15, 2), -5, Fraction(-5, 2)]]))
-        self.assertEqual(QP.new([[]]).integrate(), QP.new([[]]))
+        self.assertEqual(QP.new_integer([[]]).integrate(), QP.new_integer([[]]))
+        self.assertEqual(QP.new({Fraction(1, 5): [1, 2], Fraction(1, 3): [3, 4], Fraction(1, 2): [5, 6]}).integrate(),
+                         QP.new({0: [134], Fraction(1, 5): [-55, -10], Fraction(1, 3): [-45, -12],
+                                 Fraction(1, 2): [-34, -12]}))
 
     def test_get_constant(self):
-        self.assertEqual(QP.new([[5, 5, 7]]).get_constant(), Fraction(5))
+        self.assertEqual(QP.new_integer([[5, 5, 7]]).get_constant(), Fraction(5))
         self.assertEqual(QP.zero().get_constant(), Fraction(0))
-        self.assertEqual(QP.new([[], [], [1, 2, 0, 0, 5]]).get_constant(), Fraction(0))
+        self.assertEqual(QP.new_integer([[], [], [1, 2, 0, 0, 5]]).get_constant(), Fraction(0))
+        self.assertEqual(QP.new({Fraction(1, 2): [1]}).get_constant(), Fraction(0))
 
 
 if __name__ == '__main__':
