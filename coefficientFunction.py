@@ -269,7 +269,8 @@ def sequence_to_indices(sequence: Tuple[Tuple[int,...],...], translation: Dict) 
 
 # TODO: The signum_func also now accepts complex arguments
 def calc(sequence: Tuple[Tuple[int,...],...], collection: FunctionCollection, translation: Dict,
-         max_energy: int, signum_func:Callable[[Tuple[Tuple[int,...],...], Tuple[Tuple[int,...],...]],int]) -> QuasiPolynomial:
+         max_energy: int, signum_func:Callable[[Tuple[Tuple[int,...],...], Tuple[Tuple[int,...],...]],int],
+         energy_func: Callable[[Tuple[Tuple[int,...],...]],int]) -> QuasiPolynomial:
     """
     calc(sequence)
 
@@ -291,15 +292,15 @@ def calc(sequence: Tuple[Tuple[int,...],...], collection: FunctionCollection, tr
             s1 = partition[0]
             s2 = partition[1]
             # Check whether the required functions are already calculated.
-            f1 = calc(partition[0], collection, translation, max_energy,signum_func)
-            f2 = calc(partition[1], collection, translation, max_energy,signum_func)
+            f1 = calc(partition[0], collection, translation, max_energy, signum_func, energy_func)
+            f2 = calc(partition[1], collection, translation, max_energy, signum_func, energy_func)
             # Translate the operator sequences into its indices.
             m = sequence_to_indices(sequence, translation)
             m1 = sequence_to_indices(s1, translation)
             m2 = sequence_to_indices(s2, translation)
             # Only calculate non-vanishing contributions to the integrand.
-            if (abs(energy(m1)) <= max_energy) & (abs(energy(m2)) <= max_energy):
-                integrand = integrand + exponential(m, m1, m2,energy) * signum_func(m1, m2) * f1 * f2
+            if (abs(energy_func(m1)) <= max_energy) & (abs(energy_func(m2)) <= max_energy):
+                integrand = integrand + exponential(m, m1, m2,energy_func) * signum_func(m1, m2) * f1 * f2
         result = integrand.integrate()
         # Insert the result into the collection.
         collection[sequence] = result
@@ -308,7 +309,8 @@ def calc(sequence: Tuple[Tuple[int,...],...], collection: FunctionCollection, tr
 
 def trafo_calc(sequence: Tuple[Tuple[int,...],...], trafo_collection: FunctionCollection, collection: FunctionCollection,
                translation: Dict, max_energy: int, 
-               signum_func:Callable[[Tuple[Tuple[int,...],...], Tuple[Tuple[int,...],...]],int]) -> QuasiPolynomial:
+               signum_func:Callable[[Tuple[Tuple[int,...],...], Tuple[Tuple[int,...],...]],int],
+               energy_func: Callable[[Tuple[Tuple[int,...],...]],int]) -> QuasiPolynomial:
     """
     trafo_calc(sequence)
 
@@ -324,20 +326,21 @@ def trafo_calc(sequence: Tuple[Tuple[int,...],...], trafo_collection: FunctionCo
         return trafo_collection[sequence].function
     else:
         m = sequence_to_indices(sequence, translation)
-        integrand = exponential(((), ()), ((), ()), m,energy) * signum_func(((), ()), m) * calc(sequence, collection, translation, max_energy, signum_func)
+        integrand = (exponential(((), ()), ((), ()), m,energy_func) * signum_func(((), ()), m) 
+                        * calc(sequence, collection, translation, max_energy, signum_func, energy_func))
         partition_list = partitions(sequence)
         for partition in partition_list:
             # Rename the operator sequences.
             s1 = partition[0]
             s2 = partition[1]
             # Check whether the required functions are already calculated.
-            g1 = trafo_calc(partition[0], trafo_collection, collection, translation, max_energy, signum_func)
-            f2 = calc(partition[1], collection, translation, max_energy, signum_func)
+            g1 = trafo_calc(partition[0], trafo_collection, collection, translation, max_energy, signum_func, energy_func)
+            f2 = calc(partition[1], collection, translation, max_energy, signum_func, energy_func)
             # Translate the operator sequences into its indices.
             m1 = sequence_to_indices(s1, translation)
             m2 = sequence_to_indices(s2, translation)
             # Calculate the contributions to the integrand.
-            integrand = integrand + exponential(((), ()), ((), ()), m2,energy) * signum_func(((), ()), m2) * g1 * f2
+            integrand = integrand + exponential(((), ()), ((), ()), m2,energy_func) * signum_func(((), ()), m2) * g1 * f2
         result = integrand.integrate()
         # Insert the result into the collection.
         trafo_collection[sequence] = result

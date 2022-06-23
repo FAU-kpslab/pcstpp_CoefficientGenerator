@@ -7,7 +7,7 @@ import argparse
 
 import coefficientFunction
 from quasiPolynomial import QuasiPolynomial as qp
-from mathematics import energy, signum, signum_broad, signum_complex
+from mathematics import energy, energy_broad, signum, signum_broad, signum_complex
 from itertools import product, chain
 
 
@@ -115,13 +115,16 @@ def main():
         if delta>0:
             print("Using the broad signum function.")
             signum_func = lambda l,r: signum_broad(l,r,delta=delta)
+            energy_func = lambda i: energy_broad(i,delta=delta)
         # check if any translation value has a non-vanishing imaginary part
         elif len([v for v in translation.values() if iscomplex(v)])>0:
             print("Using the complex signum function.")
             signum_func = signum_complex
+            energy_func = energy
         else:
             print("Using the standard signum function.")
             signum_func = signum
+            energy_func = energy
 
         for order in range(max_order + 1):
             print('Starting calculations for order ' + str(order) + '.')
@@ -133,9 +136,9 @@ def main():
                     indices = coefficientFunction.sequence_to_indices(sequence_sorted, translation)
                     # Make use of block diagonality.
                     if energy(indices) == 0:
-                        coefficientFunction.calc(sequence_sorted, collection, translation, max_energy, signum_func)
+                        coefficientFunction.calc(sequence_sorted, collection, translation, max_energy, signum_func, energy_func)
                 else:
-                    coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation, max_energy, signum_func)
+                    coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation, max_energy, signum_func, energy_func)
         # print(collection.pretty_print())
         print('Starting writing process.')
         # Write the results in a file.
