@@ -20,6 +20,19 @@ def energy(indices: Tuple[Tuple[Union[int,float,Fraction],...],...]) -> Union[in
     """
     return sum(reduce(operator.add, indices))
 
+def energy_broad(indices: Tuple[Tuple[int,...],...], delta:int) -> int:
+    """
+    energy_broad(indices)
+
+    Returns the 'broadened' sum M(m)*theta(|M(m)|-`delta`) of operator sequence 
+    indices, where theta is the Heaviside step function.
+
+        Returns
+        -------
+        int
+    """
+    e = energy(indices)
+    return e * int(np.heaviside(np.abs(e)-delta,0))
 
 def signum(indices1: Tuple[Tuple[Union[int,float,Fraction],...],...], 
            indices2: Tuple[Tuple[Union[int,float,Fraction],...],...]) -> Union[int,float]:

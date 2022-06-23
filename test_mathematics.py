@@ -18,6 +18,13 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(energy(((0.2,), (2.,), ())), 2.2)
         self.assertEqual(energy(((Fraction(1,2),Fraction(1,2)), (2.,), ())), 3.0)
 
+    def test_energy_broad(self):
+        self.assertEqual(energy_broad(((2, -2), ()),0), 0)
+        self.assertEqual(energy_broad(((2, 2), ()),2), 4)
+        self.assertEqual(energy_broad(((2, 2), ()),4), 0)
+        self.assertEqual(energy_broad(((2,), (-2,), (-3,), (-1,)),2), -4)
+        self.assertEqual(energy_broad(((2,), (-2,), (-3,), (-1,)),5), 0)
+
     def test_signum(self):
         self.assertEqual(signum(((2,),), ((-2,),)), 2)
         self.assertEqual(signum(((2,), ()), ((0,), ())), 1)
