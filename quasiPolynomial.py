@@ -538,7 +538,7 @@ class QuasiPolynomial:
             bool
         """
 
-        return self.sort().polynomials == other.sort().polynomials
+        return self.polynomial_dict == other.polynomial_dict
 
     def pretty_print(self) -> str:
         """
@@ -653,7 +653,7 @@ class QuasiPolynomial:
             for e1, p1 in self.polynomials:
                 for e2, p2 in other.polynomials:
                     output = output + QuasiPolynomial({e1 + e2: p1 * p2})
-            return output.sort().simplify()
+            return output.simplify()
         # Check whether the second object is a polynomial and lift it to a quasi-polynomial.
         elif isinstance(other, Polynomial):
             return self * QuasiPolynomial({0: other})
