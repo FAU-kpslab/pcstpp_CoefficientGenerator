@@ -491,7 +491,7 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
-        return QuasiPolynomial({e: p for e, p in sorted(self.polynomials)})  # TODO: Is that needed?
+        return QuasiPolynomial({e: p for e, p in sorted(self.polynomials)})
 
     @staticmethod
     def new(coefficient_list: List[List[Union[Fraction, int, float, str]]]) -> \
@@ -538,8 +538,7 @@ class QuasiPolynomial:
             bool
         """
 
-        #return self.sort().polynomials == other.sort().polynomials
-        return self.polynomials == other.polynomials
+        return self.sort().polynomials == other.sort().polynomials
 
     def pretty_print(self) -> str:
         """
@@ -556,8 +555,7 @@ class QuasiPolynomial:
             return '0'
         else:
             output = []
-            #for e, p in self.sort().simplify().polynomials:
-            for e, p in self.simplify().polynomials:
+            for e, p in self.sort().simplify().polynomials:
                 if e == 0:
                     exponent = ''
                     polynomial = p.pretty_print()
@@ -655,8 +653,7 @@ class QuasiPolynomial:
             for e1, p1 in self.polynomials:
                 for e2, p2 in other.polynomials:
                     output = output + QuasiPolynomial({e1 + e2: p1 * p2})
-            #return output.sort().simplify()
-            return output.simplify()
+            return output.sort().simplify()
         # Check whether the second object is a polynomial and lift it to a quasi-polynomial.
         elif isinstance(other, Polynomial):
             return self * QuasiPolynomial({0: other})
