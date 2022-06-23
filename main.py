@@ -148,11 +148,14 @@ def main():
     config_file.close()
 
     if not args.config:
-        print('The calculations are done. Your coefficient file is "result.txt". If you want to keep it, store it under a '
-            'different name before executing the program again.')
+        print('The calculations are done. Your coefficient file is "result.txt". If you want to keep it, store it under'
+              ' a different name before executing the program again.')
         print('The used configuration is found in "config.yml", you can store that together with the results.')
     else:
-        print('The default configuration file is found in "config.yml". It will be overwritten when rerunning the program.')
+        print(
+            'The default configuration file is found in "config.yml". It will be overwritten when rerunning the program'
+            '.')
+
 
 if __name__ == '__main__':
     main()

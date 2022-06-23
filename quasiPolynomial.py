@@ -1,5 +1,6 @@
 from fractions import Fraction
 from typing import List, Union, Tuple, Dict
+from math import isclose
 
 import numpy as np
 
@@ -12,19 +13,21 @@ class Polynomial:
 
         Parameters
         ----------
-        coefficient_list : List[Fraction]
+        coefficient_list : List[int or Fraction or float]
             The list of coefficients.
             The coefficient of x^n is coefficient_array[n].
 
         Attributes
         ----------
-        __private_coefficients : np.ndarray[Fraction]
+        __private_coefficients : np.ndarray[int or Fraction or float]
             The numpy array of coefficients.
             The coefficient of x^n is __private_coefficients[n].
 
         Methods
         -------
-        coefficients : np.ndarray[Fraction]
+        __str__ : str
+            Prints the coefficient array.
+        coefficients : np.ndarray[int or Fraction or float]
             Gets the coefficient array.
         zero : Polynomial
             Creates an empty polynomial.
@@ -34,8 +37,6 @@ class Polynomial:
             Creates a quasi-polynomial using a list of __private_coefficients.
         copy : Polynomial
             Copies a polynomial.
-        __str__ : str
-            Prints the coefficient array.
         __eq__ : bool
             Checks whether two polynomials are mathematically equal.
         pretty_print : str
@@ -60,7 +61,7 @@ class Polynomial:
             Returns the constant coefficient.
     """
 
-    def __init__(self, coefficient_list: List[Fraction]) -> None:
+    def __init__(self, coefficient_list: List[int or Fraction or np.float64]) -> None:
         """
             Parameters
             ----------
@@ -69,7 +70,20 @@ class Polynomial:
                 The coefficient of x^n is coefficient_dict[n].
         """
 
-        self.__private_coefficients = np.asarray(coefficient_list).astype(Fraction, copy=False)
+        self.__private_coefficients = np.asarray(coefficient_list)
+
+    def __str__(self) -> str:
+        """
+        print(p)
+
+        Prints the coefficient array.
+
+            Returns
+            -------
+            str
+        """
+
+        return str([str(coeff) for coeff in self.__private_coefficients])
 
     def coefficients(self) -> np.ndarray:
         """
@@ -112,7 +126,7 @@ class Polynomial:
         # Check whether the polynomial is empty.
         if self.__private_coefficients.size != 0:
             # Check whether the last coefficient is zero to remove it.
-            while self.__private_coefficients[-1] == 0:
+            while isclose(self.__private_coefficients[-1], 0, abs_tol=1e-09):
                 self.__private_coefficients = self.__private_coefficients[:-1].copy()
                 # Check whether the polynomial is empty.
                 if self.__private_coefficients.size == 0:
@@ -120,7 +134,7 @@ class Polynomial:
         return self
 
     @staticmethod
-    def new(coefficient_list: List[Union[Fraction, int, float, str]]) -> 'Polynomial':
+    def new(coefficient_list: List[int or Fraction or np.float64 or str]) -> 'Polynomial':
         """
         new(List[scalar])
 
@@ -135,7 +149,16 @@ class Polynomial:
             Polynomial
         """
 
-        return Polynomial([Fraction(coeff) for coeff in coefficient_list]).simplify()
+        coefficients = []
+        for coeff in coefficient_list:
+            if isinstance(coeff, float):
+                coefficients.append(np.float64(coeff))
+            if isinstance(coeff, (Fraction, np.float64)):
+                coefficients.append(coeff)
+            elif isinstance(coeff, (int, str)):
+                coefficients.append(Fraction(coeff))
+        # TODO: Should we include another case with an error message?
+        return Polynomial(coefficients).simplify()
 
     def copy(self) -> 'Polynomial':
         """
@@ -150,19 +173,6 @@ class Polynomial:
 
         return Polynomial(self.__private_coefficients.copy())
 
-    def __str__(self) -> str:
-        """
-        print(p)
-
-        Prints the coefficient array.
-
-            Returns
-            -------
-            str
-        """
-
-        return str([str(coeff) for coeff in self.__private_coefficients])
-
     def __eq__(self, other: 'Polynomial') -> bool:
         """
         p1 == p2
@@ -174,7 +184,21 @@ class Polynomial:
             bool
         """
 
-        return np.array_equal(self.simplify().__private_coefficients, other.simplify().__private_coefficients)
+        if len(self.simplify().__private_coefficients) != len(other.simplify().__private_coefficients):
+            return False
+        else:
+            for coeff in range(len(self.__private_coefficients)):
+                coeff1 = self.__private_coefficients[coeff]
+                coeff2 = other.__private_coefficients[coeff]
+                # Use absolute tolerance when comparing to 0.
+                if isclose(coeff1, 0, abs_tol=1e-09) or isclose(coeff2, 0, abs_tol=1e-09):
+                    if not isclose(coeff1, coeff2, abs_tol=1e-09):
+                        return False
+                # Use relative tolerance when comparing non-zero numbers.
+                else:
+                    if not isclose(coeff1, coeff2, rel_tol=1e-09):
+                        return False
+        return True
 
     def pretty_print(self) -> str:
         """
@@ -196,29 +220,29 @@ class Polynomial:
         else:
             output = []
             # Check whether the constant term is zero to leave that away.
-            if self.__private_coefficients[0] != 0:
+            if not isclose(self.__private_coefficients[0], 0, abs_tol=1e-09):
                 output.append(str(self.__private_coefficients[0]))
-            if self.__private_coefficients[1] != 0:
+            if not isclose(self.__private_coefficients[1], 0, abs_tol=1e-09):
                 # Check whether the coefficient is 1 or -1 to leave that away.
-                if self.__private_coefficients[1] == 1:
+                if isclose(self.__private_coefficients[1], 1, rel_tol=1e-09):
                     output.append('x')
-                elif self.__private_coefficients[1] == -1:
+                elif isclose(self.__private_coefficients[1], -1, rel_tol=1e-09):
                     output.append('-x')
                 else:
                     output.append(str(self.__private_coefficients[1]) + 'x')
             for exponent, coefficient in list(enumerate(self.__private_coefficients))[2:]:
                 # Check for the remaining coefficients whether they are zero to leave those away.
-                if coefficient != 0:
+                if not isclose(coefficient, 0, abs_tol=1e-09):
                     # Check for the remaining coefficients whether they are 1 or -1 to leave that away.
-                    if coefficient == 1:
+                    if isclose(coefficient, 1, rel_tol=1e-09):
                         output.append('x^' + str(exponent))
-                    elif coefficient == -1:
+                    elif isclose(coefficient, -1, rel_tol=1e-09):
                         output.append('-x^' + str(exponent))
                     else:
                         output.append(str(coefficient) + 'x^' + str(exponent))
             return '+'.join(output).replace('+-', '-')
 
-    def scalar_multiplication(self, scalar: Union[Fraction, int, float]) -> 'Polynomial':
+    def scalar_multiplication(self, scalar: Fraction or int or np.float64) -> 'Polynomial':
         """
         p.scalar_multiplication(int)
 
@@ -283,7 +307,7 @@ class Polynomial:
 
         return self + (-other)
 
-    def __mul__(self, other: Union['Polynomial', Fraction, int, float]) -> 'Polynomial':
+    def __mul__(self, other: 'Polynomial' or Fraction or int or np.float64) -> 'Polynomial':
         """
         p1 * p2 | p * scalar
 
@@ -304,14 +328,14 @@ class Polynomial:
                       np.arange(- self.__private_coefficients.size + 1, other.__private_coefficients.size)]
             return Polynomial(output).simplify()
         # Check whether the second object is a scalar and call scalar_multiplication.
-        elif isinstance(other, (Fraction, int, float)):
+        elif isinstance(other, (Fraction, int, np.float64)):
             return self.scalar_multiplication(other)
         # If the second polynomial is not a polynomial (but e.g. a quasi-polynomial) return NotImplemented to trigger
         # the function __rmul__ of the other class.
         else:
             return NotImplemented
 
-    def __rmul__(self, other: Union[Fraction, int, float]) -> 'Polynomial':
+    def __rmul__(self, other: Fraction or int or np.float64) -> 'Polynomial':
         """
         scalar * p
 
@@ -397,10 +421,10 @@ class QuasiPolynomial:
             Prints the coefficients.
         zero : QuasiPolynomial
             Creates an empty quasi-polynomial.
-        simplify : QuasiPolynomial
-            Simplifies a quasi-polynomial by *removing* zero polynomials.
         sort : QuasiPolynomial
             Sorts a quasi-polynomial by exponent alpha.
+        simplify : QuasiPolynomial
+            Simplifies a quasi-polynomial by *removing* zero polynomials.
         new_integer : QuasiPolynomial
             Creates a quasi-polynomial with integer exponents using a nested list of __private_coefficients.
         new: QuasiPolynomial
@@ -469,19 +493,6 @@ class QuasiPolynomial:
 
         return QuasiPolynomial({})
 
-    def simplify(self) -> 'QuasiPolynomial':
-        """
-        qp.simplify()
-
-        Simplifies a quasi-polynomial by *removing* zero polynomials.
-
-            Returns
-            -------
-            QuasiPolynomial
-        """
-
-        return QuasiPolynomial({e: p.simplify() for e, p in self.polynomials if p != Polynomial.zero()})
-
     def sort(self) -> 'QuasiPolynomial':
         """
         qp.sort()
@@ -494,6 +505,19 @@ class QuasiPolynomial:
         """
 
         return QuasiPolynomial({e: p for e, p in sorted(self.polynomials)})
+
+    def simplify(self) -> 'QuasiPolynomial':
+        """
+        qp.simplify()
+
+        Simplifies a quasi-polynomial by *removing* zero polynomials.
+
+            Returns
+            -------
+            QuasiPolynomial
+        """
+
+        return QuasiPolynomial({e: p.simplify() for e, p in self.polynomials if p != Polynomial.zero()})
 
     @staticmethod
     def new_integer(coefficient_list: List[List[Fraction or int or float or str]]) -> 'QuasiPolynomial':

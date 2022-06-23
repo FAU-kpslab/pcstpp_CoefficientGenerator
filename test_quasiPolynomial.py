@@ -7,27 +7,40 @@ from quasiPolynomial import QuasiPolynomial as QP
 
 class TestPolynomial(unittest.TestCase):
 
+    def test_str(self):
+        self.assertEqual(str(P([Fraction(2), Fraction(1, 2), 2, 3.5, 1.])), "['2', '1/2', '2', '3.5', '1.0']")
+
     def test_simplify(self):
-        self.assertEqual(print(P([Fraction(2), Fraction(4), Fraction(8), Fraction(0)]).simplify()),
-                         print(P([Fraction(2), Fraction(4), Fraction(8)])))
-        self.assertEqual(print(P([Fraction(2), Fraction(4), Fraction(0), Fraction(0)]).simplify()),
-                         print(P([Fraction(2), Fraction(4)])))
-        self.assertEqual(print(P([Fraction(0), Fraction(0), Fraction(0)]).simplify()), print(P([])))
-        self.assertEqual(print(P.zero().simplify()), print(P.zero()))
-        self.assertEqual(print(P([Fraction(10, 5)]).simplify()), print(P([Fraction(1, 2)])))
+        self.assertEqual(str(P([Fraction(2), Fraction(4), Fraction(8), Fraction(0)]).simplify()),
+                         str(P([Fraction(2), Fraction(4), Fraction(8)])))
+        self.assertEqual(str(P([Fraction(2), Fraction(4), Fraction(0), Fraction(0)]).simplify()),
+                         str(P([Fraction(2), Fraction(4)])))
+        self.assertEqual(str(P([Fraction(0), Fraction(0), Fraction(0)]).simplify()), str(P.zero()))
+        self.assertEqual(str(P.zero().simplify()), str(P.zero()))
+        self.assertEqual(str(P([Fraction(5, 10)]).simplify()), str(P([Fraction(1, 2)])))
+        self.assertEqual(str(P([1.0, 1e-50]).simplify()), str(P([1.0])))
         # TODO: Add a function that checks for equality without simplification.
 
     def test_new(self):
-        self.assertEqual(P([Fraction(2)]), P.new([2]))
-        self.assertEqual(P([Fraction(1, 2)]), P.new([1/2]))
-        self.assertEqual(P([Fraction(1, 2)]), P.new([0.5]))
-        self.assertEqual(P.new([Fraction(1, 2)]), P.new([1/2]))
+        self.assertEqual(str(P.new(['3/15', Fraction(1, 2), 2, 3.5, 1.])), "['1/5', '1/2', '2', '3.5', '1.0']")
 
     def test_copy(self):
         temp = P.new([2, 4, 8])
         temp_copy = temp.copy()
         self.assertNotEqual(id(temp), id(temp.copy()))
         self.assertEqual(temp, temp_copy)
+
+    def test_eq(self):
+        self.assertTrue(P.new([2, 4, 8]) == P.new([2, 4, 8]))
+        self.assertFalse(P.new([2, 8]) == P.new([2, 4, 8]))
+        self.assertFalse(P.new([2, 4, 8]) == P.new([2, 4]))
+        self.assertTrue(P.new([0]) == P.zero())
+        self.assertTrue(P.new([2, 4, 0, 0]) == P.new([2, 4]))
+        #self.assertTrue(P.new([4/2, 4, 8]) == P.new([2, 4, 8]))
+        self.assertTrue(P.new([2., 4, 8]) == P.new([2, 4, 8]))
+        self.assertTrue(P.new([1e-50, 2]) == P.new([0, 2]))
+        self.assertTrue(P.new([1/3]) == P.new(['1/3']))
+        self.assertTrue(P.new([0.1 + 0.2]) == P.new([0.3]))
 
     def test_pretty_print(self):
         self.assertEqual(P.zero().pretty_print(), '0')
@@ -36,28 +49,21 @@ class TestPolynomial(unittest.TestCase):
         self.assertEqual(P.new([-2]).pretty_print(), '-2')
         self.assertEqual(P.new([2, 4]).pretty_print(), '2+4x')
         self.assertEqual(P.new([Fraction(1, 2), 4]).pretty_print(), '1/2+4x')
-        self.assertEqual(P.new([1/2, 4]).pretty_print(), '1/2+4x')
-        self.assertEqual(P.new([0.5, 4]).pretty_print(), '1/2+4x')
+        self.assertEqual(P.new(['1/2', 4]).pretty_print(), '1/2+4x')
+        self.assertEqual(P.new(['0.5', 4]).pretty_print(), '1/2+4x')
+        self.assertEqual(P.new([0.5, 4]).pretty_print(), '0.5+4x')
         self.assertEqual(P.new([-2, -4]).pretty_print(), '-2-4x')
         self.assertEqual(P.new([0, 4]).pretty_print(), '4x')
         self.assertEqual(P.new([2, 4, 8]).pretty_print(), '2+4x+8x^2')
         self.assertEqual(P.new([0, 4, 8, 0, 0]).pretty_print(), '4x+8x^2')
         self.assertEqual(P.new([2, 4, 0, 100]).pretty_print(), '2+4x+100x^3')
 
-    def test_eq(self):
-        self.assertTrue(P.new([2, 4, 8]) == P.new([2, 4, 8]))
-        self.assertFalse(P.new([2, 8]) == P.new([2, 4, 8]))
-        self.assertFalse(P.new([2, 4, 8]) == P.new([2, 4]))
-        self.assertTrue(P.new([0]) == P.zero())
-        self.assertTrue(P.new([2, 4, 0, 0]) == P.new([2, 4]))
-        self.assertTrue(P.new([4/2, 4, 8]) == P.new([2, 4, 8]))
-
     def test_scalar_multiplication(self):
         self.assertEqual(P.new([2, 4, 8]), P.new([1, 2, 4]).scalar_multiplication(2))
         self.assertEqual(P.zero(), P.new([1, 2, 4]).scalar_multiplication(0))
         self.assertEqual(P.new([1, 3/2, 2]), P.new([2, 3, 4]).scalar_multiplication(Fraction(1, 2)))
         self.assertEqual(P.new([1, 3/2, 2]), P.new([2, 3, 4]).scalar_multiplication(1/2))
-        self.assertEqual(P.new([1, 3 / 2, 2]), P.new([2, 3, 4]).scalar_multiplication(0.5))
+        self.assertEqual(P.new([1, 3/2, 2]), P.new([2, 3, 4]).scalar_multiplication(0.5))
 
     def test_negation(self):
         self.assertEqual(-P.new([2, 4, 8]), P.new([-2, -4, -8]))
@@ -101,6 +107,12 @@ class TestQuasiPolynomial(unittest.TestCase):
         self.assertEqual(str(QP({0: P.new([2, 4, 8]), Fraction(1, 2): P.new([3, 9]), 1: P.new([1, 5, 25])})),
                          "[(0, ['2', '4', '8']), (Fraction(1, 2), ['3', '9']), (1, ['1', '5', '25'])]")
 
+    def test_sort(self):
+        self.assertEqual(str(QP({2: P.new([2, 4, 8]), 1: P.new([1, 5, 25]), 0: P.new([1])}).sort()),
+                         str(QP({0: P.new([1]), 1: P.new([1, 5, 25]), 2: P.new([2, 4, 8])})))
+        self.assertEqual(str(QP({Fraction(1, 2): P.new([2, 4, 8]), 1: P.new([1, 5, 25]), 0: P.new([1])}).sort()),
+                         str(QP({0: P.new([1]), Fraction(1, 2): P.new([2, 4, 8]), 1: P.new([1, 5, 25])})))
+
     def test_simplify(self):
         self.assertEqual(str(QP({0: P.new([2, 4, 8, 0])}).simplify()), str(QP({0: P.new([2, 4, 8])})))
         self.assertEqual(str(QP({0: P.new([2, 4, 0, 0])}).simplify()), str(QP({0: P.new([2, 4])})))
@@ -111,12 +123,6 @@ class TestQuasiPolynomial(unittest.TestCase):
         self.assertEqual(str(QP({0: P.new([2, 4, 8]), 1: P.new([0, 0, 0]), 2: P.new([3, 9])}).simplify()),
                          str(QP({0: P.new([2, 4, 8]), 2: P.new([3, 9])})))
         self.assertEqual(str(QP({0: P.zero(), 1: P.zero(), 2: P.zero()}).simplify()), str(QP({})))
-
-    def test_sort(self):
-        self.assertEqual(str(QP({2: P.new([2, 4, 8]), 1: P.new([1, 5, 25]), 0: P.new([1])}).sort()),
-                         str(QP({0: P.new([1]), 1: P.new([1, 5, 25]), 2: P.new([2, 4, 8])})))
-        self.assertEqual(str(QP({Fraction(1, 2): P.new([2, 4, 8]), 1: P.new([1, 5, 25]), 0: P.new([1])}).sort()),
-                         str(QP({0: P.new([1]), Fraction(1, 2): P.new([2, 4, 8]), 1: P.new([1, 5, 25])})))
 
     def test_new_integer(self):
         self.assertEqual(QP({0: P.new([2, 3, 4]), 1: P.new([1])}), QP.new_integer([[2, 3, 4], [1]]))
