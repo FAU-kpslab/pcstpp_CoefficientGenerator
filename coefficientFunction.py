@@ -11,21 +11,21 @@ class CoefficientFunction:
 
         Parameters
         ----------
-        sequence : Tuple[Tuple, Tuple]
+        sequence : Tuple[Tuple[int,...],...]
             The operator sequence m identifying the function f(ell; m).
         function : QuasiPolynomial
             The corresponding coefficient function f(ell; m).
 
         Attributes
         ----------
-        __private_key : Tuple[int, int]
+        __private_key : Tuple[Tuple[int,...],...]
             The number corresponding to the sequence of operators.
         function : QuasiPolynomial
             The corresponding coefficient function f(ell; m).
 
         Methods
         -------
-        sequence : Tuple[Tuple, Tuple]
+        sequence : Tuple[Tuple[int,...],...]
             Gets the operator sequence m identifying the function f(ell; m).
         __str__ : str
             Prints the operator sequence m and the coefficient array of the corresponding coefficient function
@@ -34,11 +34,11 @@ class CoefficientFunction:
             Prints the operator sequence m and corresponding coefficient function f(ell; m).
     """
 
-    def __init__(self, sequence: Tuple[Tuple, Tuple], function: QuasiPolynomial) -> None:
+    def __init__(self, sequence: Tuple[Tuple[int,...],...], function: QuasiPolynomial) -> None:
         """
         Parameters
         ----------
-        sequence : Tuple
+        sequence : Tuple[Tuple[int,...],...]
             The operator sequence m identifying the function f(ell; m).
         function : QuasiPolynomial
             The corresponding coefficient function f(ell; m).
@@ -47,7 +47,7 @@ class CoefficientFunction:
         self.__private_key = sequence_to_key(sequence)
         self.function = function
 
-    def sequence(self) -> Tuple[Tuple, Tuple]:
+    def sequence(self) -> Tuple[Tuple[int,...],...]:
         """
         cf.sequence()
 
@@ -55,7 +55,7 @@ class CoefficientFunction:
 
             Returns
             -------
-            Tuple[Tuple, Tuple]
+            Tuple[Tuple[int,...],...]
         """
 
         return key_to_sequence(self.__private_key)
@@ -125,7 +125,7 @@ class FunctionCollection:
         self.__private_collection = dict()
         self.translation = translation
 
-    def __contains__(self, sequence: Tuple[Tuple, Tuple]) -> bool:
+    def __contains__(self, sequence: Tuple[Tuple[int,...],...]) -> bool:
         """
         sequence in FunctionCollection
 
@@ -133,7 +133,7 @@ class FunctionCollection:
 
             Parameters
             ----------
-            sequence : Tuple[Tuple, Tuple]
+            sequence : Tuple[Tuple[int,...],...]
                 The operator sequence m identifying the function f(ell; m).
 
             Returns
@@ -143,7 +143,7 @@ class FunctionCollection:
 
         return sequence_to_key(sequence) in self.__private_collection
 
-    def __setitem__(self, sequence: Tuple[Tuple, Tuple], function: QuasiPolynomial) -> None:
+    def __setitem__(self, sequence: Tuple[Tuple[int,...],...], function: QuasiPolynomial) -> None:
         """
         FunctionCollection[sequence] = function
 
@@ -151,7 +151,7 @@ class FunctionCollection:
 
             Parameters
             ----------
-            sequence : Tuple[Tuple, Tuple]
+            sequence : Tuple[Tuple[int,...],...]
                 The operator sequence m identifying the function f(ell; m).
             function : QuasiPolynomial
                 The function f(ell; m).
@@ -160,7 +160,7 @@ class FunctionCollection:
         if sequence not in self:
             self.__private_collection[sequence_to_key(sequence)] = function
 
-    def __getitem__(self, sequence: Tuple[Tuple, Tuple]) -> Optional[CoefficientFunction]:
+    def __getitem__(self, sequence: Tuple[Tuple[int,...],...]) -> Optional[CoefficientFunction]:
         """
         FunctionCollection[sequence]
 
@@ -168,7 +168,7 @@ class FunctionCollection:
 
             Parameters
             ----------
-            sequence : Tuple[Tuple, Tuple]
+            sequence : Tuple[Tuple[int,...],...]
                 The operator sequence m.
 
             Returns
@@ -181,7 +181,7 @@ class FunctionCollection:
         else:
             return None
 
-    def keys(self) -> List[Tuple[Tuple, Tuple]]:
+    def keys(self) -> List[Tuple[Tuple[int,...],...]]:
         """
         FunctionCollection.keys()
 
@@ -189,7 +189,7 @@ class FunctionCollection:
 
             Returns
             -------
-            List[Tuple[Tuple, Tuple]]
+            List[Tuple[Tuple[int,...],...]]
         """
 
         return [key_to_sequence(key) for key in self.__private_collection.keys()]
@@ -227,7 +227,7 @@ class FunctionCollection:
         return output
 
 
-def sequence_to_key(sequence: Tuple[Tuple, Tuple]) -> Tuple[Tuple, Tuple]:  # TODO The key is supposed to be an integer.
+def sequence_to_key(sequence: Tuple[Tuple[int,...],...]) -> Tuple[Tuple[int,...],...]:  # TODO The key is supposed to be an integer.
     """
     vector_to_key(sequence)
 
@@ -235,13 +235,13 @@ def sequence_to_key(sequence: Tuple[Tuple, Tuple]) -> Tuple[Tuple, Tuple]:  # TO
 
         Returns
         -------
-        Tuple[Tuple, Tuple]
+        Tuple[Tuple[int,...],...]
     """
 
     return sequence
 
 
-def key_to_sequence(key: Tuple[Tuple, Tuple]) -> Tuple[Tuple, Tuple]:  # TODO The key is supposed to be an integer.
+def key_to_sequence(key: Tuple[Tuple[int,...],...]) -> Tuple[Tuple[int,...],...]:  # TODO The key is supposed to be an integer.
     """
     key_to_sequence(key)
 
@@ -249,13 +249,13 @@ def key_to_sequence(key: Tuple[Tuple, Tuple]) -> Tuple[Tuple, Tuple]:  # TODO Th
 
         Returns
         -------
-        Tuple[Tuple, Tuple]
+        Tuple[Tuple[int,...],...]
     """
 
     return key
 
 
-def sequence_to_indices(sequence: Tuple[Tuple, Tuple], translation: Dict) -> Tuple[List, List]:
+def sequence_to_indices(sequence: Tuple[Tuple[int,...],...], translation: Dict) -> Tuple[Tuple[int,...],...]:
     """
     sequence_to_indices(key)
 
@@ -263,15 +263,12 @@ def sequence_to_indices(sequence: Tuple[Tuple, Tuple], translation: Dict) -> Tup
 
         Returns
         -------
-        Tuple[List, List]
+        Tuple[Tuple[int,...],...]
     """
-
-    sequence_left = [translation[operator_left] for operator_left in sequence[0]]
-    sequence_right = [translation[operator_right] for operator_right in sequence[1]]
-    return sequence_left, sequence_right
+    return tuple(tuple(translation[e] for e in s) for s in sequence)
 
 
-def calc(sequence: Tuple[Tuple, Tuple], collection: FunctionCollection, translation: Dict,
+def calc(sequence: Tuple[Tuple[int,...],...], collection: FunctionCollection, translation: Dict,
          max_energy: int) -> QuasiPolynomial:
     """
     calc(sequence)
@@ -309,7 +306,7 @@ def calc(sequence: Tuple[Tuple, Tuple], collection: FunctionCollection, translat
         return result
 
 
-def trafo_calc(sequence: Tuple[Tuple, Tuple], trafo_collection: FunctionCollection, collection: FunctionCollection,
+def trafo_calc(sequence: Tuple[Tuple[int,...],...], trafo_collection: FunctionCollection, collection: FunctionCollection,
                translation: Dict, max_energy: int) -> QuasiPolynomial:
     """
     trafo_calc(sequence)
@@ -326,7 +323,7 @@ def trafo_calc(sequence: Tuple[Tuple, Tuple], trafo_collection: FunctionCollecti
         return trafo_collection[sequence].function
     else:
         m = sequence_to_indices(sequence, translation)
-        integrand = exponential(([], []), ([], []), m) * signum(([], []), m) * calc(sequence, collection, translation, max_energy)
+        integrand = exponential(((), ()), ((), ()), m) * signum(((), ()), m) * calc(sequence, collection, translation, max_energy)
         partition_list = partitions(sequence)
         for partition in partition_list:
             # Rename the operator sequences.
@@ -339,7 +336,7 @@ def trafo_calc(sequence: Tuple[Tuple, Tuple], trafo_collection: FunctionCollecti
             m1 = sequence_to_indices(s1, translation)
             m2 = sequence_to_indices(s2, translation)
             # Calculate the contributions to the integrand.
-            integrand = integrand + exponential(([], []), ([], []), m2) * signum(([], []), m2) * g1 * f2
+            integrand = integrand + exponential(((), ()), ((), ()), m2) * signum(((), ()), m2) * g1 * f2
         result = integrand.integrate()
         # Insert the result into the collection.
         trafo_collection[sequence] = result

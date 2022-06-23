@@ -14,19 +14,19 @@ def main():
                                                     'two particle types')
     my_parser.add_argument('-t', '--trafo', action='store_true', help='calculate the transformation directly')
     my_config = my_parser.add_mutually_exclusive_group()
-    my_config.add_argument('-f', '--file', action='store_true',
-                           help='pass configuration using the config file "config.yml"')
+    my_config.add_argument('-f', '--file', nargs='?', const='config.yml', default=None,
+                           help='pass configuration using the config file "config.yml" '
+                                'or a custom one given as an argument')
     my_config.add_argument('-i', '--interactive', action='store_true',
                            help='pass configuration step by step in the command line')
     args = my_parser.parse_args()
 
-    if args.file:
-        print('You have decided to use a config file, titled "config.yml".')
-        config_file = open("config.yml", "r")
+    if args.file != None:
+        print('You have decided to use a config file, titled "{}".'.format(args.file))
+        config_file = open(args.file, "r")
         config = yaml.load(config_file, Loader=SafeLoader)
         max_order = config['max_order']
-        operators_left = tuple(config['operators_left'])
-        operators_right = tuple(config['operators_right'])
+        operators = list(config['operators'])
         translation = config['indices']
         starting_conditions = config['starting_conditions']
         max_energy = config['max_energy']
@@ -39,6 +39,8 @@ def main():
             [int(sequence) for sequence in input("Operators to the left of the tensor product: ").split()])
         operators_right = tuple(
             [int(sequence) for sequence in input("Operators to the right of the tensor product: ").split()])
+        # TODO: This could be generalized to arbitrary many Hilbert spaces
+        operators = [operators_left, operators_right]
         print("# Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the "
               "operators. In Lea's case, enter the indices of the operators prior to transposition.")
         translation = dict()
@@ -62,13 +64,11 @@ def main():
     else:
         print("You have decided to use the default config values.")
         # Enter the total order.
-        max_order = 2
+        max_order = 4
         # Give a unique name (integer) to every operator, so that you can distinguish them. You can take the operator
-        # index as its name, provided that they are unique. The list 'operators_left' contains all operators on the left
-        # side of the tensor product and the list 'operators_right' all operators on the right side of the tensor
-        # product.
-        operators_left = (-1, -2, -3, -4, -5)
-        operators_right = (1, 2, 3, 4, 5)
+        # index as its name, provided that they are unique. The operators can separated in arbitrarily different lists 
+        # which marks them as groups whose operators commute pairwise with those of other groups.
+        operators = [[-1, -2, -3, -4, -5], [1, 2, 3, 4, 5]]
         # Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the operators.
         # In Lea's case, enter the indices of the operators prior to transposition.
         translation = {
@@ -102,22 +102,19 @@ def main():
     for sequence in starting_conditions:
         collection[eval(sequence)] = qp.new([[starting_conditions[sequence]]])
 
+    operators_all = [operator for operator_space in operators for operator in operator_space]
+
     if not args.trafo:
         for order in range(max_order + 1):
             print('Starting calculations for order ' + str(order) + '.')
-            for order_left in range(order + 1):
-                order_right = order - order_left
-                # Calculate all possible operator sequences with 'order_left' operators on the left of the tensor
-                # product.
-                sequences_left = set(product(operators_left, repeat=order_left))
-                sequences_right = set(product(operators_right, repeat=order_right))
-                for sequence_left in sequences_left:
-                    for sequence_right in sequences_right:
-                        sequence = (sequence_left, sequence_right)
-                        indices = coefficientFunction.sequence_to_indices(sequence, translation)
-                        # Make use of block diagonality.
-                        if energy(indices) == 0:
-                            coefficientFunction.calc(sequence, collection, translation, max_energy)
+            # TODO: This version is slower as needed as we do not use the arbitrary order of the commuting operators
+            sequences = set(product(operators_all, repeat=order))
+            for sequence in sequences:
+                sequence_sorted = tuple(tuple([s for s in sequence if s in o_s]) for o_s in operators)
+                indices = coefficientFunction.sequence_to_indices(sequence_sorted, translation)
+                # Make use of block diagonality.
+                if energy(indices) == 0:
+                    coefficientFunction.calc(sequence_sorted, collection, translation, max_energy)
         # print(collection.pretty_print())
         print('Starting writing process.')
         # Write the results in a file.
@@ -129,11 +126,9 @@ def main():
                     # Only return the non-vanishing operator sequences.
                     if resulting_constant != 0:
                         # Reverse the operator sequences, because the Solver thinks from left to right.
-                        inverted_sequence = [str(operator) for operator in sequence[0][::-1]] + [str(operator) for
-                                                                                                 operator
-                                                                                                 in sequence[1][::-1]]
+                        inverted_sequence = [str(operator) for s in sequence for operator in s[::-1]]
                         # Return 'order' 'sequence' 'numerator' 'denominator'.
-                        output = [str(len(sequence[0]) + len(sequence[1]))] + inverted_sequence + [
+                        output = [str(sum([len(seq) for seq in sequence]))] + inverted_sequence + [
                             str(resulting_constant.numerator), str(resulting_constant.denominator)]
                         print(' '.join(output), file=result)
             result.close()
@@ -141,21 +136,14 @@ def main():
     if args.trafo:
         # Prepare the trafo coefficient function storage.
         trafo_collection = coefficientFunction.FunctionCollection(translation)
-        trafo_collection[((), ())] = qp.new([['1']])
+        trafo_collection[tuple([()]*len(operators))] = qp.new([['1']])
 
         for order in range(max_order + 1):
             print('Starting calculations for order ' + str(order) + '.')
-            for order_left in range(order + 1):
-                order_right = order - order_left
-                # Calculate all possible operator sequences with 'order_left' operators on the left of the tensor
-                # product.
-                sequences_left = set(product(operators_left, repeat=order_left))
-                sequences_right = set(product(operators_right, repeat=order_right))
-                for sequence_left in sequences_left:
-                    for sequence_right in sequences_right:
-                        sequence = (sequence_left, sequence_right)
-                        coefficientFunction.trafo_calc(sequence, trafo_collection, collection, translation, max_energy)
-
+            sequences = set(product(operators_all, repeat=order))
+            for sequence in sequences:
+                sequence_sorted = tuple(tuple([s for s in sequence if s in o_s]) for o_s in operators)
+                coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation, max_energy)
         # print(collection.pretty_print())
         print('Starting writing process.')
         # Write the results in a file.
@@ -165,10 +153,9 @@ def main():
                 # Only return the non-vanishing operator sequences.
                 if resulting_constant != 0:
                     # Reverse the operator sequences, because the Solver thinks from left to right.
-                    inverted_sequence = [str(operator) for operator in sequence[0][::-1]] + [str(operator) for operator
-                                                                                             in sequence[1][::-1]]
+                    inverted_sequence = [str(operator) for s in sequence for operator in s[::-1]]
                     # Return 'order' 'sequence' 'numerator' 'denominator'.
-                    output = [str(len(sequence[0]) + len(sequence[1]))] + inverted_sequence + [
+                    output = [str(sum([len(seq) for seq in sequence]))] + inverted_sequence + [
                         str(resulting_constant.numerator), str(resulting_constant.denominator)]
                     print(' '.join(output), file=result)
             result.close()
@@ -184,12 +171,11 @@ def main():
     print('max_order: ' + str(max_order), file=config_file)
     print("# Give a unique name (integer) to every operator, so that you can distinguish them. You can take the "
           "operator index as\n"
-          "# its name, provided that they are unique. The list 'operators_left' contains all operators on the left "
-          "side of the\n"
-          "# tensor product and the list 'operators_right' all operators on the right side of the tensor product.",
+          "# its name, provided that they are unique. The operators can separated in arbitrarily different lists "
+          "which marks them\n" 
+          "# as groups whose operators commute pairwise with those of other groups. ",
           file=config_file)
-    print('operators_left: ' + str(list(operators_left)), file=config_file)
-    print('operators_right: ' + str(list(operators_right)), file=config_file)
+    print('operators: ' + str(list(operators)), file=config_file)
     print("# Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the "
           "operators. In Lea's\n"
           "# case, enter the indices of the operators prior to transposition.", file=config_file)
