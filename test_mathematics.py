@@ -59,13 +59,13 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(signum_complex(((1+1j,0),(-1,3)), ((+2j+2,0),(2,2))), 0)
         
     def test_exponential(self):
-        self.assertEqual(exponential(((2, -2), ()), ((2,), ()), ((-2,), ())), qp.new_integer([[], [], [], [], [1]]))
-        self.assertEqual(exponential(((1, -1),), ((1,),), ((-1,),)), qp.new_integer([[], [], [1]]))
-        self.assertEqual(exponential(((0, 0), ()), ((0,), ()), ((0,), ())), qp.new_integer([[1]]))
-        self.assertEqual(exponential(((0, 0), (),(1,-1)), ((0,), (),(1,)), ((0,), (),(-1,))), qp.new_integer([[], [], [1]]))
-        self.assertEqual(exponential(((2., -2.), ()), ((2.,), ()), ((-2.,), ())), qp.new_integer([[], [], [], [], [1]]))
-        self.assertEqual(exponential(((Fraction(1,2), -Fraction(1,2)), ()), ((Fraction(1,2),), ()), ((-Fraction(1,2),), ())), qp.new({1:[1]}))
-        self.assertEqual(exponential(((Fraction(1,4), -Fraction(1,4)), ()), ((Fraction(1,4),), ()), ((-Fraction(1,4),), ())), qp.new({Fraction(1,2):[1]}))
+        self.assertEqual(exponential(((2, -2), ()), ((2,), ()), ((-2,), ()), energy), qp.new_integer([[], [], [], [], [1]]))
+        self.assertEqual(exponential(((1, -1),), ((1,),), ((-1,),), energy), qp.new_integer([[], [], [1]]))
+        self.assertEqual(exponential(((0, 0), ()), ((0,), ()), ((0,), ()), energy), qp.new_integer([[1]]))
+        self.assertEqual(exponential(((0, 0), (),(1,-1)), ((0,), (),(1,)), ((0,), (),(-1,)), energy), qp.new_integer([[], [], [1]]))
+        self.assertEqual(exponential(((2., -2.), ()), ((2.,), ()), ((-2.,), ()), energy), qp.new_integer([[], [], [], [], [1]]))
+        self.assertEqual(exponential(((Fraction(1,2), -Fraction(1,2)), ()), ((Fraction(1,2),), ()), ((-Fraction(1,2),), ()), energy), qp.new({1:[1]}))
+        self.assertEqual(exponential(((Fraction(1,4), -Fraction(1,4)), ()), ((Fraction(1,4),), ()), ((-Fraction(1,4),), ()), energy), qp.new({Fraction(1,2):[1]}))
 
     def test_partitions(self):
         self.assertEqual(partitions(((2,), ())), [])

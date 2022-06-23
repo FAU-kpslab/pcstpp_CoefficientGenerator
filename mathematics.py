@@ -5,7 +5,7 @@ import operator
 
 from quasiPolynomial import QuasiPolynomial
 import numpy as np
-from typing import List, Tuple, Union
+from typing import Callable, List, Tuple, Union
 
 
 def energy(indices: Tuple[Tuple[Union[int,float,Fraction],...],...]) -> Union[int,float,Fraction]:
@@ -85,7 +85,8 @@ def signum_complex(indices1: Tuple[Tuple[complex,...],...], indices2: Tuple[Tupl
 
 def exponential(indices: Tuple[Tuple[Union[int,float,Fraction],...],...], 
                 indices1: Tuple[Tuple[Union[int,float,Fraction],...],...], 
-                indices2: Tuple[Tuple[Union[int,float,Fraction],...],...]) -> QuasiPolynomial:
+                indices2: Tuple[Tuple[Union[int,float,Fraction],...],...],
+                energy_func: Callable[[Tuple[Tuple[int,...],...]],int]) -> QuasiPolynomial:
     """
     exponential(indices, indices1, indices2)
 
@@ -96,7 +97,7 @@ def exponential(indices: Tuple[Tuple[Union[int,float,Fraction],...],...],
         QuasiPolynomial
     """
 
-    alpha = abs(energy(indices)) - abs(energy(indices1)) - abs(energy(indices2))
+    alpha = abs(energy_func(indices)) - abs(energy_func(indices1)) - abs(energy_func(indices2))
     return QuasiPolynomial.new({-alpha:[1]})
 
 

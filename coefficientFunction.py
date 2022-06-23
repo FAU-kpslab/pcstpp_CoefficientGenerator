@@ -299,7 +299,7 @@ def calc(sequence: Tuple[Tuple[int,...],...], collection: FunctionCollection, tr
             m2 = sequence_to_indices(s2, translation)
             # Only calculate non-vanishing contributions to the integrand.
             if (abs(energy(m1)) <= max_energy) & (abs(energy(m2)) <= max_energy):
-                integrand = integrand + exponential(m, m1, m2) * signum_func(m1, m2) * f1 * f2
+                integrand = integrand + exponential(m, m1, m2,energy) * signum_func(m1, m2) * f1 * f2
         result = integrand.integrate()
         # Insert the result into the collection.
         collection[sequence] = result
@@ -324,7 +324,7 @@ def trafo_calc(sequence: Tuple[Tuple[int,...],...], trafo_collection: FunctionCo
         return trafo_collection[sequence].function
     else:
         m = sequence_to_indices(sequence, translation)
-        integrand = exponential(((), ()), ((), ()), m) * signum_func(((), ()), m) * calc(sequence, collection, translation, max_energy, signum_func)
+        integrand = exponential(((), ()), ((), ()), m,energy) * signum_func(((), ()), m) * calc(sequence, collection, translation, max_energy, signum_func)
         partition_list = partitions(sequence)
         for partition in partition_list:
             # Rename the operator sequences.
@@ -337,7 +337,7 @@ def trafo_calc(sequence: Tuple[Tuple[int,...],...], trafo_collection: FunctionCo
             m1 = sequence_to_indices(s1, translation)
             m2 = sequence_to_indices(s2, translation)
             # Calculate the contributions to the integrand.
-            integrand = integrand + exponential(((), ()), ((), ()), m2) * signum_func(((), ()), m2) * g1 * f2
+            integrand = integrand + exponential(((), ()), ((), ()), m2,energy) * signum_func(((), ()), m2) * g1 * f2
         result = integrand.integrate()
         # Insert the result into the collection.
         trafo_collection[sequence] = result
