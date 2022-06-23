@@ -60,11 +60,8 @@ def signum_broad(indices1: Tuple[Tuple[int,...],...], indices2: Tuple[Tuple[int,
         -------
         int
     """
-    # np.int64(.) as np.heaviside outputs floating value
-    return (np.sign(energy(indices1))*np.int64(np.heaviside(np.abs(energy(indices1))-delta,0)) 
-            - np.sign(energy(indices2))*np.int64(np.heaviside(np.abs(energy(indices2))-delta,0)))
-
-
+    return np.sign(energy_broad(indices1,delta)) - np.sign(energy_broad(indices2,delta))
+   
 def signum_complex(indices1: Tuple[Tuple[complex,...],...], indices2: Tuple[Tuple[complex,...],...]) -> complex:
     """
     signum_complex(indices1, indices2)
