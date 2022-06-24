@@ -74,54 +74,35 @@ def main():
         for sequence in starting_conditions:
             collection[eval(sequence)] = qp.new([[starting_conditions[sequence]]])
 
-        operators_all = [operator for operator_space in operators for operator in operator_space]
+        # Prepare the trafo coefficient function storage.
+        if args.trafo:
+            trafo_collection = coefficientFunction.FunctionCollection(translation)
+            trafo_collection[tuple([()]*len(operators))] = qp.new([['1']])
 
-        if not args.trafo:
-            for order in range(max_order + 1):
-                print('Starting calculations for order ' + str(order) + '.')
-                # TODO: This version is slower as needed as we do not use the arbitrary order of the commuting operators
-                sequences = set(product(operators_all, repeat=order))
-                for sequence in sequences:
-                    sequence_sorted = tuple(tuple([s for s in sequence if s in o_s]) for o_s in operators)
+        operators_all = [operator for operator_space in operators for operator in operator_space]
+    
+        for order in range(max_order + 1):
+            print('Starting calculations for order ' + str(order) + '.')
+            # TODO: This version is slower as needed as we do not use the arbitrary order of the commuting operators
+            sequences = set(product(operators_all, repeat=order))
+            for sequence in sequences:
+                sequence_sorted = tuple(tuple([s for s in sequence if s in o_s]) for o_s in operators)
+                if not args.trafo:
                     indices = coefficientFunction.sequence_to_indices(sequence_sorted, translation)
                     # Make use of block diagonality.
                     if energy(indices) == 0:
                         coefficientFunction.calc(sequence_sorted, collection, translation, max_energy)
-            # print(collection.pretty_print())
-            print('Starting writing process.')
-            # Write the results in a file.
-            with open("result.txt", "w") as result:
-                for sequence in collection.keys():
-                    # Only return the block-diagonal operator sequences.
-                    if energy(coefficientFunction.sequence_to_indices(sequence, translation)) == 0:
-                        resulting_constant = collection[sequence].function.get_constant()
-                        # Only return the non-vanishing operator sequences.
-                        if resulting_constant != 0:
-                            # Reverse the operator sequences, because the Solver thinks from left to right.
-                            inverted_sequence = [str(operator) for s in sequence for operator in s[::-1]]
-                            # Return 'order' 'sequence' 'numerator' 'denominator'.
-                            output = [str(sum([len(seq) for seq in sequence]))] + inverted_sequence + [
-                                str(resulting_constant.numerator), str(resulting_constant.denominator)]
-                            print(' '.join(output), file=result)
-                result.close()
-
-        if args.trafo:
-            # Prepare the trafo coefficient function storage.
-            trafo_collection = coefficientFunction.FunctionCollection(translation)
-            trafo_collection[tuple([()]*len(operators))] = qp.new([['1']])
-
-            for order in range(max_order + 1):
-                print('Starting calculations for order ' + str(order) + '.')
-                sequences = set(product(operators_all, repeat=order))
-                for sequence in sequences:
-                    sequence_sorted = tuple(tuple([s for s in sequence if s in o_s]) for o_s in operators)
+                else:
                     coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation, max_energy)
-            # print(collection.pretty_print())
-            print('Starting writing process.')
-            # Write the results in a file.
-            with open("result.txt", "w") as result:
-                for sequence in trafo_collection.keys():
-                    resulting_constant = trafo_collection[sequence].function.get_constant()
+        # print(collection.pretty_print())
+        print('Starting writing process.')
+        # Write the results in a file.
+        with open("result.txt", "w") as result:
+            act_collection = trafo_collection if args.trafo else collection
+            for sequence in act_collection.keys():
+                # Only return the block-diagonal operator sequences.
+                if args.trafo or energy(coefficientFunction.sequence_to_indices(sequence, translation)) == 0:
+                    resulting_constant = act_collection[sequence].function.get_constant()
                     # Only return the non-vanishing operator sequences.
                     if resulting_constant != 0:
                         # Reverse the operator sequences, because the Solver thinks from left to right.
@@ -130,7 +111,7 @@ def main():
                         output = [str(sum([len(seq) for seq in sequence]))] + inverted_sequence + [
                             str(resulting_constant.numerator), str(resulting_constant.denominator)]
                         print(' '.join(output), file=result)
-                result.close()
+            result.close()
 
     # Generate the config file.
     config_file = open("config.yml", "w")
