@@ -5,6 +5,43 @@ from math import isclose
 import numpy as np
 
 
+def is_zero(scalar: Union[int, Fraction, np.float64]):
+    """
+    is_zero(scalar)
+
+    Checks for exact numbers whether they are equal to zero and for floats whether they are close to zero.
+
+        Returns
+        -------
+        bool
+    """
+
+    if isinstance(scalar, (Fraction, int)):
+        return scalar == 0
+    elif isinstance(scalar, np.float64):
+        return isclose(scalar, 0, abs_tol=1e-09)
+
+
+def are_close(scalar1: Union[int, Fraction, float, np.float64], scalar2: Union[int, Fraction, float, np.float64]):
+    """
+    are_close(scalar1, scalar2)
+
+    Checks for non-zero exact numbers whether they are equal and for non-zero floats whether they are close
+
+        Returns
+        -------
+        bool
+    """
+
+    if isinstance(scalar1, (Fraction, int)) and isinstance(scalar2, (Fraction, int)):
+        return scalar1 == scalar2
+    elif isinstance(scalar1, (float, np.float64)) or isinstance(scalar2, (float, np.float64)):
+        if is_zero(scalar1) or is_zero(scalar2):
+            return isclose(scalar1, scalar2, abs_tol=1e-09)
+        else:
+            return isclose(scalar1, scalar2, rel_tol=1e-09)
+
+
 class Polynomial:
     """
     Polynomial(coefficient_dict)
@@ -70,7 +107,7 @@ class Polynomial:
                 The coefficient of x^n is coefficient_dict[n].
         """
 
-        if coefficient_list == []:
+        if len(coefficient_list) == 0:
             self.__private_coefficients = np.asarray([]).astype(Fraction)
         else:
             self.__private_coefficients = np.asarray(coefficient_list)
@@ -129,7 +166,7 @@ class Polynomial:
         # Check whether the polynomial is empty.
         if self.__private_coefficients.size != 0:
             # Check whether the last coefficient is zero to remove it.
-            while isclose(self.__private_coefficients[-1], 0, abs_tol=1e-09):
+            while is_zero(self.__private_coefficients[-1]):
                 self.__private_coefficients = self.__private_coefficients[:-1].copy()
                 # Check whether the polynomial is empty.
                 if self.__private_coefficients.size == 0:
@@ -195,14 +232,8 @@ class Polynomial:
             for coeff in range(len(self.__private_coefficients)):
                 coeff1 = self.__private_coefficients[coeff]
                 coeff2 = other.__private_coefficients[coeff]
-                # Use absolute tolerance when comparing to 0.
-                if isclose(coeff1, 0, abs_tol=1e-09) or isclose(coeff2, 0, abs_tol=1e-09):
-                    if not isclose(coeff1, coeff2, abs_tol=1e-09):
-                        return False
-                # Use relative tolerance when comparing non-zero numbers.
-                else:
-                    if not isclose(coeff1, coeff2, rel_tol=1e-09):
-                        return False
+                if not are_close(coeff1, coeff2):
+                    return False
         return True
 
     def pretty_print(self) -> str:
@@ -225,23 +256,23 @@ class Polynomial:
         else:
             output = []
             # Check whether the constant term is zero to leave that away.
-            if not isclose(self.__private_coefficients[0], 0, abs_tol=1e-09):
+            if not is_zero(self.__private_coefficients[0]):
                 output.append(str(self.__private_coefficients[0]))
-            if not isclose(self.__private_coefficients[1], 0, abs_tol=1e-09):
+            if not is_zero(self.__private_coefficients[1]):
                 # Check whether the coefficient is 1 or -1 to leave that away.
-                if isclose(self.__private_coefficients[1], 1, rel_tol=1e-09):
+                if are_close(self.__private_coefficients[1], 1):
                     output.append('x')
-                elif isclose(self.__private_coefficients[1], -1, rel_tol=1e-09):
+                elif are_close(self.__private_coefficients[1], -1):
                     output.append('-x')
                 else:
                     output.append(str(self.__private_coefficients[1]) + 'x')
             for exponent, coefficient in list(enumerate(self.__private_coefficients))[2:]:
                 # Check for the remaining coefficients whether they are zero to leave those away.
-                if not isclose(coefficient, 0, abs_tol=1e-09):
+                if not is_zero(coefficient):
                     # Check for the remaining coefficients whether they are 1 or -1 to leave that away.
-                    if isclose(coefficient, 1, rel_tol=1e-09):
+                    if are_close(coefficient, 1):
                         output.append('x^' + str(exponent))
-                    elif isclose(coefficient, -1, rel_tol=1e-09):
+                    elif are_close(coefficient, -1):
                         output.append('-x^' + str(exponent))
                     else:
                         output.append(str(coefficient) + 'x^' + str(exponent))

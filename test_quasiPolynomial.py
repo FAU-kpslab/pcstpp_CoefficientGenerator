@@ -1,6 +1,7 @@
 import unittest
 
 from fractions import Fraction
+import numpy as np
 from quasiPolynomial import Polynomial as P
 from quasiPolynomial import QuasiPolynomial as QP
 
@@ -63,7 +64,7 @@ class TestPolynomial(unittest.TestCase):
         self.assertEqual(P.zero(), P.new([1, 2, 4]).scalar_multiplication(0))
         self.assertEqual(P.new([1, 3/2, 2]), P.new([2, 3, 4]).scalar_multiplication(Fraction(1, 2)))
         self.assertEqual(P.new([1, 3/2, 2]), P.new([2, 3, 4]).scalar_multiplication(1/2))
-        self.assertEqual(P.new([1, 3/2, 2]), P.new([2, 3, 4]).scalar_multiplication(0.5))
+        self.assertEqual(P.new([1, 3/2, 2]), P.new([2, 3, 4]).scalar_multiplication(np.float64(0.5)))
 
     def test_negation(self):
         self.assertEqual(-P.new([2, 4, 8]), P.new([-2, -4, -8]))
