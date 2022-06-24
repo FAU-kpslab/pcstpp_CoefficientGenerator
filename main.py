@@ -1,3 +1,5 @@
+from fractions import Fraction
+
 import yaml
 from yaml.loader import SafeLoader
 
@@ -37,8 +39,8 @@ def main():
         # Enter the total order.
         max_order = 4
         # Give a unique name (integer) to every operator, so that you can distinguish them. You can take the operator
-        # index as its name, provided that they are unique. The operators can separated in arbitrarily different lists 
-        # which marks them as groups whose operators commute pairwise with those of other groups.
+        # index as its name, provided that they are unique. The operators can be separated in arbitrarily different
+        # lists which marks them as groups whose operators commute pairwise with those of other groups.
         operators = [[-1, -2, -3, -4, -5], [1, 2, 3, 4, 5]]
         # Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the operators.
         # In Lea's case, enter the indices of the operators prior to transposition.
@@ -108,8 +110,12 @@ def main():
                         # Reverse the operator sequences, because the Solver thinks from left to right.
                         inverted_sequence = [str(operator) for s in sequence for operator in s[::-1]]
                         # Return 'order' 'sequence' 'numerator' 'denominator'.
-                        output = [str(sum([len(seq) for seq in sequence]))] + inverted_sequence + [
-                            str(resulting_constant.numerator), str(resulting_constant.denominator)]
+                        if isinstance(resulting_constant, Fraction):
+                            output = [str(sum([len(seq) for seq in sequence]))] + inverted_sequence + [
+                                str(resulting_constant.numerator), str(resulting_constant.denominator)]
+                        else:
+                            output = [str(sum([len(seq) for seq in sequence]))] + inverted_sequence + [
+                                str(resulting_constant)]
                         print(' '.join(output), file=result)
             result.close()
 
