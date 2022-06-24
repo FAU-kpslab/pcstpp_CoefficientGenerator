@@ -29,9 +29,9 @@ class Test_A_FunctionCollection(unittest.TestCase):
 
     def test_print(self):
         self.assertEqual(str(collection),
-                         str(["(('-2.id',), ()): [['1']]", "(('0.id',), ()): [['1']]",
-                              "(('2.id',), ()): [['1']]", "((), ('id.-2',)): [['-1']]",
-                              "((), ('id.0',)): [['-1']]", "((), ('id.2',)): [['-1']]"]))
+                         str(["(('-2.id',), ()): [(0, ['1'])]", "(('0.id',), ()): [(0, ['1'])]",
+                              "(('2.id',), ()): [(0, ['1'])]", "((), ('id.-2',)): [(0, ['-1'])]",
+                              "((), ('id.0',)): [(0, ['-1'])]", "((), ('id.2',)): [(0, ['-1'])]"]))
 
 
 class Test_B_DifferentialEquation(unittest.TestCase):
@@ -49,7 +49,6 @@ class Test_B_DifferentialEquation(unittest.TestCase):
     def test_calc(self):
         self.assertEqual(calc((('0.id','0.id'),tuple()),collection,translation,2),QuasiPolynomial.zero())
         self.assertEqual(calc((('-2.id','2.id'),tuple()),collection,translation,2),
-                QuasiPolynomial([Polynomial([Fraction("-1/2")]),Polynomial([]),Polynomial([]),
-                                Polynomial([]),Polynomial([Fraction("1/2")])]))
+                QuasiPolynomial({0: Polynomial([Fraction("-1/2")]), 4: Polynomial([Fraction("1/2")])}))
 if __name__ == '__main__':
     unittest.main()
