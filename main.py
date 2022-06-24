@@ -135,7 +135,7 @@ def main():
                 if not args.trafo:
                     indices = coefficientFunction.sequence_to_indices(sequence_sorted, translation)
                     # Make use of block diagonality.
-                    if energy(indices) == 0:
+                    if energy_func(indices) == 0:
                         # As the band diagonality is only fulfilled up to a multiple of delta add + delta * max_order
                         # TODO: Check if this is sufficient
                         # TODO: According to Andis calculations, max_energy should depend on the
@@ -154,7 +154,7 @@ def main():
             act_collection = trafo_collection if args.trafo else collection
             for sequence in act_collection.keys():
                 # Only return the block-diagonal operator sequences.
-                if args.trafo or energy(coefficientFunction.sequence_to_indices(sequence, translation)) == 0:
+                if args.trafo or energy_func(coefficientFunction.sequence_to_indices(sequence, translation)) == 0:
                     resulting_constant = act_collection[sequence].function.get_constant()
                     # Only return the non-vanishing operator sequences.
                     if resulting_constant != 0:
