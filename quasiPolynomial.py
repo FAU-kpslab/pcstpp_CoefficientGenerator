@@ -61,7 +61,7 @@ class Polynomial:
             Returns the constant coefficient.
     """
 
-    def __init__(self, coefficient_list: List[int or Fraction or np.float64]) -> None:
+    def __init__(self, coefficient_list: List[Union[int, Fraction, np.float64]]) -> None:
         """
             Parameters
             ----------
@@ -134,7 +134,7 @@ class Polynomial:
         return self
 
     @staticmethod
-    def new(coefficient_list: List[int or Fraction or np.float64 or str]) -> 'Polynomial':
+    def new(coefficient_list: List[Union[int, Fraction, np.float64, str]]) -> 'Polynomial':
         """
         new(List[scalar])
 
@@ -242,7 +242,7 @@ class Polynomial:
                         output.append(str(coefficient) + 'x^' + str(exponent))
             return '+'.join(output).replace('+-', '-')
 
-    def scalar_multiplication(self, scalar: Fraction or int or np.float64) -> 'Polynomial':
+    def scalar_multiplication(self, scalar: Union[Fraction, int, np.float64]) -> 'Polynomial':
         """
         p.scalar_multiplication(int)
 
@@ -307,7 +307,7 @@ class Polynomial:
 
         return self + (-other)
 
-    def __mul__(self, other: 'Polynomial' or Fraction or int or np.float64) -> 'Polynomial':
+    def __mul__(self, other: Union['Polynomial', Fraction, int, np.float64]) -> 'Polynomial':
         """
         p1 * p2 | p * scalar
 
@@ -335,7 +335,7 @@ class Polynomial:
         else:
             return NotImplemented
 
-    def __rmul__(self, other: Fraction or int or np.float64) -> 'Polynomial':
+    def __rmul__(self, other: Union[Fraction, int, np.float64]) -> 'Polynomial':
         """
         scalar * p
 
@@ -403,16 +403,16 @@ class QuasiPolynomial:
 
         Parameters
         ----------
-        polynomial_dict : Dict[int or Fraction, Polynomial]
+        polynomial_dict : Dict[Union[int, Fraction], Polynomial]
             The dictionary containing all polynomials.
             The coefficient polynomial of exp(- alpha x) is polynomial_dict[alpha].
 
         Attributes
         ----------
-        polynomial_dict : Dict[int or Fraction, Polynomial]
+        polynomial_dict : Dict[Union[int, Fraction], Polynomial]
             The dictionary containing all polynomials.
             The coefficient polynomial of exp(- alpha x) is polynomial[alpha].
-        polynomials : List[Tuple[int or Fraction, Polynomial]]
+        polynomials : List[Tuple[Union[int, Fraction], Polynomial]]
             The list containing tuples of all exponents and their polynomials.
 
         Methods
@@ -453,11 +453,11 @@ class QuasiPolynomial:
             Returns the constant coefficient of the constant polynomial (alpha = 0).
     """
 
-    def __init__(self, polynomial_dict: Dict[int or Fraction, Polynomial]) -> None:
+    def __init__(self, polynomial_dict: Dict[Union[int, Fraction], Polynomial]) -> None:
         """
             Parameters
             ----------
-            polynomial_dict : Dict[int or Fraction, Polynomial]
+            polynomial_dict : Dict[Union[int, Fraction], Polynomial]
                 The dictionary containing all polynomials.
                 The coefficient polynomial of exp(- alpha x) is polynomial_dict[alpha].
         """
@@ -520,7 +520,7 @@ class QuasiPolynomial:
         return QuasiPolynomial({e: p.simplify() for e, p in self.polynomials if p != Polynomial.zero()})
 
     @staticmethod
-    def new_integer(coefficient_list: List[List[Fraction or int or float or str]]) -> 'QuasiPolynomial':
+    def new_integer(coefficient_list: List[List[Union[Fraction, int, float, str]]]) -> 'QuasiPolynomial':
         """
         new_integer(List[List[scalar]])
 
@@ -539,7 +539,7 @@ class QuasiPolynomial:
         return QuasiPolynomial(polynomial_list).simplify()
 
     @staticmethod
-    def new(coefficient_dict: Dict[int or Fraction, List[Fraction or int or float or str]]) -> 'QuasiPolynomial':
+    def new(coefficient_dict: Dict[int or Fraction, List[Union[Fraction, int, float, str]]]) -> 'QuasiPolynomial':
         """
         new(Dict[scalar, List[scalar]])
 
