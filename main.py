@@ -146,7 +146,10 @@ def main():
           file=config_file)
     print('starting_conditions:', file=config_file)
     for sequence in starting_conditions:
-        print('  ' + sequence + ": '" + str(starting_conditions[sequence] + "'"), file=config_file)
+        if isinstance(starting_conditions[sequence],str):
+            print('  ' + sequence + ": '" + str(starting_conditions[sequence] + "'"), file=config_file)
+        else:
+            print('  ' + sequence + ": " + str(starting_conditions[sequence]), file=config_file)
     print("# Introduce band-diagonality, i.e., write down the largest sum of indices occurring in the starting "
           "conditions.", file=config_file)
     print('max_energy: ' + str(max_energy), file=config_file)
