@@ -1,11 +1,11 @@
 from fractions import Fraction
 from typing import List, Union, Tuple, Dict
-from math import isclose
+from cmath import isclose
 
 import numpy as np
 
-
-def is_zero(scalar: Union[int, Fraction, float]):
+# TODO: Add exceptions when using not supported type
+def is_zero(scalar: Union[int, Fraction, float, complex]):
     """
     is_zero(scalar)
 
@@ -18,11 +18,10 @@ def is_zero(scalar: Union[int, Fraction, float]):
 
     if isinstance(scalar, (Fraction, int)):
         return scalar == 0
-    elif isinstance(scalar, float):
+    elif isinstance(scalar, (float, complex)):
         return isclose(scalar, 0, abs_tol=1e-09)
 
-
-def are_close(scalar1: Union[int, Fraction, float], scalar2: Union[int, Fraction, float]):
+def are_close(scalar1: Union[int, Fraction, float, complex], scalar2: Union[int, Fraction, float, complex]):
     """
     are_close(scalar1, scalar2)
 
@@ -35,14 +34,14 @@ def are_close(scalar1: Union[int, Fraction, float], scalar2: Union[int, Fraction
 
     if isinstance(scalar1, (Fraction, int)) and isinstance(scalar2, (Fraction, int)):
         return scalar1 == scalar2
-    elif isinstance(scalar1, float) or isinstance(scalar2, float):
+    elif isinstance(scalar1, (float, complex)) or isinstance(scalar2, (float, complex)):
         if is_zero(scalar1) or is_zero(scalar2):
             return isclose(scalar1, scalar2, abs_tol=1e-09)
         else:
             return isclose(scalar1, scalar2, rel_tol=1e-09)
 
 
-def inverse(scalar: Union[int, Fraction, float]):
+def inverse(scalar: Union[int, Fraction, float, complex]):
     """
     inverse(scalar)
 
@@ -55,7 +54,7 @@ def inverse(scalar: Union[int, Fraction, float]):
 
     if isinstance(scalar, (int, Fraction)):
         return Fraction(1, scalar)
-    elif isinstance(scalar, float):
+    elif isinstance(scalar, (float, complex)):
         return 1/scalar
 
 
@@ -67,13 +66,13 @@ class Polynomial:
 
         Parameters
         ----------
-        coefficient_list : List[Union[int, Fraction, float]]
+        coefficient_list : List[Union[int, Fraction, float, complex]]
             The list of coefficients.
             The coefficient of x^n is coefficient_array[n].
 
         Attributes
         ----------
-        __private_coefficients : np.ndarray[Union[int, Fraction, float]]
+        __private_coefficients : np.ndarray[Union[int, Fraction, float, complex]]
             The numpy array of coefficients.
             The coefficient of x^n is __private_coefficients[n].
 
@@ -81,7 +80,7 @@ class Polynomial:
         -------
         __str__ : str
             Prints the coefficient array.
-        coefficients : np.ndarray[Union[int, Fraction, float]]
+        coefficients : np.ndarray[Union[int, Fraction, float, complex]]
             Gets the coefficient array.
         zero : Polynomial
             Creates an empty polynomial.
@@ -115,7 +114,7 @@ class Polynomial:
             Returns the constant coefficient.
     """
 
-    def __init__(self, coefficient_list: List[Union[Fraction, float]]) -> None:
+    def __init__(self, coefficient_list: List[Union[Fraction, float, complex]]) -> None:
         """
             Parameters
             ----------
@@ -191,7 +190,7 @@ class Polynomial:
         return self
 
     @staticmethod
-    def new(coefficient_list: List[Union[int, Fraction, float, str]]) -> 'Polynomial':
+    def new(coefficient_list: List[Union[int, Fraction, float, str, complex]]) -> 'Polynomial':
         """
         new(List[scalar])
 
@@ -210,9 +209,7 @@ class Polynomial:
         for coeff in coefficient_list:
             if isinstance(coeff, (int, str)):
                 coefficients.append(Fraction(coeff))
-            elif isinstance(coeff, Fraction):
-                coefficients.append(coeff)
-            elif isinstance(coeff, float):
+            elif isinstance(coeff, (Fraction, float, complex)):
                 coefficients.append(coeff)
             else:
                 raise TypeError("Type {} is not supported for coefficients in `Polynomial`".format(type(coeff)))
@@ -294,7 +291,7 @@ class Polynomial:
                         output.append(str(coefficient) + 'x^' + str(exponent))
             return '+'.join(output).replace('+-', '-')
 
-    def scalar_multiplication(self, scalar: Union[Fraction, int, float]) -> 'Polynomial':
+    def scalar_multiplication(self, scalar: Union[Fraction, int, float, complex]) -> 'Polynomial':
         """
         p.scalar_multiplication(int)
 
@@ -359,7 +356,7 @@ class Polynomial:
 
         return self + (-other)
 
-    def __mul__(self, other: Union['Polynomial', Fraction, int, float]) -> 'Polynomial':
+    def __mul__(self, other: Union['Polynomial', Fraction, int, float, complex]) -> 'Polynomial':
         """
         p1 * p2 | p * scalar
 
@@ -380,14 +377,14 @@ class Polynomial:
                       np.arange(- self.__private_coefficients.size + 1, other.__private_coefficients.size)]
             return Polynomial(output).simplify()
         # Check whether the second object is a scalar and call scalar_multiplication.
-        elif isinstance(other, (Fraction, int, float)):
+        elif isinstance(other, (Fraction, int, float, complex)):
             return self.scalar_multiplication(other)
         # If the second polynomial is not a polynomial (but e.g. a quasi-polynomial) return NotImplemented to trigger
         # the function __rmul__ of the other class.
         else:
             return NotImplemented
 
-    def __rmul__(self, other: Union[Fraction, int, float]) -> 'Polynomial':
+    def __rmul__(self, other: Union[Fraction, int, float, complex]) -> 'Polynomial':
         """
         scalar * p
 
@@ -588,7 +585,7 @@ class QuasiPolynomial:
         return QuasiPolynomial({e: p.simplify() for e, p in output.items() if p != Polynomial.zero()})
 
     @staticmethod
-    def new_integer(coefficient_list: List[List[Union[Fraction, int, float, str]]]) -> 'QuasiPolynomial':
+    def new_integer(coefficient_list: List[List[Union[Fraction, int, float, str, complex]]]) -> 'QuasiPolynomial':
         """
         new_integer(List[List[scalar]])
 
@@ -607,7 +604,7 @@ class QuasiPolynomial:
         return QuasiPolynomial(polynomial_list).simplify()
 
     @staticmethod
-    def new(coefficient_dict: Dict[Union[int, Fraction, float], List[Union[Fraction, int, float, str]]]) -> 'QuasiPolynomial':
+    def new(coefficient_dict: Dict[Union[int, Fraction, float], List[Union[Fraction, int, float, str, complex]]]) -> 'QuasiPolynomial':
         """
         new(Dict[scalar, List[scalar]])
 
@@ -699,7 +696,7 @@ class QuasiPolynomial:
                 output.append(polynomial + exponent)
             return '+'.join(output).replace('+-', '-')
 
-    def scalar_multiplication(self, scalar: Union[Fraction, int, float]) -> 'QuasiPolynomial':
+    def scalar_multiplication(self, scalar: Union[Fraction, int, float, complex]) -> 'QuasiPolynomial':
         """
         qp.scalar_multiplication(int)
 
@@ -760,7 +757,7 @@ class QuasiPolynomial:
         return self + (-other)
 
     def __mul__(self,
-                other: Union['QuasiPolynomial', Polynomial, Fraction, int, float]) -> 'QuasiPolynomial':
+                other: Union['QuasiPolynomial', Polynomial, Fraction, int, float, complex]) -> 'QuasiPolynomial':
         """
         qp1 * qp2 | qp * p | qp * scalar
 
@@ -782,12 +779,12 @@ class QuasiPolynomial:
         elif isinstance(other, Polynomial):
             return self * QuasiPolynomial({0: other})
         # Check whether the second object is a scalar and call scalar_multiplication.
-        if isinstance(other, (Fraction, int, float)):
+        if isinstance(other, (Fraction, int, float, complex)):
             return self.scalar_multiplication(other)
         else:
             return NotImplemented
 
-    def __rmul__(self, other: Union[Polynomial, Fraction, int, float]) -> 'QuasiPolynomial':
+    def __rmul__(self, other: Union[Polynomial, Fraction, int, float, complex]) -> 'QuasiPolynomial':
         """
         p * qp | scalar * qp
 

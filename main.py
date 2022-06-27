@@ -34,6 +34,10 @@ def main():
         starting_conditions = config['starting_conditions']
         max_energy = config['max_energy']
         config_file.close()
+        # postprocessing of complex values in starting_conditions 
+        for (k,v) in starting_conditions.items():
+            if isinstance(v,str) and "j" in v:
+                starting_conditions[k] = complex(v)
     else:
         print("You have decided to use the default config values.")
         # Enter the total order.
@@ -72,10 +76,12 @@ def main():
     
     if not args.config:
         # If needed, convert all starting_conditions to the same type
-        if len([v for v in starting_conditions.values() if isinstance(v,float)])>0:
+        if len([v for v in starting_conditions.values() if isinstance(v, (complex, float))])>0:
+            type_to_use = complex if len([v for v in starting_conditions.values() if isinstance(v, (complex))])>0 else float
+            print("Forcing all coefficients to type {}".format(type_to_use))
             for k,v in starting_conditions.items():
                 try:
-                    starting_conditions[k] = float(v)
+                    starting_conditions[k] = type_to_use(v)
                 except ValueError:
                     raise ValueError("Incompatible type in starting conditions at {}. "
                                      "Only use one datatype.".format(k))
