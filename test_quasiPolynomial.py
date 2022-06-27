@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 
 from fractions import Fraction
 from quasiPolynomial import Polynomial as P
@@ -23,6 +24,10 @@ class TestPolynomial(unittest.TestCase):
 
     def test_new(self):
         self.assertEqual(str(P.new(['3/15', Fraction(1, 2), 2, 3.5, 1.])), "['1/5', '1/2', '2', '3.5', '1.0']")
+        with self.assertRaises(TypeError):
+            P.new([0,2,[1]])
+        with self.assertRaises(TypeError):
+            P.new([np.float32(2.1),1])
 
     def test_copy(self):
         temp = P.new([2, 4, 8])

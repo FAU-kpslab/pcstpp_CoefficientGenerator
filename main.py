@@ -71,6 +71,15 @@ def main():
         max_energy = 2
     
     if not args.config:
+        # If needed, convert all starting_conditions to the same type
+        if len([v for v in starting_conditions.values() if isinstance(v,float)])>0:
+            for k,v in starting_conditions.items():
+                try:
+                    starting_conditions[k] = float(v)
+                except ValueError:
+                    raise ValueError("Incompatible type in starting conditions at {}. "
+                                     "Only use one datatype.".format(k))
+
         # Prepare the coefficient function storage.
         collection = coefficientFunction.FunctionCollection(translation)
         for sequence in starting_conditions:

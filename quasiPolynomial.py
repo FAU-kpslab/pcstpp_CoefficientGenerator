@@ -214,7 +214,8 @@ class Polynomial:
                 coefficients.append(coeff)
             elif isinstance(coeff, float):
                 coefficients.append(coeff)
-        # TODO: Include another case with an error message.
+            else:
+                raise TypeError("Type {} is not supported for coefficients in `Polynomial`".format(type(coeff)))
         return Polynomial(coefficients).simplify()
 
     def copy(self) -> 'Polynomial':
