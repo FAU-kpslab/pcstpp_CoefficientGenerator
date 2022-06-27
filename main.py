@@ -137,12 +137,11 @@ def main():
                     # Make use of block diagonality.
                     if energy_func(indices) == 0:
                         # As the band diagonality is only fulfilled up to a multiple of delta add + delta * max_order
-                        # TODO: Check if this is sufficient
                         # TODO: According to Andis calculations, max_energy should depend on the
                         # specific order used in one calculation -> implement order-dependent max_energy
                         # in `calc` in `coefficientFunction.py`
                         # TODO: Maybe even make max_energy completely automatic?
-                        coefficientFunction.calc(sequence_sorted, collection, translation, max_energy + delta * max_order,
+                        coefficientFunction.calc(sequence_sorted, collection, translation, max_energy + delta * max_order + 1000,
                                                  signum_func, energy_func)
                 else:
                     coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation,
