@@ -89,6 +89,11 @@ def main():
                     raise ValueError("Incompatible type in starting conditions at {}. "
                                      "Only use one datatype.".format(k))
 
+        for k,v in translation.items():
+            # If string, the value has to be converted to Fraction
+            if isinstance(v, str):
+                translation[k] = Fraction(v)
+
         # Prepare the coefficient function storage.
         collection = coefficientFunction.FunctionCollection(translation)
         for sequence in starting_conditions:
