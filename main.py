@@ -8,7 +8,7 @@ import argparse
 import coefficientFunction
 from quasiPolynomial import QuasiPolynomial as qp
 from mathematics import energy
-from itertools import product
+from itertools import product, chain
 
 
 def main():
@@ -75,12 +75,13 @@ def main():
         max_energy = 2
     
     if not args.config:
-        # TODO: Also check for floats in translation, as this results in
-        # floating coefficients, too.
         # If needed, convert all starting_conditions to the same type
-        if len([v for v in starting_conditions.values() if isinstance(v, (complex, float))])>0:
-            type_to_use = complex if len([v for v in starting_conditions.values() if isinstance(v, (complex))])>0 else float
+        if len([v for v in chain(starting_conditions.values(), translation.values()) if isinstance(v, (complex, float))])>0:
+            type_to_use = (complex if len([v for v in chain(starting_conditions.values(), translation.values()) 
+                           if isinstance(v, (complex))])>0 else float)
             print("Forcing all coefficients to type {}".format(type_to_use))
+            # Only changing starting_conditions as it is sufficient to get
+            # a consistent coefficient file.
             for k,v in starting_conditions.items():
                 try:
                     starting_conditions[k] = type_to_use(v)
