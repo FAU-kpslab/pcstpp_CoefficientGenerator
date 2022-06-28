@@ -1,13 +1,14 @@
+from fractions import Fraction
 from functools import reduce
 from itertools import product, combinations
 import operator
 
 from quasiPolynomial import QuasiPolynomial
 import numpy as np
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 
-def energy(indices: Tuple[Tuple[int,...],...]) -> int:
+def energy(indices: Tuple[Tuple[Union[int,float,Fraction],...],...]) -> Union[int,float,Fraction]:
     """
     energy(indices)
 
@@ -15,12 +16,13 @@ def energy(indices: Tuple[Tuple[int,...],...]) -> int:
 
         Returns
         -------
-        int
+        Union[int, float, Fraction]
     """
     return sum(reduce(operator.add, indices))
 
 
-def signum(indices1: Tuple[Tuple[int,...],...], indices2: Tuple[Tuple[int,...],...]) -> int:
+def signum(indices1: Tuple[Tuple[Union[int,float,Fraction],...],...], 
+           indices2: Tuple[Tuple[Union[int,float,Fraction],...],...]) -> Union[int,float]:
     """
     signum(indices1, indices2)
 
@@ -28,13 +30,15 @@ def signum(indices1: Tuple[Tuple[int,...],...], indices2: Tuple[Tuple[int,...],.
 
         Returns
         -------
-        int
+        Union[int, float]
     """
-
+    # TODO: Maybe change to math.copysign https://stackoverflow.com/questions/1986152/why-doesnt-python-have-a-sign-function
     return np.sign(energy(indices1)) - np.sign(energy(indices2))
 
 
-def exponential(indices: Tuple[Tuple[int,...],...], indices1: Tuple[Tuple[int,...],...], indices2: Tuple[Tuple[int,...],...]) -> QuasiPolynomial:
+def exponential(indices: Tuple[Tuple[Union[int,float,Fraction],...],...], 
+                indices1: Tuple[Tuple[Union[int,float,Fraction],...],...], 
+                indices2: Tuple[Tuple[Union[int,float,Fraction],...],...]) -> QuasiPolynomial:
     """
     exponential(indices, indices1, indices2)
 
@@ -46,12 +50,10 @@ def exponential(indices: Tuple[Tuple[int,...],...], indices1: Tuple[Tuple[int,..
     """
 
     alpha = abs(energy(indices)) - abs(energy(indices1)) - abs(energy(indices2))
-    coefficient_list = [[] for _ in range(- alpha)]
-    coefficient_list.append([1])
-    return QuasiPolynomial.new_integer(coefficient_list)
+    return QuasiPolynomial.new({-alpha:[1]})
 
 
-def partitions(sequence: Tuple[Tuple[int,...],...]) -> List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]:
+def partitions(sequence: Tuple[Tuple[Union[int,float,Fraction],...],...]) -> List[Tuple[Tuple[Tuple[Union[int,float,Fraction],...],...],Tuple[Tuple[Union[int,float,Fraction],...],...]]]:
     """
     partitions(sequence)
 
@@ -59,7 +61,7 @@ def partitions(sequence: Tuple[Tuple[int,...],...]) -> List[Tuple[Tuple[Tuple[in
 
         Returns
         -------
-        List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]
+        List[Tuple[Tuple[Tuple[Union[int,float,Fraction],...],...],Tuple[Tuple[Union[int,float,Fraction],...],...]]]
     """
     # TODO: Why we have to look at all possible partitions, especially those where
     # we have different amount of terms on the left side for commuting Hilbert spaces?

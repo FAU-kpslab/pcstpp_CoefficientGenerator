@@ -75,6 +75,8 @@ def main():
         max_energy = 2
     
     if not args.config:
+        # TODO: Also check for floats in translation, as this results in
+        # floating coefficients, too.
         # If needed, convert all starting_conditions to the same type
         if len([v for v in starting_conditions.values() if isinstance(v, (complex, float))])>0:
             type_to_use = complex if len([v for v in starting_conditions.values() if isinstance(v, (complex))])>0 else float
