@@ -152,12 +152,14 @@ def main():
     print('operators: ' + str(list(operators)), file=config_file)
     print("# Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the "
           "operators. In Lea's\n"
-          "# case, enter the indices of the operators prior to transposition.", file=config_file)
+          "# case, enter the indices of the operators prior to transposition.\n"
+          "# The indices can be of type integer, float and Fraction (e.g. '1/2').", file=config_file)
     print('indices:', file=config_file)
     for key in translation.keys():
         print('  ' + str(key) + ': ' + str(translation[key]), file=config_file)
     print("# Manually insert the solution for the coefficient functions with non-vanishing starting condition as "
-          "strings.",
+          "string, integer, float\n"
+          "# or complex (e.g. (1+2j)).",
           file=config_file)
     print('starting_conditions:', file=config_file)
     for sequence in starting_conditions:
