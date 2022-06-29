@@ -145,9 +145,9 @@ def main():
     # Generate the config file.
     config_file = open("config.yml", "w")
     print('---', file=config_file)
-    print("# This is an exemplary config file. If you use this program for the first time, you can also "
-          "specify everything step\n"
-          "# by step in the command line; the program will then generate the correct config file.\n",
+    print("# This is an exemplary config file. Following the comments in this file, you can modify it for your "
+          "purpose and rerun\n"
+          "# the program with the flag '--file'. For more infos, use flag '--help'.\n",
           file=config_file)
     print("# Enter the total order.", file=config_file)
     print('max_order: ' + str(max_order), file=config_file)
