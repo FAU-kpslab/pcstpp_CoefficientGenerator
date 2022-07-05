@@ -267,10 +267,10 @@ def sequence_to_indices(sequence: Tuple[Tuple[int,...],...], translation: Dict) 
     """
     return tuple(tuple(translation[e] for e in s) for s in sequence)
 
-# TODO: The signum_func also now accepts complex arguments
 def calc(sequence: Tuple[Tuple[int,...],...], collection: FunctionCollection, translation: Dict,
-         max_energy: int, signum_func:Callable[[Tuple[Tuple[int,...],...], Tuple[Tuple[int,...],...]],int],
-         energy_func: Callable[[Tuple[Tuple[int,...],...]],int]) -> QuasiPolynomial:
+         max_energy: int, signum_func:Union[Callable[[Tuple[Tuple[Union[int,float,Fraction],...],...], Tuple[Tuple[Union[int,float,Fraction],...],...]],Union[int,float]],
+                                            Callable[[Tuple[Tuple[complex,...],...], Tuple[Tuple[complex,...],...]],complex]],
+         energy_func: Callable[[Tuple[Tuple[Union[int,float,Fraction,complex],...],...]],Union[int,float,Fraction,complex]]) -> QuasiPolynomial:
     """
     calc(sequence)
 
@@ -309,8 +309,9 @@ def calc(sequence: Tuple[Tuple[int,...],...], collection: FunctionCollection, tr
 
 def trafo_calc(sequence: Tuple[Tuple[int,...],...], trafo_collection: FunctionCollection, collection: FunctionCollection,
                translation: Dict, max_energy: int, 
-               signum_func:Callable[[Tuple[Tuple[int,...],...], Tuple[Tuple[int,...],...]],int],
-               energy_func: Callable[[Tuple[Tuple[int,...],...]],int]) -> QuasiPolynomial:
+               signum_func:Union[Callable[[Tuple[Tuple[Union[int,float,Fraction],...],...], Tuple[Tuple[Union[int,float,Fraction],...],...]],Union[int,float]], 
+                                 Callable[[Tuple[Tuple[complex,...],...], Tuple[Tuple[complex,...],...]],complex]],
+               energy_func: Callable[[Tuple[Tuple[Union[int,float,Fraction,complex],...],...]],Union[int,float,Fraction,complex]]) -> QuasiPolynomial:
     """
     trafo_calc(sequence)
 

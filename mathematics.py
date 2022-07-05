@@ -99,8 +99,7 @@ def exponential(indices: Tuple[Tuple[Union[int,float,Fraction,complex],...],...]
     alpha = abs(energy_func(indices)) - abs(energy_func(indices1)) - abs(energy_func(indices2))
     return QuasiPolynomial.new({-alpha:[1]})
 
-# TODO: Should partitions only take type int? Check again the definitions.
-def partitions(sequence: Tuple[Tuple[Union[int,float,Fraction],...],...]) -> List[Tuple[Tuple[Tuple[Union[int,float,Fraction],...],...],Tuple[Tuple[Union[int,float,Fraction],...],...]]]:
+def partitions(sequence: Tuple[Tuple[int,...],...]) -> List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]:
     """
     partitions(sequence)
 
@@ -108,7 +107,7 @@ def partitions(sequence: Tuple[Tuple[Union[int,float,Fraction],...],...]) -> Lis
 
         Returns
         -------
-        List[Tuple[Tuple[Tuple[Union[int,float,Fraction],...],...],Tuple[Tuple[Union[int,float,Fraction],...],...]]]
+        List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]
     """
     # TODO: Why we have to look at all possible partitions, especially those where
     # we have different amount of terms on the left side for commuting Hilbert spaces?
