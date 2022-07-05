@@ -17,6 +17,8 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(energy(((2,), (2.,), ())), 4.)
         self.assertEqual(energy(((0.2,), (2.,), ())), 2.2)
         self.assertEqual(energy(((Fraction(1,2),Fraction(1,2)), (2.,), ())), 3.0)
+        self.assertEqual(energy(((2,), (2j,), ())), 2+2j)
+        self.assertAlmostEqual(energy(((2,-4+1.2j), (2.1-1.2j,), ())), 0.1)
 
     def test_energy_broad(self):
         self.assertEqual(energy_broad(((2, -2), ()),0), 0)
@@ -24,6 +26,10 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(energy_broad(((2, 2), ()),4), 0)
         self.assertEqual(energy_broad(((2,), (-2,), (-3,), (-1,)),2), -4)
         self.assertEqual(energy_broad(((2,), (-2,), (-3,), (-1,)),5), 0)
+        self.assertEqual(energy_broad(((2, 2.2), ()),4), 4.2)
+        self.assertEqual(energy_broad(((Fraction(1,3), 2.2), ()),1), Fraction(1,3)+2.2)
+        self.assertEqual(energy_broad(((2, 2.2, -1.01), ()),4), 0)
+        self.assertEqual(energy_broad(((2, 2.+ Fraction(1,10000000000000)), ()),4), 0)
 
     def test_signum(self):
         self.assertEqual(signum(((2,),), ((-2,),)), 2)
@@ -47,6 +53,8 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(signum_broad(((), (2,)), ((2,), (2, 2)),delta=0), 0)
         self.assertEqual(signum_broad(((), (-1,)), ((2,), ()),delta=1), -1)
         self.assertIsInstance(signum_broad(((2,),), ((-2,),),delta=1), np.int64)
+        self.assertEqual(signum_broad(((2.2,), (-1.3,)), ((2,), ()),delta=1), -1)
+        self.assertEqual(signum_broad(((Fraction(1,3),), ()), ((-0.5,), ()),delta=1), 0)
 
     def test_signum_complex(self):
         self.assertEqual(signum_complex(((2,),), ((-2,),)), 2)
@@ -66,6 +74,7 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(exponential(((2., -2.), ()), ((2.,), ()), ((-2.,), ()), energy), qp.new_integer([[], [], [], [], [1]]))
         self.assertEqual(exponential(((Fraction(1,2), -Fraction(1,2)), ()), ((Fraction(1,2),), ()), ((-Fraction(1,2),), ()), energy), qp.new({1:[1]}))
         self.assertEqual(exponential(((Fraction(1,4), -Fraction(1,4)), ()), ((Fraction(1,4),), ()), ((-Fraction(1,4),), ()), energy), qp.new({Fraction(1,2):[1]}))
+        self.assertEqual(exponential(((1+1j, -1-1j), ()), ((1+1j,), ()), ((-1-1j,), ()), energy), qp.new({2*abs(1+1j):[1]}))
 
     def test_partitions(self):
         self.assertEqual(partitions(((2,), ())), [])
