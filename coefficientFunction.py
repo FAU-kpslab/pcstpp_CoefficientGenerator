@@ -268,7 +268,7 @@ def sequence_to_indices(sequence: Sequence, translation: Dict) -> Indices[Energy
     return tuple(tuple(translation[e] for e in s) for s in sequence)
 
 def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict,
-         max_energy: int, signum_func:Union[Callable[[Indices[Energy_real], Indices[Energy_real]],int],
+         max_energy: Energy_real, signum_func:Union[Callable[[Indices[Energy_real], Indices[Energy_real]],int],
                                             Callable[[Indices[complex], Indices[complex]],complex]],
          energy_func: Callable[[Indices[Energy]],Energy]) -> QuasiPolynomial:
     """
@@ -308,7 +308,7 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict,
 
 
 def trafo_calc(sequence: Sequence, trafo_collection: FunctionCollection, collection: FunctionCollection,
-               translation: Dict, max_energy: int, 
+               translation: Dict, max_energy: Energy_real,
                signum_func:Union[Callable[[Indices[Energy_real], Indices[Energy_real]],int],
                                  Callable[[Indices[complex], Indices[complex]],complex]],
                energy_func: Callable[[Indices[Energy]],Energy]) -> QuasiPolynomial:
