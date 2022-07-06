@@ -9,10 +9,10 @@ import numpy as np
 from typing import Callable, List, Tuple, Union, TypeVar
 
 Coeff = Union[int,float,Fraction,complex]
-Coeff_real = Union[int,float,Fraction]
-Energy = TypeVar('Energy', bound= Union[int,float,Fraction,complex])
-Energy_real = TypeVar('Energy_real', bound=Union[int,float,Fraction])
-Indices = Tuple[Tuple[Energy,...],...]
+Energy = Coeff
+Energy_real = Union[int,float,Fraction]
+E = TypeVar('E', bound= Energy)
+Indices = Tuple[Tuple[E,...],...]
 Sequence = Tuple[Tuple[int,...],...]
 
 def energy(indices: Indices[Energy]) -> Energy:
@@ -27,7 +27,7 @@ def energy(indices: Indices[Energy]) -> Energy:
     """
     return sum(reduce(operator.add, indices))
 
-def energy_broad(indices: Indices[Energy_real], delta:Energy_real) -> Union[Energy_real,int]:
+def energy_broad(indices: Indices[Energy_real], delta:Energy_real) -> Energy_real:
     """
     energy_broad(indices)
 

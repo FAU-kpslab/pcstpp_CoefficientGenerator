@@ -52,7 +52,7 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(signum_broad(((-1,), (), (1,)), ((2,), (),(-1,)),delta=1), 0)
         self.assertEqual(signum_broad(((), (2,)), ((2,), (2, 2)),delta=0), 0)
         self.assertEqual(signum_broad(((), (-1,)), ((2,), ()),delta=1), -1)
-        self.assertIsInstance(signum_broad(((2,),), ((-2,),),delta=1), np.int64)
+        self.assertIsInstance(signum_broad(((2,),), ((-2,),),delta=1), int)
         self.assertEqual(signum_broad(((2.2,), (-1.3,)), ((2,), ()),delta=1), -1)
         self.assertEqual(signum_broad(((Fraction(1,3),), ()), ((-0.5,), ()),delta=1), 0)
 
