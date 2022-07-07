@@ -7,8 +7,9 @@ import argparse
 
 import coefficientFunction
 from quasiPolynomial import QuasiPolynomial as qp
-from mathematics import energy, energy_broad, signum, signum_broad, signum_complex
+from mathematics import Energy, Coeff, energy, energy_broad, signum, signum_broad, signum_complex
 from itertools import product, chain
+from typing import cast, Dict, Union
 
 
 def main():
@@ -79,7 +80,10 @@ def main():
         # Introduce band-diagonality, i.e., write down the largest sum of indices occurring in the starting conditions.
         max_energy = 2
         delta = 0
-    
+    # Defining the concrete types
+    starting_conditions = cast(Dict[str,Union[Coeff,str]],starting_conditions)
+    translation = cast(Dict[int, Energy],translation)
+
     if not args.config:
         # If needed, convert all starting_conditions to the same type
         if len([v for v in chain(starting_conditions.values(), translation.values()) if isinstance(v, (complex, float))])>0:
@@ -199,7 +203,7 @@ def main():
     print('starting_conditions:', file=config_file)
     for sequence in starting_conditions:
         if isinstance(starting_conditions[sequence],str):
-            print('  ' + sequence + ": '" + str(starting_conditions[sequence] + "'"), file=config_file)
+            print('  ' + sequence + ": '" + str(starting_conditions[sequence]) + "'", file=config_file)
         else:
             print('  ' + sequence + ": " + str(starting_conditions[sequence]), file=config_file)
     print("# Introduce band-diagonality, i.e., write down the largest absolute value of possible index sums occurring "

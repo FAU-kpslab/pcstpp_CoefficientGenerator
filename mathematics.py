@@ -6,16 +6,17 @@ from cmath import isclose
 
 from quasiPolynomial import QuasiPolynomial, are_close
 import numpy as np
-from typing import Callable, List, Tuple, Union, TypeVar
+from typing import Callable, List, Tuple, Union, TypeVar, cast
 
 Coeff = Union[int,float,Fraction,complex]
 Energy = Coeff
 Energy_real = Union[int,float,Fraction]
 E = TypeVar('E', bound= Energy)
+E_real = TypeVar('E_real', bound= Energy_real)
 Indices = Tuple[Tuple[E,...],...]
 Sequence = Tuple[Tuple[int,...],...]
 
-def energy(indices: Indices[Energy]) -> Energy:
+def energy(indices: Indices[E]) -> E:
     """
     energy(indices)
 
@@ -25,7 +26,7 @@ def energy(indices: Indices[Energy]) -> Energy:
         -------
         Union[int, float, Fraction, complex]
     """
-    return sum(reduce(operator.add, indices))
+    return sum(reduce(operator.add, indices),start=cast(E,0))
 
 def energy_broad(indices: Indices[Energy_real], delta:Energy_real) -> Energy_real:
     """
@@ -53,7 +54,6 @@ def signum(indices1: Indices[Energy_real], indices2: Indices[Energy_real]) -> in
         -------
         int
     """
-    # TODO: Maybe change to math.copysign https://stackoverflow.com/questions/1986152/why-doesnt-python-have-a-sign-function
     return int(np.sign(energy(indices1))) - int(np.sign(energy(indices2)))
 
 def signum_broad(indices1: Indices[Energy_real], indices2: Indices[Energy_real], delta:Energy_real) -> int:

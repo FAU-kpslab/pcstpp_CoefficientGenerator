@@ -1,12 +1,11 @@
 from fractions import Fraction
-from typing import List, Union, Tuple, Dict,TYPE_CHECKING
+from typing import List, Union, Dict,TYPE_CHECKING
 from cmath import isclose
 if TYPE_CHECKING:
     from mathematics import Coeff, Energy_real
 
 import numpy as np
 
-# TODO: Add exceptions when using not supported type
 def is_zero(scalar: "Coeff")->bool:
     """
     is_zero(scalar)
@@ -22,6 +21,8 @@ def is_zero(scalar: "Coeff")->bool:
         return scalar == 0
     elif isinstance(scalar, (float, complex)):
         return isclose(scalar, 0, abs_tol=1e-09)
+    else:
+        raise TypeError("This is no valid type for this function!")
 
 def are_close(scalar1: "Coeff", scalar2: "Coeff")->bool:
     """
@@ -41,7 +42,8 @@ def are_close(scalar1: "Coeff", scalar2: "Coeff")->bool:
             return isclose(scalar1, scalar2, abs_tol=1e-09)
         else:
             return isclose(scalar1, scalar2, rel_tol=1e-09)
-
+    else:
+        raise TypeError("These types can not be compared!")
 
 def inverse(scalar: "Coeff"):
     """
@@ -116,7 +118,7 @@ class Polynomial:
             Returns the constant coefficient.
     """
 
-    def __init__(self, coefficient_list: List["Coeff"]) -> None:
+    def __init__(self, coefficient_list: Union[List["Coeff"],np.ndarray]) -> None:
         """
             Parameters
             ----------
@@ -375,7 +377,7 @@ class Polynomial:
             # Flip it such that all __private_coefficients corresponding to the same x^n are part of the same diagonals.
             combinations = np.flipud(np.outer(self.__private_coefficients, other.__private_coefficients))
             # Sum over the diagonals to obtain the real __private_coefficients.
-            output = [sum(combinations.diagonal(exponent), Fraction(0)) for exponent in
+            output:List[Coeff] = [sum(combinations.diagonal(exponent), Fraction(0)) for exponent in
                       np.arange(- self.__private_coefficients.size + 1, other.__private_coefficients.size)]
             return Polynomial(output).simplify()
         # Check whether the second object is a scalar and call scalar_multiplication.
@@ -602,7 +604,7 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
-        polynomial_list = {e: Polynomial.new(coefficient_list[e]) for e in range(len(coefficient_list))}
+        polynomial_list:Dict[Energy_real,Polynomial] = {e: Polynomial.new(coefficient_list[e]) for e in range(len(coefficient_list))}
         return QuasiPolynomial(polynomial_list).simplify()
 
     @staticmethod

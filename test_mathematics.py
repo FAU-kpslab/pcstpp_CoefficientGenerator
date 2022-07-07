@@ -18,6 +18,8 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(energy(((0.2,), (2.,), ())), 2.2)
         self.assertEqual(energy(((Fraction(1,2),Fraction(1,2)), (2.,), ())), 3.0)
         self.assertEqual(energy(((2,), (2j,), ())), 2+2j)
+        # officially `complex` is not supported, maybe rewrite this test
+        # https://stackoverflow.com/questions/12136762/assertalmostequal-in-python-unit-test-for-collections-of-floats#:~:text=The%20assertAlmostEqual%20%28x%2C%20y%29%20method%20in%20Python%27s%20unit,%28%29%20is%20that%20it%20only%20works%20on%20floats.
         self.assertAlmostEqual(energy(((2,-4+1.2j), (2.1-1.2j,), ())), 0.1)
 
     def test_energy_broad(self):

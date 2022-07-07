@@ -121,7 +121,7 @@ class FunctionCollection:
             Transform the collection in a form suitable to be read by humans.
     """
 
-    def __init__(self, translation: Dict) -> None:
+    def __init__(self, translation: Dict[int, Energy]) -> None:
         self.__private_collection = dict()
         self.translation = translation
 
@@ -255,7 +255,7 @@ def key_to_sequence(key: Sequence) -> Sequence:  # TODO The key is supposed to b
     return key
 
 
-def sequence_to_indices(sequence: Sequence, translation: Dict) -> Indices[Energy]:
+def sequence_to_indices(sequence: Sequence, translation: Dict[int,Energy]) -> Indices[Energy]:
     """
     sequence_to_indices(key)
 
@@ -263,13 +263,13 @@ def sequence_to_indices(sequence: Sequence, translation: Dict) -> Indices[Energy
 
         Returns
         -------
-        Tuple[Tuple[int,...],...]
+        Tuple[Tuple[Union[int,float,Fraction,complex],...],...]
     """
     return tuple(tuple(translation[e] for e in s) for s in sequence)
 
-def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict,
+def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[int,Energy],
          max_energy: Energy_real, signum_func:Union[Callable[[Indices[Energy_real], Indices[Energy_real]],int],
-                                            Callable[[Indices[complex], Indices[complex]],complex]],
+                                                    Callable[[Indices[complex], Indices[complex]],complex]],
          energy_func: Callable[[Indices[Energy]],Energy]) -> QuasiPolynomial:
     """
     calc(sequence)
@@ -300,7 +300,7 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict,
             m2 = sequence_to_indices(s2, translation)
             # Only calculate non-vanishing contributions to the integrand.
             if (abs(energy_func(m1)) <= max_energy) & (abs(energy_func(m2)) <= max_energy):
-                integrand = integrand + exponential(m, m1, m2,energy_func) * signum_func(m1, m2) * f1 * f2
+                integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
         result = integrand.integrate()
         # Insert the result into the collection.
         collection[sequence] = result
@@ -308,7 +308,7 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict,
 
 
 def trafo_calc(sequence: Sequence, trafo_collection: FunctionCollection, collection: FunctionCollection,
-               translation: Dict, max_energy: Energy_real,
+               translation: Dict[int,Energy], max_energy: Energy_real,
                signum_func:Union[Callable[[Indices[Energy_real], Indices[Energy_real]],int],
                                  Callable[[Indices[complex], Indices[complex]],complex]],
                energy_func: Callable[[Indices[Energy]],Energy]) -> QuasiPolynomial:
