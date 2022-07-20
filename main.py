@@ -41,7 +41,7 @@ def main():
                 starting_conditions[k] = complex(v)
         # postprocessing of complex values in translation 
         for (k,v) in translation.items():
-            if isinstance(v,str):
+            if isinstance(v,str) and "j" in v:
                 translation[k] = complex(v)
     else:
         print("You have decided to use the default config values.")
