@@ -7,12 +7,12 @@ from coefficientFunction import *
 
 translation = dict([('-2.id', -2), ('0.id', 0), ('2.id', 2), ('id.-2', -2), ('id.0', 0), ('id.2', 2)])
 collection = FunctionCollection(translation)
-collection[(('-2.id',), ())] = qp.new([[1]])
-collection[(('0.id',), ())] = qp.new([[1]])
-collection[(('2.id',), ())] = qp.new([[1]])
-collection[((), ('id.-2',))] = qp.new([[-1]])
-collection[((), ('id.0',))] = qp.new([[-1]])
-collection[((), ('id.2',))] = qp.new([[-1]])
+collection[(('-2.id',), ())] = qp.new_integer([[1]])
+collection[(('0.id',), ())] = qp.new_integer([[1]])
+collection[(('2.id',), ())] = qp.new_integer([[1]])
+collection[((), ('id.-2',))] = qp.new_integer([[-1]])
+collection[((), ('id.0',))] = qp.new_integer([[-1]])
+collection[((), ('id.2',))] = qp.new_integer([[-1]])
 
 # Classes and methods are tested in the order of alphabet 
 # https://stackoverflow.com/questions/30286268/order-of-tests-in-python-unittest
@@ -36,8 +36,8 @@ class Test_A_FunctionCollection(unittest.TestCase):
 
 class Test_B_DifferentialEquation(unittest.TestCase):
     def test_differential_equation(self):
-        self.assertEqual(collection[(('2.id',), ())].function, qp.new([[1]]))
-        self.assertEqual(collection[((), ('id.-2',))].function, qp.new([[-1]]))
+        self.assertEqual(collection[(('2.id',), ())].function, qp.new_integer([[1]]))
+        self.assertEqual(collection[((), ('id.-2',))].function, qp.new_integer([[-1]]))
         with self.assertRaises(AttributeError):
             # As the item is not in 'collection' a 'NoneType' object is returned 
             collection[(('0.id',), ('id.-2',))].function
