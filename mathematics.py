@@ -4,7 +4,7 @@ from itertools import product, combinations
 import operator
 from cmath import isclose
 
-from quasiPolynomial import QuasiPolynomial
+from quasiPolynomial import QuasiPolynomial, are_close
 import numpy as np
 from typing import Callable, List, Tuple, Union
 
@@ -36,7 +36,7 @@ def energy_broad(indices: Tuple[Tuple[Union[int,float,Fraction],...],...],
     e = energy(indices)
     # also return 0 if `abs(e)` is very close to `delta` to deal with
     # floating errors
-    return e if abs(e)>delta and not isclose(abs(e),delta,rel_tol=1e-09) else 0
+    return e if abs(e)>delta and not are_close(abs(e),delta) else 0
 
 def signum(indices1: Tuple[Tuple[Union[int,float,Fraction],...],...], 
            indices2: Tuple[Tuple[Union[int,float,Fraction],...],...]) -> Union[int,float]:
