@@ -600,7 +600,7 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
-        polynomial_list = {alpha: Polynomial.new(coefficient_list[alpha]) for alpha in range(len(coefficient_list))}
+        polynomial_list = {e: Polynomial.new(coefficient_list[e]) for e in range(len(coefficient_list))}
         return QuasiPolynomial(polynomial_list).simplify()
 
     @staticmethod
