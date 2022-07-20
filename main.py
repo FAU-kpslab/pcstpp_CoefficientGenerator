@@ -141,7 +141,7 @@ def main():
                         # specific order used in one calculation -> implement order-dependent max_energy
                         # in `calc` in `coefficientFunction.py`
                         # TODO: Maybe even make max_energy completely automatic?
-                        coefficientFunction.calc(sequence_sorted, collection, translation, max_energy + delta * max_order + 1000,
+                        coefficientFunction.calc(sequence_sorted, collection, translation, max_energy + delta * max_order,
                                                  signum_func, energy_func)
                 else:
                     coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation,
