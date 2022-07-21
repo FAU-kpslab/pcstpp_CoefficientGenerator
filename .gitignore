@@ -129,6 +129,7 @@ pip-selfcheck.json
 .idea/mongoSettings.xml
 
 .idea/
+.vscode/
 
 ## File-based project format:
 *.iws
