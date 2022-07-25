@@ -47,8 +47,8 @@ class Test_B_DifferentialEquation(unittest.TestCase):
         self.assertEqual(key_to_sequence((('0.id',), ())),collection.keys()[1])
 
     def test_calc(self):
-        self.assertEqual(calc((('0.id','0.id'),tuple()),collection,translation,2),QuasiPolynomial.zero())
-        self.assertEqual(calc((('-2.id','2.id'),tuple()),collection,translation,2),
+        self.assertEqual(calc((('0.id','0.id'),tuple()),collection,translation,2,signum,energy),QuasiPolynomial.zero())
+        self.assertEqual(calc((('-2.id','2.id'),tuple()),collection,translation,2,signum,energy),
                 QuasiPolynomial({0: Polynomial([Fraction("-1/2")]), 4: Polynomial([Fraction("1/2")])}))
 if __name__ == '__main__':
     unittest.main()

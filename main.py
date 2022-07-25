@@ -1,5 +1,5 @@
 from fractions import Fraction
-
+from numpy import sign, iscomplex
 import yaml
 from yaml.loader import SafeLoader
 
@@ -7,7 +7,7 @@ import argparse
 
 import coefficientFunction
 from quasiPolynomial import QuasiPolynomial as qp
-from mathematics import energy
+from mathematics import energy, energy_broad, signum, signum_broad, signum_complex
 from itertools import product, chain
 
 
@@ -33,11 +33,16 @@ def main():
         translation = config['indices']
         starting_conditions = config['starting_conditions']
         max_energy = config['max_energy']
+        delta = config['delta'] if 'delta' in config else 0
         config_file.close()
         # postprocessing of complex values in starting_conditions 
         for (k,v) in starting_conditions.items():
             if isinstance(v,str) and "j" in v:
                 starting_conditions[k] = complex(v)
+        # postprocessing of complex values in translation 
+        for (k,v) in translation.items():
+            if isinstance(v,str) and "j" in v:
+                translation[k] = complex(v)
     else:
         print("You have decided to use the default config values.")
         # Enter the total order.
@@ -73,6 +78,7 @@ def main():
             '((), (2, 4))': '-1/2'}
         # Introduce band-diagonality, i.e., write down the largest sum of indices occurring in the starting conditions.
         max_energy = 2
+        delta = 0
     
     if not args.config:
         # If needed, convert all starting_conditions to the same type
@@ -105,7 +111,21 @@ def main():
             trafo_collection[tuple([()]*len(operators))] = qp.new_integer([['1']])
 
         operators_all = [operator for operator_space in operators for operator in operator_space]
-    
+        
+        if delta>0:
+            print("Using the broad signum function.")
+            signum_func = lambda l,r: signum_broad(l,r,delta=delta)
+            energy_func = lambda i: energy_broad(i,delta=delta)
+        # check if any translation value has a non-vanishing imaginary part
+        elif len([v for v in translation.values() if iscomplex(v)])>0:
+            print("Using the complex signum function.")
+            signum_func = signum_complex
+            energy_func = energy
+        else:
+            print("Using the standard signum function.")
+            signum_func = signum
+            energy_func = energy
+
         for order in range(max_order + 1):
             print('Starting calculations for order ' + str(order) + '.')
             # TODO: This version is slower as needed as we do not use the arbitrary order of the commuting operators
@@ -115,10 +135,17 @@ def main():
                 if not args.trafo:
                     indices = coefficientFunction.sequence_to_indices(sequence_sorted, translation)
                     # Make use of block diagonality.
-                    if energy(indices) == 0:
-                        coefficientFunction.calc(sequence_sorted, collection, translation, max_energy)
+                    if energy_func(indices) == 0:
+                        # As the band diagonality is only fulfilled up to a multiple of delta add + delta * max_order
+                        # TODO: According to Andis calculations, max_energy should depend on the
+                        # specific order used in one calculation -> implement order-dependent max_energy
+                        # in `calc` in `coefficientFunction.py`
+                        # TODO: Maybe even make max_energy completely automatic?
+                        coefficientFunction.calc(sequence_sorted, collection, translation, max_energy + delta * max_order,
+                                                 signum_func, energy_func)
                 else:
-                    coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation, max_energy)
+                    coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation,
+                                                   max_energy + delta * max_order, signum_func, energy_func)
         # print(collection.pretty_print())
         print('Starting writing process.')
         # Write the results in a file.
@@ -126,7 +153,7 @@ def main():
             act_collection = trafo_collection if args.trafo else collection
             for sequence in act_collection.keys():
                 # Only return the block-diagonal operator sequences.
-                if args.trafo or energy(coefficientFunction.sequence_to_indices(sequence, translation)) == 0:
+                if args.trafo or energy_func(coefficientFunction.sequence_to_indices(sequence, translation)) == 0:
                     resulting_constant = act_collection[sequence].function.get_constant()
                     # Only return the non-vanishing operator sequences.
                     if resulting_constant != 0:
@@ -161,23 +188,27 @@ def main():
     print("# Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the "
           "operators. In Lea's\n"
           "# case, enter the indices of the operators prior to transposition.\n"
-          "# The indices can be of type integer, float and Fraction (e.g. '1/2').", file=config_file)
+          "# The indices can be of type integer, float, Fraction (e.g. '1/2') or complex (e.g. (1+2j))."
+          , file=config_file)
     print('indices:', file=config_file)
     for key in translation.keys():
         print('  ' + str(key) + ': ' + str(translation[key]), file=config_file)
     print("# Manually insert the solution for the coefficient functions with non-vanishing starting condition as "
-          "string, integer, float\n"
-          "# or complex (e.g. (1+2j)).",
-          file=config_file)
+          "string, integer,\n"
+          "# float or complex (e.g. (1+2j)).", file=config_file)
     print('starting_conditions:', file=config_file)
     for sequence in starting_conditions:
         if isinstance(starting_conditions[sequence],str):
             print('  ' + sequence + ": '" + str(starting_conditions[sequence] + "'"), file=config_file)
         else:
             print('  ' + sequence + ": " + str(starting_conditions[sequence]), file=config_file)
-    print("# Introduce band-diagonality, i.e., write down the largest sum of indices occurring in the starting "
-          "conditions.", file=config_file)
+    print("# Introduce band-diagonality, i.e., write down the largest absolute value of possible index sums occurring "
+          "in the\n"
+          "# starting conditions.", file=config_file)
     print('max_energy: ' + str(max_energy), file=config_file)
+    print("# Optionally, specify the delta value for the 'broad signum' function, i.e., half of the width of "
+          "the 0 level.", file=config_file)
+    print('delta: ' + str(delta), file=config_file)
     print('...', file=config_file)
     config_file.close()
 
