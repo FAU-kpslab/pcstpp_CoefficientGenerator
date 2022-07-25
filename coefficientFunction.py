@@ -34,7 +34,7 @@ class CoefficientFunction:
             Prints the operator sequence m and corresponding coefficient function f(ell; m).
     """
 
-    def __init__(self, sequence: Tuple[Tuple[int,...],...], function: QuasiPolynomial) -> None:
+    def __init__(self, sequence: Sequence, function: QuasiPolynomial) -> None:
         """
         Parameters
         ----------
@@ -47,7 +47,7 @@ class CoefficientFunction:
         self.__private_key = sequence_to_key(sequence)
         self.function = function
 
-    def sequence(self) -> Tuple[Tuple[int,...],...]:
+    def sequence(self) -> Sequence:
         """
         cf.sequence()
 
@@ -121,11 +121,11 @@ class FunctionCollection:
             Transform the collection in a form suitable to be read by humans.
     """
 
-    def __init__(self, translation: Dict) -> None:
+    def __init__(self, translation: Dict[int, Energy]) -> None:
         self.__private_collection = dict()
         self.translation = translation
 
-    def __contains__(self, sequence: Tuple[Tuple[int,...],...]) -> bool:
+    def __contains__(self, sequence: Sequence) -> bool:
         """
         sequence in FunctionCollection
 
@@ -143,7 +143,7 @@ class FunctionCollection:
 
         return sequence_to_key(sequence) in self.__private_collection
 
-    def __setitem__(self, sequence: Tuple[Tuple[int,...],...], function: QuasiPolynomial) -> None:
+    def __setitem__(self, sequence: Sequence, function: QuasiPolynomial) -> None:
         """
         FunctionCollection[sequence] = function
 
@@ -160,7 +160,7 @@ class FunctionCollection:
         if sequence not in self:
             self.__private_collection[sequence_to_key(sequence)] = function
 
-    def __getitem__(self, sequence: Tuple[Tuple[int,...],...]) -> Optional[CoefficientFunction]:
+    def __getitem__(self, sequence: Sequence) -> Optional[CoefficientFunction]:
         """
         FunctionCollection[sequence]
 
@@ -181,7 +181,7 @@ class FunctionCollection:
         else:
             return None
 
-    def keys(self) -> List[Tuple[Tuple[int,...],...]]:
+    def keys(self) -> List[Sequence]:
         """
         FunctionCollection.keys()
 
@@ -227,7 +227,7 @@ class FunctionCollection:
         return output
 
 
-def sequence_to_key(sequence: Tuple[Tuple[int,...],...]) -> Tuple[Tuple[int,...],...]:  # TODO The key is supposed to be an integer.
+def sequence_to_key(sequence: Sequence) -> Sequence:  # TODO The key is supposed to be an integer.
     """
     vector_to_key(sequence)
 
@@ -241,7 +241,7 @@ def sequence_to_key(sequence: Tuple[Tuple[int,...],...]) -> Tuple[Tuple[int,...]
     return sequence
 
 
-def key_to_sequence(key: Tuple[Tuple[int,...],...]) -> Tuple[Tuple[int,...],...]:  # TODO The key is supposed to be an integer.
+def key_to_sequence(key: Sequence) -> Sequence:  # TODO The key is supposed to be an integer.
     """
     key_to_sequence(key)
 
@@ -255,7 +255,7 @@ def key_to_sequence(key: Tuple[Tuple[int,...],...]) -> Tuple[Tuple[int,...],...]
     return key
 
 
-def sequence_to_indices(sequence: Tuple[Tuple[int,...],...], translation: Dict) -> Tuple[Tuple[int,...],...]:
+def sequence_to_indices(sequence: Sequence, translation: Dict[int,Energy]) -> Indices[Energy]:
     """
     sequence_to_indices(key)
 
@@ -263,14 +263,14 @@ def sequence_to_indices(sequence: Tuple[Tuple[int,...],...], translation: Dict) 
 
         Returns
         -------
-        Tuple[Tuple[int,...],...]
+        Tuple[Tuple[Union[int,float,Fraction,complex],...],...]
     """
     return tuple(tuple(translation[e] for e in s) for s in sequence)
 
-def calc(sequence: Tuple[Tuple[int,...],...], collection: FunctionCollection, translation: Dict,
-         max_energy: int, signum_func:Union[Callable[[Tuple[Tuple[Union[int,float,Fraction],...],...], Tuple[Tuple[Union[int,float,Fraction],...],...]],Union[int,float]],
-                                            Callable[[Tuple[Tuple[complex,...],...], Tuple[Tuple[complex,...],...]],complex]],
-         energy_func: Callable[[Tuple[Tuple[Union[int,float,Fraction,complex],...],...]],Union[int,float,Fraction,complex]]) -> QuasiPolynomial:
+def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[int,Energy],
+         max_energy: Energy_real, signum_func:Union[Callable[[Indices[Energy_real], Indices[Energy_real]],int],
+                                                    Callable[[Indices[complex], Indices[complex]],complex]],
+         energy_func: Callable[[Indices[Energy]],Energy]) -> QuasiPolynomial:
     """
     calc(sequence)
 
@@ -300,18 +300,18 @@ def calc(sequence: Tuple[Tuple[int,...],...], collection: FunctionCollection, tr
             m2 = sequence_to_indices(s2, translation)
             # Only calculate non-vanishing contributions to the integrand.
             if (abs(energy_func(m1)) <= max_energy) & (abs(energy_func(m2)) <= max_energy):
-                integrand = integrand + exponential(m, m1, m2,energy_func) * signum_func(m1, m2) * f1 * f2
+                integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
         result = integrand.integrate()
         # Insert the result into the collection.
         collection[sequence] = result
         return result
 
 
-def trafo_calc(sequence: Tuple[Tuple[int,...],...], trafo_collection: FunctionCollection, collection: FunctionCollection,
-               translation: Dict, max_energy: int, 
-               signum_func:Union[Callable[[Tuple[Tuple[Union[int,float,Fraction],...],...], Tuple[Tuple[Union[int,float,Fraction],...],...]],Union[int,float]], 
-                                 Callable[[Tuple[Tuple[complex,...],...], Tuple[Tuple[complex,...],...]],complex]],
-               energy_func: Callable[[Tuple[Tuple[Union[int,float,Fraction,complex],...],...]],Union[int,float,Fraction,complex]]) -> QuasiPolynomial:
+def trafo_calc(sequence: Sequence, trafo_collection: FunctionCollection, collection: FunctionCollection,
+               translation: Dict[int,Energy], max_energy: Energy_real,
+               signum_func:Union[Callable[[Indices[Energy_real], Indices[Energy_real]],int],
+                                 Callable[[Indices[complex], Indices[complex]],complex]],
+               energy_func: Callable[[Indices[Energy]],Energy]) -> QuasiPolynomial:
     """
     trafo_calc(sequence)
 
@@ -327,6 +327,7 @@ def trafo_calc(sequence: Tuple[Tuple[int,...],...], trafo_collection: FunctionCo
         return trafo_collection[sequence].function
     else:
         m = sequence_to_indices(sequence, translation)
+        # TODO: Why does `signum_func` gives a type checking error?
         integrand = (exponential(((), ()), ((), ()), m,energy_func) * signum_func(((), ()), m) 
                         * calc(sequence, collection, translation, max_energy, signum_func, energy_func))
         partition_list = partitions(sequence)

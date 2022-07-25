@@ -6,10 +6,17 @@ from cmath import isclose
 
 from quasiPolynomial import QuasiPolynomial, are_close
 import numpy as np
-from typing import Callable, List, Tuple, Union
+from typing import Callable, List, Tuple, Union, TypeVar, cast
 
+Coeff = Union[int,float,Fraction,complex]
+Energy = Coeff
+Energy_real = Union[int,float,Fraction]
+E = TypeVar('E', bound= Energy)
+E_real = TypeVar('E_real', bound= Energy_real)
+Indices = Tuple[Tuple[E,...],...]
+Sequence = Tuple[Tuple[int,...],...]
 
-def energy(indices: Tuple[Tuple[Union[int,float,Fraction,complex],...],...]) -> Union[int,float,Fraction,complex]:
+def energy(indices: Indices[E]) -> E:
     """
     energy(indices)
 
@@ -19,10 +26,9 @@ def energy(indices: Tuple[Tuple[Union[int,float,Fraction,complex],...],...]) -> 
         -------
         Union[int, float, Fraction, complex]
     """
-    return sum(reduce(operator.add, indices))
+    return sum(reduce(operator.add, indices),start=cast(E,0))
 
-def energy_broad(indices: Tuple[Tuple[Union[int,float,Fraction],...],...], 
-                 delta:Union[int,float,Fraction]) -> Union[int,float,Fraction]:
+def energy_broad(indices: Indices[Energy_real], delta:Energy_real) -> Energy_real:
     """
     energy_broad(indices)
 
@@ -38,8 +44,7 @@ def energy_broad(indices: Tuple[Tuple[Union[int,float,Fraction],...],...],
     # floating errors
     return e if abs(e)>delta and not are_close(abs(e),delta) else 0
 
-def signum(indices1: Tuple[Tuple[Union[int,float,Fraction],...],...], 
-           indices2: Tuple[Tuple[Union[int,float,Fraction],...],...]) -> Union[int,float]:
+def signum(indices1: Indices[Energy_real], indices2: Indices[Energy_real]) -> int:
     """
     signum(indices1, indices2)
 
@@ -47,14 +52,11 @@ def signum(indices1: Tuple[Tuple[Union[int,float,Fraction],...],...],
 
         Returns
         -------
-        Union[int, float]
+        int
     """
-    # TODO: Maybe change to math.copysign https://stackoverflow.com/questions/1986152/why-doesnt-python-have-a-sign-function
-    return np.sign(energy(indices1)) - np.sign(energy(indices2))
+    return int(np.sign(energy(indices1))) - int(np.sign(energy(indices2)))
 
-def signum_broad(indices1: Tuple[Tuple[Union[int,float,Fraction],...],...], 
-                 indices2: Tuple[Tuple[Union[int,float,Fraction],...],...], 
-                 delta:Union[int,float,Fraction]) -> Union[int,float]:
+def signum_broad(indices1: Indices[Energy_real], indices2: Indices[Energy_real], delta:Energy_real) -> int:
     """
     signum_broad(indices1, indices2, delta)
 
@@ -64,11 +66,11 @@ def signum_broad(indices1: Tuple[Tuple[Union[int,float,Fraction],...],...],
 
         Returns
         -------
-        Union[int, float]
+        int
     """
-    return np.sign(energy_broad(indices1,delta)) - np.sign(energy_broad(indices2,delta))
+    return int(np.sign(energy_broad(indices1,delta))) - int(np.sign(energy_broad(indices2,delta)))
    
-def signum_complex(indices1: Tuple[Tuple[complex,...],...], indices2: Tuple[Tuple[complex,...],...]) -> complex:
+def signum_complex(indices1: Indices[complex], indices2: Indices[complex]) -> complex:
     """
     signum_complex(indices1, indices2)
 
@@ -82,10 +84,10 @@ def signum_complex(indices1: Tuple[Tuple[complex,...],...], indices2: Tuple[Tupl
     complex_sgn = lambda z: 0 if np.abs(z) == 0 else np.conj(z)/np.abs(z)
     return complex_sgn(energy(indices1)) - complex_sgn(energy(indices2))
 
-def exponential(indices: Tuple[Tuple[Union[int,float,Fraction,complex],...],...], 
-                indices1: Tuple[Tuple[Union[int,float,Fraction,complex],...],...], 
-                indices2: Tuple[Tuple[Union[int,float,Fraction,complex],...],...],
-                energy_func: Callable[[Tuple[Tuple[Union[int,float,Fraction,complex],...],...]],Union[int,float,Fraction,complex]]) -> QuasiPolynomial:
+def exponential(indices: Indices[Energy], 
+                indices1: Indices[Energy], 
+                indices2: Indices[Energy],
+                energy_func: Callable[[Indices[Energy]],Energy]) -> QuasiPolynomial:
     """
     exponential(indices, indices1, indices2)
 
@@ -99,7 +101,7 @@ def exponential(indices: Tuple[Tuple[Union[int,float,Fraction,complex],...],...]
     alpha = abs(energy_func(indices)) - abs(energy_func(indices1)) - abs(energy_func(indices2))
     return QuasiPolynomial.new({-alpha:[1]})
 
-def partitions(sequence: Tuple[Tuple[int,...],...]) -> List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]:
+def partitions(sequence: Sequence) -> List[Tuple[Sequence,Sequence]]:
     """
     partitions(sequence)
 

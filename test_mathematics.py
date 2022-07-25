@@ -18,6 +18,8 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(energy(((0.2,), (2.,), ())), 2.2)
         self.assertEqual(energy(((Fraction(1,2),Fraction(1,2)), (2.,), ())), 3.0)
         self.assertEqual(energy(((2,), (2j,), ())), 2+2j)
+        # officially `complex` is not supported, maybe rewrite this test
+        # https://stackoverflow.com/questions/12136762/assertalmostequal-in-python-unit-test-for-collections-of-floats#:~:text=The%20assertAlmostEqual%20%28x%2C%20y%29%20method%20in%20Python%27s%20unit,%28%29%20is%20that%20it%20only%20works%20on%20floats.
         self.assertAlmostEqual(energy(((2,-4+1.2j), (2.1-1.2j,), ())), 0.1)
 
     def test_energy_broad(self):
@@ -52,7 +54,7 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(signum_broad(((-1,), (), (1,)), ((2,), (),(-1,)),delta=1), 0)
         self.assertEqual(signum_broad(((), (2,)), ((2,), (2, 2)),delta=0), 0)
         self.assertEqual(signum_broad(((), (-1,)), ((2,), ()),delta=1), -1)
-        self.assertIsInstance(signum_broad(((2,),), ((-2,),),delta=1), np.int64)
+        self.assertIsInstance(signum_broad(((2,),), ((-2,),),delta=1), int)
         self.assertEqual(signum_broad(((2.2,), (-1.3,)), ((2,), ()),delta=1), -1)
         self.assertEqual(signum_broad(((Fraction(1,3),), ()), ((-0.5,), ()),delta=1), 0)
 
@@ -89,8 +91,6 @@ class TestHelper(unittest.TestCase):
                          [(((), (4,)), ((1, 2), (5,))), (((), (4, 5)), ((1, 2), ())), (((1,), ()), ((2,), (4, 5))),
                           (((1,), (4,)), ((2,), (5,))), (((1,), (4, 5)), ((2,), ())), (((1, 2), ()), ((), (4, 5))),
                           (((1, 2), (4,)), ((), (5,)))])
-        self.assertEqual(partitions(((2, -2.), ())), [(((2,), ()), ((-2.,), ()))])
-        self.assertEqual(partitions(((2, -Fraction(1,2)), ())), [(((2,), ()), ((-Fraction(1,2),), ()))])
 
 if __name__ == '__main__':
     unittest.main()
