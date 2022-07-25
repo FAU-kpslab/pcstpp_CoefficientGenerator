@@ -188,22 +188,23 @@ def main():
     print("# Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the "
           "operators. In Lea's\n"
           "# case, enter the indices of the operators prior to transposition.\n"
-          "# The indices can be of type integer, float and Fraction (e.g. '1/2').", file=config_file)
+          "# The indices can be of type integer, float, Fraction (e.g. '1/2') or complex (e.g. (1+2j))."
+          , file=config_file)
     print('indices:', file=config_file)
     for key in translation.keys():
         print('  ' + str(key) + ': ' + str(translation[key]), file=config_file)
     print("# Manually insert the solution for the coefficient functions with non-vanishing starting condition as "
-          "string, integer, float\n"
-          "# or complex (e.g. (1+2j)).",
-          file=config_file)
+          "string, integer,\n"
+          "# float or complex (e.g. (1+2j)).", file=config_file)
     print('starting_conditions:', file=config_file)
     for sequence in starting_conditions:
         if isinstance(starting_conditions[sequence],str):
             print('  ' + sequence + ": '" + str(starting_conditions[sequence] + "'"), file=config_file)
         else:
             print('  ' + sequence + ": " + str(starting_conditions[sequence]), file=config_file)
-    print("# Introduce band-diagonality, i.e., write down the largest sum of indices occurring in the starting "
-          "conditions.", file=config_file)
+    print("# Introduce band-diagonality, i.e., write down the largest absolute value of possible index sums occurring "
+          "in the\n"
+          "# starting conditions.", file=config_file)
     print('max_energy: ' + str(max_energy), file=config_file)
     print("# Optionally, specify the delta value for the 'broad signum' function, i.e., half of the width of "
           "the 0 level.", file=config_file)
