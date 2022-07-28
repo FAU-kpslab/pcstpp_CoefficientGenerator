@@ -6,15 +6,19 @@ from cmath import isclose
 
 from quasiPolynomial import QuasiPolynomial, are_close, is_zero
 import numpy as np
+import sympy as sym
 from typing import Callable, List, Tuple, Union, TypeVar, cast
 
-Coeff = Union[int,float,Fraction,complex]
+Expr = sym.core.expr.Expr
+Coeff = Union[int,float,Fraction,complex,Expr]
 Energy = Coeff
 Energy_real = Union[int,float,Fraction]
 E = TypeVar('E', bound= Energy)
 E_real = TypeVar('E_real', bound= Energy_real)
 Indices = Tuple[Tuple[E,...],...]
 Sequence = Tuple[Tuple[int,...],...]
+
+# TODO: Update documentation for `sympy`
 
 def energy(indices: Indices[E]) -> E:
     """
@@ -70,7 +74,7 @@ def signum_broad(indices1: Indices[Energy_real], indices2: Indices[Energy_real],
     """
     return int(np.sign(energy_broad(indices1,delta))) - int(np.sign(energy_broad(indices2,delta)))
    
-def signum_complex(indices1: Indices[complex], indices2: Indices[complex]) -> complex:
+def signum_complex(indices1: Indices[Union[complex,Expr]], indices2: Indices[Union[complex,Expr]]) -> Union[complex,Expr]:
     """
     signum_complex(indices1, indices2)
 
@@ -81,7 +85,12 @@ def signum_complex(indices1: Indices[complex], indices2: Indices[complex]) -> co
         -------
         complex
     """
-    complex_sgn = lambda z: 0 if is_zero(z) else np.conj(z)/np.abs(z)
+    if isinstance(indices1, complex) and isinstance(indices2, complex):
+        # TODO: Maybe change from numpy to built-in
+        # In this case we may not need to use this if-else
+        complex_sgn = lambda z: 0 if is_zero(z) else np.conj(z)/np.abs(z)
+    else:
+        complex_sgn = lambda z: 0 if is_zero(z) else sym.conjugate(z)/sym.Abs(z)
     return complex_sgn(energy(indices1)) - complex_sgn(energy(indices2))
 
 def exponential(indices: Indices[Energy], 

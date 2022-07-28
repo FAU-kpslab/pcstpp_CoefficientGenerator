@@ -1,16 +1,19 @@
 import unittest
 import numpy as np
+import sympy as sym
 
 from fractions import Fraction
 from quasiPolynomial import Polynomial as P
 from quasiPolynomial import QuasiPolynomial as QP
 
+# Defining symbols for testing
+a, b = sym.symbols('a b')
 
 class TestPolynomial(unittest.TestCase):
 
     def test_str(self):
-        self.assertEqual(str(P([Fraction(2), Fraction(1, 2), 2, 3.5, 1., 1j, 1.2+2.1j])),
-                         "['2', '1/2', '2', '3.5', '1.0', '1j', '(1.2+2.1j)']")
+        self.assertEqual(str(P([Fraction(2), Fraction(1, 2), 2, 3.5, 1., 1j, 1.2+2.1j, 2*a+1])),
+                         "['2', '1/2', '2', '3.5', '1.0', '1j', '(1.2+2.1j)', '2*a + 1']")
 
     def test_simplify(self):
         self.assertEqual(str(P([Fraction(2), Fraction(4), Fraction(8), Fraction(0)]).simplify()),
@@ -22,10 +25,13 @@ class TestPolynomial(unittest.TestCase):
         self.assertEqual(str(P([Fraction(5, 10)]).simplify()), str(P([Fraction(1, 2)])))
         self.assertEqual(str(P([1.0, 1e-25]).simplify()), str(P([1.0])))
         self.assertEqual(str(P([1.0 + 2j, 1e-10j]).simplify()), str(P([1.0+2j])))
+        self.assertEqual(str(P([2*a]).simplify()), str(P([2*a+1-1])))
+        self.assertEqual(str(P([2*a-2*a]).simplify()), str(P.zero()))
+        self.assertEqual(str(P([2*a, Fraction(1,2)*2]).simplify()), str(P([2*a,1])))
         # TODO: Add a function that checks for equality without simplification.
 
     def test_new(self):
-        self.assertEqual(str(P.new(['3/15', Fraction(1, 2), 2, 3.5, 1.])), "['1/5', '1/2', '2', '3.5', '1.0']")
+        self.assertEqual(str(P.new(['3/15', Fraction(1, 2), 2, 3.5, 1.,a])), "['1/5', '1/2', '2', '3.5', '1.0', 'a']")
         with self.assertRaises(TypeError):
             P.new([0,2,[1]])
         with self.assertRaises(TypeError):
@@ -49,6 +55,8 @@ class TestPolynomial(unittest.TestCase):
         self.assertTrue(P.new([1/3]) == P.new(['1/3']))
         self.assertTrue(P.new([0.1 + 0.2]) == P.new([0.3]))
         self.assertTrue(P.new([0.1j + 0.2 - 0.1j]) == P.new([0.2]))
+        # Assuming `scalar` of type `Expr` to be exact
+        self.assertTrue(P.new([a, 4, 0, 0]) == P.new([a, 4]))
 
     def test_pretty_print(self):
         self.assertEqual(P.zero().pretty_print(), '0')
@@ -74,6 +82,8 @@ class TestPolynomial(unittest.TestCase):
         self.assertEqual(P.new([1, 3/2, 2]), P.new([2, 3, 4]).scalar_multiplication(1/2))
         self.assertEqual(P.new([1, 3/2, 2]), P.new([2, 3, 4]).scalar_multiplication(0.5))
         self.assertEqual(P.new([1j, 3j/2, 2j]), P.new([2, 3, 4]).scalar_multiplication(0.5j))
+        self.assertEqual(P.new([4, 6, 2*a]), P.new([2, 3, a]).scalar_multiplication(2))
+        self.assertEqual(P.new([4*a, 6*a, 2*a**2]), P.new([2, 3, a]).scalar_multiplication(2*a))
 
     def test_negation(self):
         self.assertEqual(-P.new([2, 4, 8]), P.new([-2, -4, -8]))
@@ -86,6 +96,8 @@ class TestPolynomial(unittest.TestCase):
         self.assertEqual(P.new([1]) + P.new([1, 2j+1]), P.new([2, 2j+1]))
         self.assertEqual(P.zero() + P.new([2, 4]), P.new([2, 4]))
         self.assertEqual(P.zero() + P.zero(), P.zero())
+        self.assertEqual(P.new([a]) + P.new([2, 4]), P.new([2+a, 4]))
+        self.assertEqual(P.zero() + P.new([a]), P.new([a]))
 
     def test_multiplication(self):
         self.assertEqual(P.new([1, 2]) * P.new([5, 1]), P.new([5, 11, 2]))
@@ -98,16 +110,19 @@ class TestPolynomial(unittest.TestCase):
         self.assertEqual(P.new([1, 2, 3, 4]) * P.zero(), P.zero())
         self.assertEqual(P.new([1, 2, 3, 4]) * 2, P.new([2, 4, 6, 8]))
         self.assertEqual(2 * P.new([1, 2, 3, 4]), P.new([2, 4, 6, 8]))
+        self.assertEqual(P.new([a]) * P.new([1, 2, 3, 4]), P.new([a, 2*a, 3*a, 4*a]))
 
     def test_integrate(self):
         self.assertEqual(P.new([5, 5, 7]).integrate(), P.new([0, 5, Fraction(5, 2), Fraction(7, 3)]))
         self.assertEqual(P.new([5, 5j+2.1, 7.]).integrate(), P.new([0, 5, (5j+2.1)/2, 7/3]))
         self.assertEqual(P.zero().integrate(), P.zero())
+        self.assertEqual(P.new([5, 5, a]).integrate(), P.new([0, 5, Fraction(5, 2), a/3]))
 
     def test_diff(self):
         self.assertEqual(P.new([5, 5, 7]).diff(), P.new([5, 14]))
         self.assertEqual(P.zero().diff(), P.zero())
         self.assertEqual(P.new([5]).diff(), P.zero())
+        self.assertEqual(P.new([5, 5*a, 7]).diff(), P.new([5*a, 14]))
 
 
 class TestQuasiPolynomial(unittest.TestCase):

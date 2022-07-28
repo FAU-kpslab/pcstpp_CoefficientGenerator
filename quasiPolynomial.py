@@ -2,9 +2,13 @@ from fractions import Fraction
 from typing import List, Union, Dict,TYPE_CHECKING
 from cmath import isclose
 if TYPE_CHECKING:
-    from mathematics import Coeff, Energy_real
+    from mathematics import Coeff, Energy_real, Expr
 
 import numpy as np
+import sympy as sym
+from sympy.core.expr import Expr
+
+# TODO: Update documentation for `sympy`
 
 def is_zero(scalar: "Coeff")->bool:
     """
@@ -16,8 +20,9 @@ def is_zero(scalar: "Coeff")->bool:
         -------
         bool
     """
-
-    if isinstance(scalar, (Fraction, int)):
+    
+    # Assuming `scalar` of type `Expr` to be exact
+    if isinstance(scalar, (Fraction, int, Expr)):
         return scalar == 0
     elif isinstance(scalar, (float, complex)):
         return isclose(scalar, 0, abs_tol=1e-09)
@@ -35,7 +40,8 @@ def are_close(scalar1: "Coeff", scalar2: "Coeff")->bool:
         bool
     """
 
-    if isinstance(scalar1, (Fraction, int)) and isinstance(scalar2, (Fraction, int)):
+    # Assuming `scalar` of type `Expr` to be exact
+    if isinstance(scalar1, (Fraction, int, Expr)) and isinstance(scalar2, (Fraction, int, Expr)):
         return scalar1 == scalar2
     elif isinstance(scalar1, (float, complex)) or isinstance(scalar2, (float, complex)):
         if is_zero(scalar1) or is_zero(scalar2):
@@ -58,7 +64,7 @@ def inverse(scalar: "Coeff"):
 
     if isinstance(scalar, (int, Fraction)):
         return Fraction(1, scalar)
-    elif isinstance(scalar, (float, complex)):
+    elif isinstance(scalar, (float, complex, Expr)):
         return 1/scalar
 
 
@@ -213,7 +219,7 @@ class Polynomial:
         for coeff in coefficient_list:
             if isinstance(coeff, (int, str)):
                 coefficients.append(Fraction(coeff))
-            elif isinstance(coeff, (Fraction, float, complex)):
+            elif isinstance(coeff, (Fraction, float, complex, Expr)):
                 coefficients.append(coeff)
             else:
                 raise TypeError("Type {} is not supported for coefficients in `Polynomial`".format(type(coeff)))
@@ -264,6 +270,7 @@ class Polynomial:
             str
         """
 
+        # TODO: Check if `sym` works
         # Check whether the polynomial is empty.
         if self == Polynomial.zero():
             return '0'
@@ -381,7 +388,7 @@ class Polynomial:
                       np.arange(- self.__private_coefficients.size + 1, other.__private_coefficients.size)]
             return Polynomial(output).simplify()
         # Check whether the second object is a scalar and call scalar_multiplication.
-        elif isinstance(other, (Fraction, int, float, complex)):
+        elif isinstance(other, (Fraction, int, float, complex, Expr)):
             return self.scalar_multiplication(other)
         # If the second polynomial is not a polynomial (but e.g. a quasi-polynomial) return NotImplemented to trigger
         # the function __rmul__ of the other class.
@@ -447,7 +454,7 @@ class Polynomial:
         else:
             return self.coefficients()[0]
 
-
+# TODO: Do analog implementation of `sympy`
 class QuasiPolynomial:
     """
     QuasiPolynomial(coefficient_dict)
