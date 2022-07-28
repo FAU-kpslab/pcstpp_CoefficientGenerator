@@ -1,16 +1,18 @@
 from fractions import Fraction
-from typing import List, Union, Dict,TYPE_CHECKING
+from typing import List, Union, Dict, TYPE_CHECKING
 from cmath import isclose
+
 if TYPE_CHECKING:
     from mathematics import Coeff, Energy_real, Expr
 
 import numpy as np
-import sympy as sym
 from sympy.core.expr import Expr
+
 
 # TODO: Update documentation for `sympy`
 
-def is_zero(scalar: "Coeff")->bool:
+
+def is_zero(scalar: "Coeff") -> bool:
     """
     is_zero(scalar)
 
@@ -20,7 +22,7 @@ def is_zero(scalar: "Coeff")->bool:
         -------
         bool
     """
-    
+
     # Assuming `scalar` of type `Expr` to be exact
     if isinstance(scalar, (Fraction, int, Expr)):
         return scalar == 0
@@ -29,7 +31,8 @@ def is_zero(scalar: "Coeff")->bool:
     else:
         raise TypeError("This is no valid type for this function!")
 
-def are_close(scalar1: "Coeff", scalar2: "Coeff")->bool:
+
+def are_close(scalar1: "Coeff", scalar2: "Coeff") -> bool:
     """
     are_close(scalar1, scalar2)
 
@@ -51,6 +54,7 @@ def are_close(scalar1: "Coeff", scalar2: "Coeff")->bool:
     else:
         raise TypeError("These types can not be compared!")
 
+
 def inverse(scalar: "Coeff"):
     """
     inverse(scalar)
@@ -65,7 +69,7 @@ def inverse(scalar: "Coeff"):
     if isinstance(scalar, (int, Fraction)):
         return Fraction(1, scalar)
     elif isinstance(scalar, (float, complex, Expr)):
-        return 1/scalar
+        return 1 / scalar
 
 
 class Polynomial:
@@ -124,7 +128,7 @@ class Polynomial:
             Returns the constant coefficient.
     """
 
-    def __init__(self, coefficient_list: Union[List["Coeff"],np.ndarray]) -> None:
+    def __init__(self, coefficient_list: Union[List["Coeff"], np.ndarray]) -> None:
         """
             Parameters
             ----------
@@ -384,8 +388,8 @@ class Polynomial:
             # Flip it such that all __private_coefficients corresponding to the same x^n are part of the same diagonals.
             combinations = np.flipud(np.outer(self.__private_coefficients, other.__private_coefficients))
             # Sum over the diagonals to obtain the real __private_coefficients.
-            output:List[Coeff] = [sum(combinations.diagonal(exponent), Fraction(0)) for exponent in
-                      np.arange(- self.__private_coefficients.size + 1, other.__private_coefficients.size)]
+            output: List[Coeff] = [sum(combinations.diagonal(exponent), Fraction(0)) for exponent in
+                                   np.arange(- self.__private_coefficients.size + 1, other.__private_coefficients.size)]
             return Polynomial(output).simplify()
         # Check whether the second object is a scalar and call scalar_multiplication.
         elif isinstance(other, (Fraction, int, float, complex, Expr)):
@@ -454,7 +458,7 @@ class Polynomial:
         else:
             return self.coefficients()[0]
 
-# TODO: Do analog implementation of `sympy`
+
 class QuasiPolynomial:
     """
     QuasiPolynomial(coefficient_dict)
@@ -477,12 +481,12 @@ class QuasiPolynomial:
 
         Methods
         -------
+        sort : QuasiPolynomial
+            Sorts a quasi-polynomial by exponent alpha.
         __str__ : str
             Prints the coefficients.
         zero : QuasiPolynomial
             Creates an empty quasi-polynomial.
-        sort : QuasiPolynomial
-            Sorts a quasi-polynomial by exponent alpha.
         simplify : QuasiPolynomial
             Simplifies a quasi-polynomial by *removing* zero polynomials.
         new_integer : QuasiPolynomial
@@ -513,7 +517,7 @@ class QuasiPolynomial:
             Returns the constant coefficient of the constant polynomial (alpha = 0).
     """
 
-    def __init__(self, polynomial_dict: Dict["Energy_real", Polynomial]) -> None:
+    def __init__(self, polynomial_dict: Dict[Union["Energy_real", Expr], Polynomial]) -> None:
         """
             Parameters
             ----------
@@ -524,6 +528,23 @@ class QuasiPolynomial:
 
         self.polynomial_dict = polynomial_dict
         self.polynomials = polynomial_dict.items()
+
+    def sort(self) -> 'QuasiPolynomial':
+        """
+        qp.sort()
+
+        Sorts a quasi-polynomial by exponent alpha.
+
+            Returns
+            -------
+            QuasiPolynomial
+        """
+
+        # Sort alphabetically when using `sympy`.
+        if len([e for e in self.polynomial_dict.keys() if isinstance(e, Expr)]) > 0:
+            return QuasiPolynomial({e: p for e, p in sorted(self.polynomials, key=lambda e: str(e))})
+        else:
+            return QuasiPolynomial({e: p for e, p in sorted(self.polynomials)})
 
     def __str__(self) -> str:
         """
@@ -536,8 +557,7 @@ class QuasiPolynomial:
                 str
         """
 
-        return str(
-            [(e, [str(coeff) for coeff in p.coefficients()]) for e, p in sorted(self.polynomials)])
+        return str([(e, [str(coeff) for coeff in p.coefficients()]) for e, p in self.sort().polynomials])
 
     @staticmethod
     def zero() -> 'QuasiPolynomial':
@@ -552,19 +572,6 @@ class QuasiPolynomial:
         """
 
         return QuasiPolynomial({})
-
-    def sort(self) -> 'QuasiPolynomial':
-        """
-        qp.sort()
-
-        Sorts a quasi-polynomial by exponent alpha.
-
-            Returns
-            -------
-            QuasiPolynomial
-        """
-
-        return QuasiPolynomial({e: p for e, p in sorted(self.polynomials)})
 
     def simplify(self) -> 'QuasiPolynomial':
         """
@@ -611,11 +618,12 @@ class QuasiPolynomial:
             QuasiPolynomial
         """
 
-        polynomial_list:Dict[Energy_real,Polynomial] = {e: Polynomial.new(coefficient_list[e]) for e in range(len(coefficient_list))}
+        polynomial_list: Dict[Energy_real, Polynomial] = {e: Polynomial.new(coefficient_list[e]) for e in
+                                                          range(len(coefficient_list))}
         return QuasiPolynomial(polynomial_list).simplify()
 
     @staticmethod
-    def new(coefficient_dict: Dict["Energy_real", List[Union["Coeff", str]]]) -> 'QuasiPolynomial':
+    def new(coefficient_dict: Dict[Union["Energy_real", Expr], List[Union["Coeff", str]]]) -> 'QuasiPolynomial':
         """
         new(Dict[scalar, List[scalar]])
 
@@ -790,7 +798,7 @@ class QuasiPolynomial:
         elif isinstance(other, Polynomial):
             return self * QuasiPolynomial({0: other})
         # Check whether the second object is a scalar and call scalar_multiplication.
-        if isinstance(other, (Fraction, int, float, complex)):
+        if isinstance(other, (Fraction, int, float, complex, Expr)):
             return self.scalar_multiplication(other)
         else:
             return NotImplemented
@@ -839,8 +847,9 @@ class QuasiPolynomial:
                     # Perform partial integration multiple times.
                     for n in np.arange(1, p.coefficients().size):
                         temp_polynomial = temp_polynomial.diff()
-                        resulting_polynomial = resulting_polynomial - (temp_polynomial * inverse(e)**(n+1))
-                        resulting_constant = resulting_constant + temp_polynomial.coefficients()[0] * inverse(e)**(n+1)
+                        resulting_polynomial = resulting_polynomial - (temp_polynomial * inverse(e) ** (n + 1))
+                        resulting_constant = resulting_constant + temp_polynomial.coefficients()[0] * inverse(e) ** (
+                                n + 1)
                     constant = constant + resulting_constant
                     output[e] = resulting_polynomial
             return (QuasiPolynomial(output) + QuasiPolynomial.new_integer([[constant]])).simplify()
