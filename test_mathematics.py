@@ -4,7 +4,8 @@ from fractions import Fraction
 from mathematics import *
 from quasiPolynomial import QuasiPolynomial as qp
 
-# TODO: Write tests for `sympy`
+# Defining symbols for testing
+a, b = sym.symbols('a b')
 
 class TestHelper(unittest.TestCase):
 
@@ -22,6 +23,9 @@ class TestHelper(unittest.TestCase):
         # officially `complex` is not supported, maybe rewrite this test
         # https://stackoverflow.com/questions/12136762/assertalmostequal-in-python-unit-test-for-collections-of-floats#:~:text=The%20assertAlmostEqual%20%28x%2C%20y%29%20method%20in%20Python%27s%20unit,%28%29%20is%20that%20it%20only%20works%20on%20floats.
         self.assertAlmostEqual(energy(((2,-4+1.2j), (2.1-1.2j,), ())), 0.1)
+        self.assertEqual(energy(((2, 2 * a),)), 2 + 2 * a)
+        self.assertEqual(energy(((-2 * a, 2 * a),)), 0)
+        self.assertEqual(energy(((Fraction(1,2) * a ** 2,Fraction(1,2)), (2,), ())), Fraction(1,2) * a ** 2 + Fraction(5,2))
 
     def test_energy_broad(self):
         self.assertEqual(energy_broad(((2, -2), ()),0), 0)
@@ -68,7 +72,11 @@ class TestHelper(unittest.TestCase):
         self.assertAlmostEqual(signum_complex(((1+3j,-2+2j),), ((-2j-2,1),)), np.exp(-np.angle(-1+5j)*1j) - np.exp(-np.angle(-1-2j)*1j))
         self.assertEqual(signum_complex(((1+1j,),), ((+2j+2,),)), 0)
         self.assertEqual(signum_complex(((1+1j,0),(-1,3)), ((+2j+2,0),(2,2))), 0)
-        
+        self.assertEqual(signum_complex(((2*a,),), ((2*a,),)), 0)
+        self.assertEqual(signum_complex(((2*a,),), ((3*a,),)), 0)
+        self.assertEqual(signum_complex(((2*a,),), ((0,),)), (2*a).conjugate() / abs(2*a))
+        self.assertEqual(signum_complex(((2*a,),), ((-3*a,),)), (2*a).conjugate() / abs(2*a) + (3*a).conjugate() / abs(3*a))
+
     def test_exponential(self):
         self.assertEqual(exponential(((2, -2), ()), ((2,), ()), ((-2,), ()), energy), qp.new_integer([[], [], [], [], [1]]))
         self.assertEqual(exponential(((1, -1),), ((1,),), ((-1,),), energy), qp.new_integer([[], [], [1]]))
@@ -78,6 +86,9 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(exponential(((Fraction(1,2), -Fraction(1,2)), ()), ((Fraction(1,2),), ()), ((-Fraction(1,2),), ()), energy), qp.new({1:[1]}))
         self.assertEqual(exponential(((Fraction(1,4), -Fraction(1,4)), ()), ((Fraction(1,4),), ()), ((-Fraction(1,4),), ()), energy), qp.new({Fraction(1,2):[1]}))
         self.assertEqual(exponential(((1+1j, -1-1j), ()), ((1+1j,), ()), ((-1-1j,), ()), energy), qp.new({2*abs(1+1j):[1]}))
+        self.assertEqual(exponential(((2*a, -2*a),), ((2*a,),), ((-2*a,),), energy), qp.new({4*sym.Abs(a):[1]}))
+        self.assertEqual(exponential(((2*a, -2), ()), ((2*a,), ()), ((-2,), ()), energy), qp.new({2*sym.Abs(a) + 2 - sym.Abs(2*a-2):[1]}))
+        self.assertEqual(exponential(((Fraction(3,2)*a, -Fraction(3,2)*a),), ((3*a/2,),), ((-3*a/2,),), energy), qp.new({6*sym.Abs(a/2):[1]}))
 
     def test_partitions(self):
         self.assertEqual(partitions(((2,), ())), [])
