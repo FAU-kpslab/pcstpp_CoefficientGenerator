@@ -2,7 +2,6 @@ from fractions import Fraction
 from functools import reduce
 from itertools import product, combinations
 import operator
-from cmath import isclose
 
 from quasiPolynomial import QuasiPolynomial, are_close, is_zero
 import numpy as np
@@ -10,13 +9,14 @@ import sympy as sym
 from typing import Callable, List, Tuple, Union, TypeVar, cast
 
 Expr = sym.core.expr.Expr
-Coeff = Union[int,float,Fraction,complex,Expr]
+Coeff = Union[int, float, Fraction, complex, Expr]
 Energy = Coeff
-Energy_real = Union[int,float,Fraction]
-E = TypeVar('E', bound= Energy)
-E_real = TypeVar('E_real', bound= Energy_real)
-Indices = Tuple[Tuple[E,...],...]
-Sequence = Tuple[Tuple[int,...],...]
+Energy_real = Union[int, float, Fraction]
+E = TypeVar('E', bound=Energy)
+E_real = TypeVar('E_real', bound=Energy_real)
+Indices = Tuple[Tuple[E, ...], ...]
+Sequence = Tuple[Tuple[int, ...], ...]
+
 
 # TODO: Update documentation for `sympy`
 
@@ -30,9 +30,11 @@ def energy(indices: Indices[E]) -> E:
         -------
         Union[int, float, Fraction, complex]
     """
-    return sum(reduce(operator.add, indices),start=cast(E,0))
 
-def energy_broad(indices: Indices[Energy_real], delta:Energy_real) -> Energy_real:
+    return sum(reduce(operator.add, indices), start=cast(E, 0))
+
+
+def energy_broad(indices: Indices[Energy_real], delta: Energy_real) -> Energy_real:
     """
     energy_broad(indices)
 
@@ -43,10 +45,12 @@ def energy_broad(indices: Indices[Energy_real], delta:Energy_real) -> Energy_rea
         -------
         Union[int, float, Fraction]
     """
+
     e = energy(indices)
     # also return 0 if `abs(e)` is very close to `delta` to deal with
     # floating errors
-    return e if abs(e)>delta and not are_close(abs(e),delta) else 0
+    return e if abs(e) > delta and not are_close(abs(e), delta) else 0
+
 
 def signum(indices1: Indices[Energy_real], indices2: Indices[Energy_real]) -> int:
     """
@@ -58,9 +62,11 @@ def signum(indices1: Indices[Energy_real], indices2: Indices[Energy_real]) -> in
         -------
         int
     """
+
     return int(np.sign(energy(indices1))) - int(np.sign(energy(indices2)))
 
-def signum_broad(indices1: Indices[Energy_real], indices2: Indices[Energy_real], delta:Energy_real) -> int:
+
+def signum_broad(indices1: Indices[Energy_real], indices2: Indices[Energy_real], delta: Energy_real) -> int:
     """
     signum_broad(indices1, indices2, delta)
 
@@ -72,9 +78,12 @@ def signum_broad(indices1: Indices[Energy_real], indices2: Indices[Energy_real],
         -------
         int
     """
-    return int(np.sign(energy_broad(indices1,delta))) - int(np.sign(energy_broad(indices2,delta)))
-   
-def signum_complex(indices1: Indices[Union[complex,Expr]], indices2: Indices[Union[complex,Expr]]) -> Union[complex,Expr]:
+
+    return int(np.sign(energy_broad(indices1, delta))) - int(np.sign(energy_broad(indices2, delta)))
+
+
+def signum_complex(indices1: Indices[Union[complex, Expr]], indices2: Indices[Union[complex, Expr]]) -> Union[
+    complex, Expr]:
     """
     signum_complex(indices1, indices2)
 
@@ -85,18 +94,15 @@ def signum_complex(indices1: Indices[Union[complex,Expr]], indices2: Indices[Uni
         -------
         complex
     """
-    if isinstance(indices1, complex) and isinstance(indices2, complex):
-        # TODO: Maybe change from numpy to built-in
-        # In this case we may not need to use this if-else
-        complex_sgn = lambda z: 0 if is_zero(z) else np.conj(z)/np.abs(z)
-    else:
-        complex_sgn = lambda z: 0 if is_zero(z) else sym.conjugate(z)/sym.Abs(z)
+
+    complex_sgn = lambda z: 0 if is_zero(z) else z.conjugate() / abs(z)
     return complex_sgn(energy(indices1)) - complex_sgn(energy(indices2))
 
-def exponential(indices: Indices[Energy], 
-                indices1: Indices[Energy], 
+
+def exponential(indices: Indices[Energy],
+                indices1: Indices[Energy],
                 indices2: Indices[Energy],
-                energy_func: Callable[[Indices[Energy]],Energy]) -> QuasiPolynomial:
+                energy_func: Callable[[Indices[Energy]], Energy]) -> QuasiPolynomial:
     """
     exponential(indices, indices1, indices2)
 
@@ -108,9 +114,10 @@ def exponential(indices: Indices[Energy],
     """
 
     alpha = abs(energy_func(indices)) - abs(energy_func(indices1)) - abs(energy_func(indices2))
-    return QuasiPolynomial.new({-alpha:[1]})
+    return QuasiPolynomial.new({-alpha: [1]})
 
-def partitions(sequence: Sequence) -> List[Tuple[Sequence,Sequence]]:
+
+def partitions(sequence: Sequence) -> List[Tuple[Sequence, Sequence]]:
     """
     partitions(sequence)
 
@@ -120,11 +127,12 @@ def partitions(sequence: Sequence) -> List[Tuple[Sequence,Sequence]]:
         -------
         List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]
     """
+
     # TODO: Why we have to look at all possible partitions, especially those where
     # we have different amount of terms on the left side for commuting Hilbert spaces?
     # Should this depend on the starting conditions e.g. is this needed for the Dicke model?
     # -> Maybe add an option to restrict partitions depending on the model
-    partitions = [[(s[:i],s[i:]) for i in range(len(s) + 1)] for s in sequence]
+    partitions = [[(s[:i], s[i:]) for i in range(len(s) + 1)] for s in sequence]
     # skip edge cases of completely empty left or right side
     valid_partitions = list(product(*partitions))[1:-1]
-    return [(tuple(l[0] for l in pr),tuple(r[1] for r in pr)) for pr in valid_partitions]
+    return [(tuple(l[0] for l in pr), tuple(r[1] for r in pr)) for pr in valid_partitions]
