@@ -4,7 +4,7 @@ from itertools import product, combinations
 import operator
 from cmath import isclose
 
-from quasiPolynomial import QuasiPolynomial, are_close
+from quasiPolynomial import QuasiPolynomial, are_close, is_zero
 import numpy as np
 from typing import Callable, List, Tuple, Union, TypeVar, cast
 
@@ -81,7 +81,7 @@ def signum_complex(indices1: Indices[complex], indices2: Indices[complex]) -> co
         -------
         complex
     """
-    complex_sgn = lambda z: 0 if np.abs(z) == 0 else np.conj(z)/np.abs(z)
+    complex_sgn = lambda z: 0 if is_zero(z) else np.conj(z)/np.abs(z)
     return complex_sgn(energy(indices1)) - complex_sgn(energy(indices2))
 
 def exponential(indices: Indices[Energy], 
