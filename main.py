@@ -44,6 +44,11 @@ def main():
         for (k,v) in translation.items():
             if isinstance(v,str) and "j" in v:
                 translation[k] = complex(v)
+        # postprocessing of Expr values in translation 
+        for (k,v) in translation.items():
+            if isinstance(v,str) and "a" in v:
+                # TODO: How to convert?
+                raise NotImplementedError()
     else:
         print("You have decided to use the default config values.")
         # Enter the total order.
@@ -85,6 +90,7 @@ def main():
     translation = cast(Dict[int, Energy],translation)
 
     if not args.config:
+        # Assuming expressions of type `Expr` to be exact
         # If needed, convert all starting_conditions to the same type
         if len([v for v in chain(starting_conditions.values(), translation.values()) if isinstance(v, (complex, float))])>0:
             type_to_use = (complex if len([v for v in chain(starting_conditions.values(), translation.values()) 
@@ -116,6 +122,7 @@ def main():
 
         operators_all = [operator for operator_space in operators for operator in operator_space]
         
+        # TODO: Add another case for `Expr` (sympy) entries 
         if delta>0:
             print("Using the broad signum function.")
             signum_func = lambda l,r: signum_broad(l,r,delta=delta)
@@ -174,6 +181,7 @@ def main():
             result.close()
 
     # Generate the config file.
+    # TODO: Does this work with sympy
     config_file = open("config.yml", "w")
     print('---', file=config_file)
     print("# This is an exemplary config file. Following the comments in this file, you can modify it for your "
