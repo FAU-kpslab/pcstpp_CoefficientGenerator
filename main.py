@@ -14,9 +14,7 @@ from sympy.parsing.sympy_parser import parse_expr
 import sympy as sym
 
 # Standard Symbol for symbolic calculations
-# TODO: Add assumptions? Maybe do this later on when knowing
-# if it is real/complex
-a = sym.Symbol("a")
+a = sym.Symbol("a",positive=True)
 
 def main():
     my_parser = argparse.ArgumentParser(description='Use pCUT to block-diagonalize a Lindbladian or a Hamiltonian with '
@@ -46,14 +44,17 @@ def main():
         for (k,v) in starting_conditions.items():
             if isinstance(v,str) and "j" in v:
                 starting_conditions[k] = complex(v)
-        # postprocessing of complex values in translation 
-        for (k,v) in translation.items():
-            if isinstance(v,str) and "j" in v:
-                translation[k] = complex(v)
-        # postprocessing of Expr values in translation 
+        # postprocessing of Expr values in translation
         for (k,v) in translation.items():
             if isinstance(v,str) and "a" in v:
                 translation[k] = parse_expr(v,local_dict={"a":a})
+        # postprocessing of complex values in translation
+        for (k,v) in translation.items():
+            if isinstance(v,str) and "j" in v:
+                translation[k] = complex(v)
+        # postprocessing of Expr value for max_energy
+        if isinstance(max_energy,str) and "a" in max_energy:
+            max_energy = parse_expr(max_energy,local_dict={"a":a})
     else:
         print("You have decided to use the default config values.")
         # Enter the total order.

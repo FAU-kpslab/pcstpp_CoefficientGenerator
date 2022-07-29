@@ -299,8 +299,18 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
             m1 = sequence_to_indices(s1, translation)
             m2 = sequence_to_indices(s2, translation)
             # Only calculate non-vanishing contributions to the integrand.
-            if (abs(energy_func(m1)) <= max_energy) & (abs(energy_func(m2)) <= max_energy):
-                integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
+            try:
+                if (abs(energy_func(m1)) <= max_energy) & (abs(energy_func(m2)) <= max_energy):
+                    integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
+            except TypeError:
+                try:
+                    if ((sym.Abs(energy_func(m1))**2).expand(real=True) <= (max_energy**2).expand(real=True)) & ((sym.Abs(energy_func(m2))**2).expand(real=True) <= (max_energy**2).expand(real=True)):
+                        integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
+                except TypeError:
+                    print("m1: {}".format((sym.Abs(energy_func(m1))**2).expand(real=True) <= (max_energy**2).expand(real=True)))
+                    print("m2: {}".format((sym.Abs(energy_func(m2))**2).expand(real=True) <= (max_energy**2).expand(real=True)))
+                    integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
+
         result = integrand.integrate()
         # Insert the result into the collection.
         collection[sequence] = result
