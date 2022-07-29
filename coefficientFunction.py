@@ -306,11 +306,10 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
         collection[sequence] = result
         return result
 
-# TODO: Analog to `calc` for `sympy`
 def trafo_calc(sequence: Sequence, trafo_collection: FunctionCollection, collection: FunctionCollection,
-               translation: Dict[int,Energy], max_energy: Energy_real,
+               translation: Dict[int,Energy], max_energy: Union[Energy_real,Expr],
                signum_func:Union[Callable[[Indices[Energy_real], Indices[Energy_real]],int],
-                                 Callable[[Indices[complex], Indices[complex]],complex]],
+                                 Callable[[Indices[Union[complex,Expr]], Indices[Union[complex,Expr]]],Union[complex,Expr]]],
                energy_func: Callable[[Indices[Energy]],Energy]) -> QuasiPolynomial:
     """
     trafo_calc(sequence)

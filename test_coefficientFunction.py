@@ -5,7 +5,10 @@ from coefficientFunction import FunctionCollection
 from quasiPolynomial import Polynomial, Fraction, QuasiPolynomial as qp
 from coefficientFunction import *
 
-translation = dict([('-2.id', -2), ('0.id', 0), ('2.id', 2), ('id.-2', -2), ('id.0', 0), ('id.2', 2)])
+# Defining symbols for testing
+a, b = sym.symbols('a b')
+
+translation = dict([('-2.id', -2), ('0.id', 0), ('2.id', 2), ('id.-2', -2), ('id.0', 0), ('id.2', 2), ('a.id', a), ('-a.id', -a)])
 collection = FunctionCollection(translation)
 collection[(('-2.id',), ())] = qp.new_integer([[1]])
 collection[(('0.id',), ())] = qp.new_integer([[1]])
@@ -13,6 +16,8 @@ collection[(('2.id',), ())] = qp.new_integer([[1]])
 collection[((), ('id.-2',))] = qp.new_integer([[-1]])
 collection[((), ('id.0',))] = qp.new_integer([[-1]])
 collection[((), ('id.2',))] = qp.new_integer([[-1]])
+collection[(('a.id',), ())] = qp.new_integer([[1]])
+collection[(('-a.id',), ())] = qp.new_integer([[1]])
 
 # TODO: Write tests for `sympy`
 
@@ -27,13 +32,14 @@ class Test_A_FunctionCollection(unittest.TestCase):
     def test_keys(self):
         self.assertEqual(collection.keys(),
                          [(('-2.id',), ()), (('0.id',), ()), (('2.id',), ()), ((), ('id.-2',)), ((), ('id.0',)),
-                          ((), ('id.2',))])
+                          ((), ('id.2',)), (('a.id',), ()), (('-a.id',), ())])
 
     def test_print(self):
         self.assertEqual(str(collection),
                          str(["(('-2.id',), ()): [(0, ['1'])]", "(('0.id',), ()): [(0, ['1'])]",
                               "(('2.id',), ()): [(0, ['1'])]", "((), ('id.-2',)): [(0, ['-1'])]",
-                              "((), ('id.0',)): [(0, ['-1'])]", "((), ('id.2',)): [(0, ['-1'])]"]))
+                              "((), ('id.0',)): [(0, ['-1'])]", "((), ('id.2',)): [(0, ['-1'])]",
+                              "(('a.id',), ()): [(0, ['1'])]", "(('-a.id',), ()): [(0, ['1'])]"]))
 
 
 class Test_B_DifferentialEquation(unittest.TestCase):
@@ -52,5 +58,9 @@ class Test_B_DifferentialEquation(unittest.TestCase):
         self.assertEqual(calc((('0.id','0.id'),tuple()),collection,translation,2,signum,energy),QuasiPolynomial.zero())
         self.assertEqual(calc((('-2.id','2.id'),tuple()),collection,translation,2,signum,energy),
                 QuasiPolynomial({0: Polynomial([Fraction("-1/2")]), 4: Polynomial([Fraction("1/2")])}))
+        # TODO: The following result is not pretty, as `sym.conjugate(a)/sym.Abs(a)**2` should be `a`,
+        # but this is not found by sympy
+        self.assertEqual(calc((('-a.id','a.id'),tuple()),collection,translation,sym.Abs(a),signum_complex,energy),
+                QuasiPolynomial({0: Polynomial([-sym.conjugate(a)/sym.Abs(a)**2]), 2*sym.Abs(a): Polynomial([sym.conjugate(a)/sym.Abs(a)**2])}))
 if __name__ == '__main__':
     unittest.main()
