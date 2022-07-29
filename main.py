@@ -46,14 +46,14 @@ def main():
                 starting_conditions[k] = complex(v)
         # postprocessing of Expr values in translation
         for (k,v) in translation.items():
-            if isinstance(v,str) and "a" in v:
+            if isinstance(v,str) and ("a" in v or "I" in v):
                 translation[k] = parse_expr(v,local_dict={"a":a})
         # postprocessing of complex values in translation
         for (k,v) in translation.items():
             if isinstance(v,str) and "j" in v:
                 translation[k] = complex(v)
         # postprocessing of Expr value for max_energy
-        if isinstance(max_energy,str) and "a" in max_energy:
+        if isinstance(max_energy,str) and ("a" in max_energy or "I" in max_energy):
             max_energy = parse_expr(max_energy,local_dict={"a":a})
     else:
         print("You have decided to use the default config values.")
