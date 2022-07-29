@@ -11,6 +11,8 @@ from sympy.core.expr import Expr
 
 # TODO: Update documentation for `sympy`
 
+# ONLY TEMPORARY
+SIMPLIFY_RESULTS = True
 
 def is_zero(scalar: "Coeff") -> bool:
     """
@@ -456,7 +458,8 @@ class Polynomial:
         if self == Polynomial.zero():
             return Fraction(0)
         else:
-            return self.coefficients()[0]
+            return (self.coefficients()[0].simplify() if isinstance(self.coefficients()[0],Expr) and SIMPLIFY_RESULTS
+                    else self.coefficients()[0])
 
 
 class QuasiPolynomial:
