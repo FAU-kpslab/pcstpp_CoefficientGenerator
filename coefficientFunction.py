@@ -299,18 +299,27 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
             m1 = sequence_to_indices(s1, translation)
             m2 = sequence_to_indices(s2, translation)
             # Only calculate non-vanishing contributions to the integrand.
-            if (abs(energy_func(m1)) <= max_energy) & (abs(energy_func(m2)) <= max_energy):
-                integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
+            try:
+                if (abs(energy_func(m1)) <= max_energy) & (abs(energy_func(m2)) <= max_energy):
+                    integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
+            except TypeError:
+                try:
+                    if ((sym.Abs(energy_func(m1))**2).expand(real=True) <= (max_energy**2).expand(real=True)) & ((sym.Abs(energy_func(m2))**2).expand(real=True) <= (max_energy**2).expand(real=True)):
+                        integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
+                except TypeError:
+                    print("m1: {}".format((sym.Abs(energy_func(m1))**2).expand(real=True) <= (max_energy**2).expand(real=True)))
+                    print("m2: {}".format((sym.Abs(energy_func(m2))**2).expand(real=True) <= (max_energy**2).expand(real=True)))
+                    integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
+
         result = integrand.integrate()
         # Insert the result into the collection.
         collection[sequence] = result
         return result
 
-# TODO: Analog to `calc` for `sympy`
 def trafo_calc(sequence: Sequence, trafo_collection: FunctionCollection, collection: FunctionCollection,
-               translation: Dict[int,Energy], max_energy: Energy_real,
+               translation: Dict[int,Energy], max_energy: Union[Energy_real,Expr],
                signum_func:Union[Callable[[Indices[Energy_real], Indices[Energy_real]],int],
-                                 Callable[[Indices[complex], Indices[complex]],complex]],
+                                 Callable[[Indices[Union[complex,Expr]], Indices[Union[complex,Expr]]],Union[complex,Expr]]],
                energy_func: Callable[[Indices[Energy]],Energy]) -> QuasiPolynomial:
     """
     trafo_calc(sequence)
