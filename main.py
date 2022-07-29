@@ -6,7 +6,7 @@ from yaml.loader import SafeLoader
 import argparse
 
 import coefficientFunction
-from quasiPolynomial import QuasiPolynomial as qp
+from quasiPolynomial import QuasiPolynomial as qp, is_zero
 from mathematics import Energy, Coeff, energy, energy_broad, signum, signum_broad, signum_complex
 from itertools import product, chain
 from typing import cast, Dict, Union
@@ -139,7 +139,7 @@ def main():
                 if not args.trafo:
                     indices = coefficientFunction.sequence_to_indices(sequence_sorted, translation)
                     # Make use of block diagonality.
-                    if energy_func(indices) == 0:
+                    if coefficientFunction.is_zero(energy_func(indices)):
                         # As the band diagonality is only fulfilled up to a multiple of delta add + delta * max_order
                         # TODO: According to Andis calculations, max_energy should depend on the
                         # specific order used in one calculation -> implement order-dependent max_energy
