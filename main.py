@@ -7,10 +7,16 @@ import argparse
 
 import coefficientFunction
 from quasiPolynomial import QuasiPolynomial as qp, is_zero
-from mathematics import Energy, Coeff, energy, energy_broad, signum, signum_broad, signum_complex
+from mathematics import Energy, Coeff, Expr, energy, energy_broad, signum, signum_broad, signum_complex
 from itertools import product, chain
 from typing import cast, Dict, Union
+from sympy.parsing.sympy_parser import parse_expr
+import sympy as sym
 
+# Standard Symbol for symbolic calculations
+# TODO: Add assumptions? Maybe do this later on when knowing
+# if it is real/complex
+a = sym.Symbol("a")
 
 def main():
     my_parser = argparse.ArgumentParser(description='Use pCUT to block-diagonalize a Lindbladian or a Hamiltonian with '
@@ -47,8 +53,7 @@ def main():
         # postprocessing of Expr values in translation 
         for (k,v) in translation.items():
             if isinstance(v,str) and "a" in v:
-                # TODO: How to convert?
-                raise NotImplementedError()
+                translation[k] = parse_expr(v,local_dict={"a":a})
     else:
         print("You have decided to use the default config values.")
         # Enter the total order.
@@ -122,7 +127,6 @@ def main():
 
         operators_all = [operator for operator_space in operators for operator in operator_space]
         
-        # TODO: Add another case for `Expr` (sympy) entries 
         if delta>0:
             print("Using the broad signum function.")
             signum_func = lambda l,r: signum_broad(l,r,delta=delta)
@@ -130,6 +134,10 @@ def main():
         # check if any translation value has a non-vanishing imaginary part
         elif len([v for v in translation.values() if iscomplex(v)])>0:
             print("Using the complex signum function.")
+            signum_func = signum_complex
+            energy_func = energy
+        elif len([v for v in translation.values() if isinstance(v,Expr)])>0:
+            print("Using the complex signum function for symbolic calculations.")
             signum_func = signum_complex
             energy_func = energy
         else:
@@ -181,7 +189,6 @@ def main():
             result.close()
 
     # Generate the config file.
-    # TODO: Does this work with sympy
     config_file = open("config.yml", "w")
     print('---', file=config_file)
     print("# This is an exemplary config file. Following the comments in this file, you can modify it for your "
