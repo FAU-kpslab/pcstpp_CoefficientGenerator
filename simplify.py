@@ -2,6 +2,7 @@ import argparse
 
 import sympy
 from sympy import I, sqrt
+from sympy.parsing.sympy_parser import parse_expr
 
 a = sympy.symbols('a',positive=True)
 
@@ -21,4 +22,4 @@ lines = file.readlines()
 with open("result_simplified.txt", "w") as new_file:
 	for line in lines:
 		order = int(line[0])
-		new_file.write((" ".join(line.split(' ')[0:order+1])) + " " + str(sympy.simplify(" ".join(line.split(' ')[order+1:]))) + "\n")
+		new_file.write((" ".join(line.split(' ')[0:order+1])) + " " + str(sympy.simplify(parse_expr(" ".join(line.split(' ')[order+1:]),local_dict={"a":a}))) + "\n")
