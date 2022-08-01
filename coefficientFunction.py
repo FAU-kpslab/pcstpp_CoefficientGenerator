@@ -307,8 +307,10 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
                     if ((sym.Abs(energy_func(m1))**2).expand(real=True) <= (max_energy**2).expand(real=True)) & ((sym.Abs(energy_func(m2))**2).expand(real=True) <= (max_energy**2).expand(real=True)):
                         integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
                 except TypeError:
-                    print("m1: {}".format((sym.Abs(energy_func(m1))**2).expand(real=True) <= (max_energy**2).expand(real=True)))
-                    print("m2: {}".format((sym.Abs(energy_func(m2))**2).expand(real=True) <= (max_energy**2).expand(real=True)))
+                    if isinstance((sym.Abs(energy_func(m1))**2).expand(real=True) <= (max_energy**2).expand(real=True),sym.core.relational.Relational):
+                        print("Unresolved relational: {}".format((abs(energy_func(m1)) <= max_energy)))
+                    if isinstance((sym.Abs(energy_func(m2))**2).expand(real=True) <= (max_energy**2).expand(real=True),sym.core.relational.Relational):
+                        print("Unresolved relational: {}".format((abs(energy_func(m2)) <= max_energy)))
                     integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
 
         result = integrand.integrate()
