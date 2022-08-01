@@ -12,7 +12,7 @@ from sympy.core.expr import Expr
 # TODO: Update documentation for `sympy`
 
 # ONLY TEMPORARY
-SIMPLIFY_RESULTS = True
+SIMPLIFY_RESULTS = False
 
 def is_zero(scalar: "Coeff") -> bool:
     """
