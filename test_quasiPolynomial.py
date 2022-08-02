@@ -210,6 +210,7 @@ class TestQuasiPolynomial(unittest.TestCase):
         self.assertTrue(QP.new_integer([[], [2, 4j - 4j + 2, 8]]) == QP.new({1. + 1e-15: [2, 2, 8]}))
         self.assertTrue(QP.new({1: [a, 2], a**2 + 1: [3]}) == QP.new({a**2 + 1: [3], 1: [a, 2]}))
 
+    # TODO: Test fails due to new `Piecewise` functions -> fix this
     def test_pretty_print(self):
         self.assertEqual(QP.new_integer([]).pretty_print(), '0')
         self.assertEqual(QP.new_integer([[0]]).pretty_print(), '0')
@@ -309,6 +310,7 @@ class TestQuasiPolynomial(unittest.TestCase):
         self.assertEqual(QP.new({1 + a: [1]}) * QP.new({a: [2]}), QP.new({1 + 2*a: [2]}))
         self.assertEqual(QP.new({1: [a]}) * QP.new({1: [a]}), QP.new({2: [a**2]}))
 
+    # TODO: Test fails due to new `Piecewise` functions -> fix this
     def test_integrate(self):
         self.assertEqual(QP.new_integer([[5, 5, 7]]).integrate(),
                          QP.new_integer([[0, 5, Fraction(5, 2), Fraction(7, 3)]]))
