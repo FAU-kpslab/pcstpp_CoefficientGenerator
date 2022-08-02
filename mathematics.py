@@ -80,6 +80,7 @@ def signum_broad(indices1: Indices[Energy_real], indices2: Indices[Energy_real],
     return int(np.sign(energy_broad(indices1, delta))) - int(np.sign(energy_broad(indices2, delta)))
 
 
+# TODO: Update typing (exponent_zero)
 def signum_complex(indices1: Indices[Union[complex, Expr]], indices2: Indices[Union[complex, Expr]]) -> Union[complex,
                                                                                                               Expr]:
     """
@@ -95,6 +96,21 @@ def signum_complex(indices1: Indices[Union[complex, Expr]], indices2: Indices[Un
 
     complex_sgn = lambda z: 0 if is_zero(z) else z.conjugate() / abs(z)
     return complex_sgn(energy(indices1)) - complex_sgn(energy(indices2))
+
+def signum_expr(indices1: Indices[Expr], indices2: Indices[Expr]) -> Expr:
+    """
+    signum_expr(indices1, indices2)
+
+    Returns the prefactor sgn(M(m1)) - sgn(M(m2)) with the definition sgn(z) = z / |z|
+    as used in the Ferkinghoff, Uhrig paper using sympy functionality.
+
+        Returns
+        -------
+        Expr
+    """
+
+    expr_sgn = lambda z: sym.Piecewise((z.conjugate() / sym.Abs(z), sym.Ne(z,0)),(0,True))
+    return expr_sgn(energy(indices1)) - expr_sgn(energy(indices2))
 
 
 def exponential(indices: Indices[Energy],

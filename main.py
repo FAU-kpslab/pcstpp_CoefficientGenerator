@@ -6,8 +6,8 @@ from yaml.loader import SafeLoader
 import argparse
 
 import coefficientFunction
-from quasiPolynomial import QuasiPolynomial as qp
-from mathematics import Energy, Coeff, Expr, energy, energy_broad, signum, signum_broad, signum_complex
+from quasiPolynomial import QuasiPolynomial as qp, is_zero
+from mathematics import Energy, Coeff, Expr, energy, energy_broad, signum, signum_broad, signum_complex, signum_expr
 from itertools import product, chain
 from typing import cast, Dict, Union
 from sympy.parsing.sympy_parser import parse_expr
@@ -154,7 +154,7 @@ def main():
             energy_func = energy
         elif len([v for v in translation.values() if isinstance(v, Expr)]) > 0:
             print("Using the complex signum function for symbolic calculations.")
-            signum_func = signum_complex
+            signum_func = signum_expr
             energy_func = energy
         else:
             print("Using the standard signum function.")
