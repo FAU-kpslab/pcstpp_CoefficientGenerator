@@ -12,6 +12,7 @@ h0 = sympy.symbols('h0')
 my_parser = argparse.ArgumentParser(description='Use the solver with sympy expressions.')
 my_parser.add_argument('-f', '--file', nargs='?', const='result.txt', default=None, help='pass the coefficient file "result.txt" or a custom one given as an argument')
 my_parser.add_argument('-s', '--solver', nargs='?', const='./', default=None, help='pass the folder containing the solver if not in the same folder')
+my_parser.add_argument('-1', '--step1', action='store_true', help='just calculate the solver results separately, without combining them with the prefactors')
 args = my_parser.parse_args()
 
 if args.file != None:
@@ -39,21 +40,23 @@ with open("result_solver_temp.txt", "w") as solver_results:
 		else:
 			solver_results.write(result)
 
-print('The expectation values of the individual T-operator sequences can be found in "result_solver_temp.txt". Now they are multiplied with their respective prefactor to obtain the final result.\n')
+print('The expectation values of the individual T-operator sequences can be found in "result_solver_temp.txt".')
 
-intermediate_results = []
-
-with open("result_solver_temp.txt", "r") as solver_results:
-	prefactors = solver_results.readlines()
-	for row in range(len(coefficients)):
-		order = int(coefficients[row][0])
-		prefactor = parse_expr(" ".join(coefficients[row].split(' ')[order+1:]),local_dict={"a":a})
-		# Check for empty lines
-		if prefactors[row] != '\n':
-			expectation_value = parse_expr(prefactors[row],local_dict={"h0":h0})
-			intermediate_results.append(prefactor * expectation_value)
-print("The result reads:")
-print(sum(intermediate_results).simplify())
+if not args.step1:
+	print('Now they are multiplied with their respective prefactor to obtain the final result.\n')
+	intermediate_results = []
+	
+	with open("result_solver_temp.txt", "r") as solver_results:
+		prefactors = solver_results.readlines()
+		for row in range(len(coefficients)):
+			order = int(coefficients[row][0])
+			prefactor = parse_expr(" ".join(coefficients[row].split(' ')[order+1:]),local_dict={"a":a})
+			# Check for empty lines
+			if prefactors[row] != '\n':
+				expectation_value = parse_expr(prefactors[row],local_dict={"h0":h0})
+				intermediate_results.append(prefactor.simplify() * expectation_value)
+	print("The result reads:")
+	print(sum(intermediate_results).simplify())
 		
 file.close()		
 		
