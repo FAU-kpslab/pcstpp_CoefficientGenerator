@@ -18,6 +18,7 @@ else:
 	file = open("result.txt", "r")
 
 lines = file.readlines()
+file.close()
 
 with open("result_simplified.txt", "w") as new_file:
 	for line in lines:
