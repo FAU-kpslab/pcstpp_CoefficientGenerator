@@ -862,12 +862,10 @@ class QuasiPolynomial:
                         resulting_polynomial = Polynomial.new([sym.Piecewise((r, sym.Ne(e,0)),(0,True)) for r in  resulting_polynomial.coefficients()])
                         output[e] = resulting_polynomial
                         constant = constant + sym.Piecewise((resulting_constant,sym.Ne(e,0)), (0,True))
-                        # We assume: If the exponent is zero then the complete term
-                        # should be zero due to canceling signums
-                        # So we add no resulting_constant and do not add the term to the
-                        # output[0]
-                        # poly_int = Polynomial.new([sym.Piecewise((r,sym.Eq(e,0)), (0,True)) for r in p.integrate().coefficients()])
-                        # output[0] = (output[0] if 0 in output.keys() else Polynomial.zero()) + poly_int
+                        # If e=0, we have to treat p as a simple polynomial, so
+                        # we only integrate and add the result to output[0]
+                        poly_int = Polynomial.new([sym.Piecewise((r,sym.Eq(e,0)), (0,True)) for r in p.integrate().coefficients()])
+                        output[0] = (output[0] if 0 in output.keys() else Polynomial.zero()) + poly_int
                     else:
                         constant = constant + resulting_constant
                         output[e] = resulting_polynomial
