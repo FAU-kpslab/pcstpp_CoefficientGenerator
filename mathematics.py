@@ -31,7 +31,7 @@ def energy(indices: Indices[E]) -> E:
         Union[int, float, Fraction, complex]
     """
 
-    return sum(reduce(operator.add, indices), start=cast(E, 0))
+    return sum(reduce(operator.add, indices), cast(E, 0))
 
 
 def energy_broad(indices: Indices[Energy_real], delta: Energy_real) -> Energy_real:
