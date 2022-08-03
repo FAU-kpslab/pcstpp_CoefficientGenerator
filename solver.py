@@ -54,9 +54,9 @@ if not args.step1:
 			# Check for empty lines
 			if prefactors[row] != '\n':
 				expectation_value = parse_expr(prefactors[row],local_dict={"h0":h0})
-				intermediate_results.append(prefactor.simplify() * expectation_value)
+				intermediate_results.append(sympy.simplify(prefactor) * expectation_value)
 	print("The result reads:")
-	print(sum(intermediate_results).simplify())
+	print(sympy.simplify(sum(intermediate_results)))
 		
 file.close()		
 		
