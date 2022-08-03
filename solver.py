@@ -37,6 +37,10 @@ with open("result_solver_temp.txt", "w") as solver_results:
 		result = subprocess.run("cd {}; ./Solver".format(args.solver), capture_output=True, text=True, shell=True).stdout.replace('^', '**')
 		if result[0] == ';':
 			solver_results.write(result[2:])
+		# Check for explicitly mentioned kets (and ignore them for now, i.e. add everything together).
+		elif result.find('|') != -1:
+			pos = result.find('|')
+			solver_results.write(result[:pos] + '\n')
 		else:
 			solver_results.write(result)
 
