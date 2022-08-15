@@ -9,8 +9,6 @@ import numpy as np
 from sympy.core.expr import Expr
 
 
-# TODO: Update documentation for `sympy`
-
 # ONLY TEMPORARY
 SIMPLIFY_RESULTS = False
 
@@ -82,13 +80,13 @@ class Polynomial:
 
         Parameters
         ----------
-        coefficient_list : List[Union[int, Fraction, float, complex]]
+        coefficient_list : List[Union[int, float, Fraction, complex, Expr]]
             The list of coefficients.
             The coefficient of x^n is coefficient_array[n].
 
         Attributes
         ----------
-        __private_coefficients : np.ndarray[Union[int, Fraction, float, complex]]
+        __private_coefficients : np.ndarray[Union[int, float, Fraction, complex, Expr]]
             The numpy array of coefficients.
             The coefficient of x^n is __private_coefficients[n].
 
@@ -96,7 +94,7 @@ class Polynomial:
         -------
         __str__ : str
             Prints the coefficient array.
-        coefficients : np.ndarray[Union[int, Fraction, float, complex]]
+        coefficients : np.ndarray[Union[int, float, Fraction, complex, Expr]]
             Gets the coefficient array.
         zero : Polynomial
             Creates an empty polynomial.
@@ -126,7 +124,7 @@ class Polynomial:
             Integrate a polynomial with starting condition 0.
         diff : Polynomial
             Perform the derivative of a polynomial.
-        get_constant : Fraction
+        get_constant : Union[int, float, Fraction, complex, Expr]
             Returns the constant coefficient.
     """
 
@@ -134,7 +132,7 @@ class Polynomial:
         """
             Parameters
             ----------
-            coefficient_list : List[Fraction]
+            coefficient_list : List[Union[int, float, Fraction, complex, Expr]]
                 The list of coefficients.
                 The coefficient of x^n is coefficient_dict[n].
         """
@@ -165,7 +163,7 @@ class Polynomial:
 
             Returns
             -------
-            np.ndarray[Fraction]
+            np.ndarray[Union[int, float, Fraction, complex, Expr]]
         """
 
         return self.__private_coefficients.copy()
@@ -310,7 +308,7 @@ class Polynomial:
 
     def scalar_multiplication(self, scalar: "Coeff") -> 'Polynomial':
         """
-        p.scalar_multiplication(int)
+        p.scalar_multiplication(scalar)
 
         Multiplies a polynomial with a scalar.
 
@@ -452,7 +450,7 @@ class Polynomial:
 
             Returns
             -------
-            Fraction
+            Union[int, float, Fraction, complex, Expr]
         """
 
         if self == Polynomial.zero():
@@ -470,16 +468,16 @@ class QuasiPolynomial:
 
         Parameters
         ----------
-        polynomial_dict : Dict[Union[int, Fraction, float], Polynomial]
+        polynomial_dict : Dict[Union[int, float, Fraction, Expr], Polynomial]
             The dictionary containing all polynomials.
             The coefficient polynomial of exp(- alpha x) is polynomial_dict[alpha].
 
         Attributes
         ----------
-        polynomial_dict : Dict[Union[int, Fraction, float], Polynomial]
+        polynomial_dict : Dict[Union[int, float, Fraction, Expr], Polynomial]
             The dictionary containing all polynomials.
             The coefficient polynomial of exp(- alpha x) is polynomial[alpha].
-        polynomials : List[Tuple[Union[int, Fraction, float], Polynomial]]
+        polynomials : List[Tuple[Union[int, float, Fraction, Expr], Polynomial]]
             The list containing tuples of all exponents and their polynomials.
 
         Methods
@@ -516,7 +514,7 @@ class QuasiPolynomial:
             Multiplies a polynomial with a quasi-polynomial or a scalar with a quasi-polynomial.
         integrate : QuasiPolynomial
             Integrate a quasi-polynomial with starting condition 0.
-        get_constant : Fraction
+        get_constant : Union[int, float, Fraction, complex, Expr]
             Returns the constant coefficient of the constant polynomial (alpha = 0).
     """
 
@@ -524,7 +522,7 @@ class QuasiPolynomial:
         """
             Parameters
             ----------
-            polynomial_dict : Dict[Union[int, float, Fraction], Polynomial]
+            polynomial_dict : Dict[Union[int, float, Fraction, Expr], Polynomial]
                 The dictionary containing all polynomials.
                 The coefficient polynomial of exp(- alpha x) is polynomial_dict[alpha].
         """
@@ -720,7 +718,7 @@ class QuasiPolynomial:
 
     def scalar_multiplication(self, scalar: "Coeff") -> 'QuasiPolynomial':
         """
-        qp.scalar_multiplication(int)
+        qp.scalar_multiplication(scalar)
 
         Multiplies a quasi-polynomial with a scalar.
 
@@ -821,7 +819,7 @@ class QuasiPolynomial:
 
     def integrate(self) -> 'QuasiPolynomial':
         """
-        integrate(p)
+        integrate(qp)
 
         Integrate a polynomial with starting condition 0.
 
@@ -865,7 +863,7 @@ class QuasiPolynomial:
 
             Returns
             -------
-            Fraction
+            Union[int, float, Fraction, complex, Expr]
         """
 
         return self.polynomial_dict.get(0, Polynomial.zero()).get_constant()

@@ -18,8 +18,6 @@ Indices = Tuple[Tuple[E, ...], ...]
 Sequence = Tuple[Tuple[int, ...], ...]
 
 
-# TODO: Update documentation for `sympy`
-
 def energy(indices: Indices[E]) -> E:
     """
     energy(indices)
@@ -28,7 +26,7 @@ def energy(indices: Indices[E]) -> E:
 
         Returns
         -------
-        Union[int, float, Fraction, complex]
+        Union[int, float, Fraction, complex, Expr]
     """
 
     return sum(reduce(operator.add, indices), cast(E, 0))
@@ -92,7 +90,7 @@ def signum_complex(indices1: Indices[Union[complex, Expr]], indices2: Indices[Un
 
         Returns
         -------
-        complex
+        Union[complex, Expr]
     """
 
     complex_sgn = lambda z: 0 if is_zero(z) else z.conjugate() / abs(z)
