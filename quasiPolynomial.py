@@ -8,9 +8,9 @@ if TYPE_CHECKING:
 import numpy as np
 from sympy.core.expr import Expr
 
-
 # ONLY TEMPORARY
 SIMPLIFY_RESULTS = False
+
 
 def is_zero(scalar: "Coeff") -> bool:
     """
@@ -456,7 +456,7 @@ class Polynomial:
         if self == Polynomial.zero():
             return Fraction(0)
         else:
-            return (self.coefficients()[0].simplify() if isinstance(self.coefficients()[0],Expr) and SIMPLIFY_RESULTS
+            return (self.coefficients()[0].simplify() if isinstance(self.coefficients()[0], Expr) and SIMPLIFY_RESULTS
                     else self.coefficients()[0])
 
 

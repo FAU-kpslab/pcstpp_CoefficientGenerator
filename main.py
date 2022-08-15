@@ -1,12 +1,12 @@
 from fractions import Fraction
-from numpy import sign, iscomplex
+from numpy import iscomplex
 import yaml
 from yaml.loader import SafeLoader
 
 import argparse
 
 import coefficientFunction
-from quasiPolynomial import QuasiPolynomial as qp, is_zero
+from quasiPolynomial import QuasiPolynomial as qp
 from mathematics import Energy, Coeff, Expr, energy, energy_broad, signum, signum_broad, signum_complex
 from itertools import product, chain
 from typing import cast, Dict, Union
@@ -14,7 +14,8 @@ from sympy.parsing.sympy_parser import parse_expr
 import sympy as sym
 
 # Standard Symbol for symbolic calculations
-a = sym.Symbol("a",positive=True)
+a = sym.Symbol("a", positive=True)
+
 
 def main():
     my_parser = argparse.ArgumentParser(description='Use pCUT to block-diagonalize a Lindbladian or a Hamiltonian with '
@@ -29,7 +30,7 @@ def main():
                                 'any calculations.')
     args = my_parser.parse_args()
 
-    if args.file != None:
+    if args.file is not None:
         print('You have decided to use a config file, titled "{}".'.format(args.file))
         config_file = open(args.file, "r")
         config = yaml.load(config_file, Loader=SafeLoader)
@@ -41,20 +42,20 @@ def main():
         delta = config['delta'] if 'delta' in config else 0
         config_file.close()
         # postprocessing of complex values in starting_conditions 
-        for (k,v) in starting_conditions.items():
-            if isinstance(v,str) and "j" in v:
+        for (k, v) in starting_conditions.items():
+            if isinstance(v, str) and "j" in v:
                 starting_conditions[k] = complex(v)
         # postprocessing of Expr values in translation
-        for (k,v) in translation.items():
-            if isinstance(v,str) and ("a" in v or "I" in v):
-                translation[k] = parse_expr(v,local_dict={"a":a})
+        for (k, v) in translation.items():
+            if isinstance(v, str) and ("a" in v or "I" in v):
+                translation[k] = parse_expr(v, local_dict={"a": a})
         # postprocessing of complex values in translation
-        for (k,v) in translation.items():
-            if isinstance(v,str) and "j" in v:
+        for (k, v) in translation.items():
+            if isinstance(v, str) and "j" in v:
                 translation[k] = complex(v)
         # postprocessing of Expr value for max_energy
-        if isinstance(max_energy,str) and ("a" in max_energy or "I" in max_energy):
-            max_energy = parse_expr(max_energy,local_dict={"a":a})
+        if isinstance(max_energy, str) and ("a" in max_energy or "I" in max_energy):
+            max_energy = parse_expr(max_energy, local_dict={"a": a})
     else:
         print("You have decided to use the default config values.")
         # Enter the total order.
@@ -92,26 +93,27 @@ def main():
         max_energy = 2
         delta = 0
     # Defining the concrete types
-    starting_conditions = cast(Dict[str,Union[Coeff,str]],starting_conditions)
-    translation = cast(Dict[int, Energy],translation)
+    starting_conditions = cast(Dict[str, Union[Coeff, str]], starting_conditions)
+    translation = cast(Dict[int, Energy], translation)
 
     if not args.config:
         # Assuming expressions of type `Expr` to be exact
         # If needed, convert all starting_conditions to the same type
-        if len([v for v in chain(starting_conditions.values(), translation.values()) if isinstance(v, (complex, float))])>0:
-            type_to_use = (complex if len([v for v in chain(starting_conditions.values(), translation.values()) 
-                           if isinstance(v, (complex))])>0 else float)
+        if len([v for v in chain(starting_conditions.values(), translation.values()) if
+                isinstance(v, (complex, float))]) > 0:
+            type_to_use = (complex if len([v for v in chain(starting_conditions.values(), translation.values())
+                                           if isinstance(v, complex)]) > 0 else float)
             print("Forcing all coefficients to type {}".format(type_to_use))
             # Only changing starting_conditions as it is sufficient to get
             # a consistent coefficient file.
-            for k,v in starting_conditions.items():
+            for k, v in starting_conditions.items():
                 try:
                     starting_conditions[k] = type_to_use(v)
                 except ValueError:
                     raise ValueError("Incompatible type in starting conditions at {}. "
                                      "Only use one datatype.".format(k))
 
-        for k,v in translation.items():
+        for k, v in translation.items():
             # If string, the value has to be converted to Fraction
             if isinstance(v, str):
                 translation[k] = Fraction(v)
@@ -124,20 +126,20 @@ def main():
         # Prepare the trafo coefficient function storage.
         if args.trafo:
             trafo_collection = coefficientFunction.FunctionCollection(translation)
-            trafo_collection[tuple([()]*len(operators))] = qp.new_integer([['1']])
+            trafo_collection[tuple([()] * len(operators))] = qp.new_integer([['1']])
 
         operators_all = [operator for operator_space in operators for operator in operator_space]
-        
-        if delta>0:
+
+        if delta > 0:
             print("Using the broad signum function.")
-            signum_func = lambda l,r: signum_broad(l,r,delta=delta)
-            energy_func = lambda i: energy_broad(i,delta=delta)
+            signum_func = lambda l, r: signum_broad(l, r, delta=delta)
+            energy_func = lambda i: energy_broad(i, delta=delta)
         # check if any translation value has a non-vanishing imaginary part
-        elif len([v for v in translation.values() if iscomplex(v)])>0:
+        elif len([v for v in translation.values() if iscomplex(v)]) > 0:
             print("Using the complex signum function.")
             signum_func = signum_complex
             energy_func = energy
-        elif len([v for v in translation.values() if isinstance(v,Expr)])>0:
+        elif len([v for v in translation.values() if isinstance(v, Expr)]) > 0:
             print("Using the complex signum function for symbolic calculations.")
             signum_func = signum_complex
             energy_func = energy
@@ -157,12 +159,11 @@ def main():
                     # Make use of block diagonality.
                     if coefficientFunction.is_zero(energy_func(indices)):
                         # As the band diagonality is only fulfilled up to a multiple of delta add + delta * max_order
-                        # TODO: According to Andis calculations, max_energy should depend on the
-                        # specific order used in one calculation -> implement order-dependent max_energy
-                        # in `calc` in `coefficientFunction.py`
+                        # TODO: According to Andis calculations, max_energy should depend on the specific order used in
+                        #  one calculation -> implement order-dependent max_energy in `calc` in `coefficientFunction.py`
                         # TODO: Maybe even make max_energy completely automatic?
-                        coefficientFunction.calc(sequence_sorted, collection, translation, max_energy + delta * max_order,
-                                                 signum_func, energy_func)
+                        coefficientFunction.calc(sequence_sorted, collection, translation,
+                                                 max_energy + delta * max_order, signum_func, energy_func)
                 else:
                     coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation,
                                                    max_energy + delta * max_order, signum_func, energy_func)
@@ -201,15 +202,15 @@ def main():
     print("# Give a unique name (integer) to every operator, so that you can distinguish them. You can take the "
           "operator index as\n"
           "# its name, provided that they are unique. The operators can separated in arbitrarily different lists "
-          "which marks them\n" 
+          "which marks them\n"
           "# as groups whose operators commute pairwise with those of other groups. ",
           file=config_file)
     print('operators: ' + str(list(operators)), file=config_file)
     print("# Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the "
           "operators. In Lea's\n"
           "# case, enter the indices of the operators prior to transposition.\n"
-          "# The indices can be of type integer, float, Fraction (e.g. '1/2') or complex (e.g. (1+2j))."
-          , file=config_file)
+          "# The indices can be of type integer, float, Fraction (e.g. '1/2') or complex (e.g. (1+2j)).",
+          file=config_file)
     print('indices:', file=config_file)
     for key in translation.keys():
         print('  ' + str(key) + ': ' + str(translation[key]), file=config_file)
@@ -218,7 +219,7 @@ def main():
           "# float or complex (e.g. (1+2j)).", file=config_file)
     print('starting_conditions:', file=config_file)
     for sequence in starting_conditions:
-        if isinstance(starting_conditions[sequence],str):
+        if isinstance(starting_conditions[sequence], str):
             print('  ' + sequence + ": '" + str(starting_conditions[sequence]) + "'", file=config_file)
         else:
             print('  ' + sequence + ": " + str(starting_conditions[sequence]), file=config_file)

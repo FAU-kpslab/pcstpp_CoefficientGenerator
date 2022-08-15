@@ -1,6 +1,6 @@
 from fractions import Fraction
 from functools import reduce
-from itertools import product, combinations
+from itertools import product
 import operator
 
 from quasiPolynomial import QuasiPolynomial, are_close, is_zero
@@ -80,8 +80,8 @@ def signum_broad(indices1: Indices[Energy_real], indices2: Indices[Energy_real],
     return int(np.sign(energy_broad(indices1, delta))) - int(np.sign(energy_broad(indices2, delta)))
 
 
-def signum_complex(indices1: Indices[Union[complex, Expr]], indices2: Indices[Union[complex, Expr]]) -> Union[
-    complex, Expr]:
+def signum_complex(indices1: Indices[Union[complex, Expr]], indices2: Indices[Union[complex, Expr]]) -> Union[complex,
+                                                                                                              Expr]:
     """
     signum_complex(indices1, indices2)
 
