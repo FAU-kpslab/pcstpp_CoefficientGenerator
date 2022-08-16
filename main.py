@@ -100,20 +100,19 @@ def main():
     if not args.config:
         # Assuming expressions of type `Expr` to be exact
         # If needed, convert all starting_conditions to the same type
-        # TODO: The following block converts the starting conditions to sympy expressions. This does not solve the
-        #  problem of the suddenly occuring floats, so I am not sure whether we should delete this. The next step is to
-        #  convert the indices to sympy expressions, which would surely solve our problem. I am not sure how to make
-        #  that.
         if len([v for v in chain(starting_conditions.values(), translation.values()) if isinstance(v, Expr)]) > 0:
             type_to_use = Expr
             print("Forcing all coefficients to type {}".format(type_to_use))
-            # Only changing starting_conditions as it is sufficient to get
-            # a consistent coefficient file.
             for k, v in starting_conditions.items():
                 try:
                     starting_conditions[k] = sympify(v)
                 except ValueError:
                     raise ValueError("Incompatible type in starting conditions at {}. Only use one datatype.".format(k))
+            for k, v in translation.items():
+                try:
+                    translation[k] = sympify(v)
+                except ValueError:
+                    raise ValueError("Incompatible type in index {}. Only use one datatype.".format(k))
         elif len([v for v in chain(starting_conditions.values(), translation.values()) if
                   isinstance(v, (complex, float))]) > 0:
             type_to_use = (complex if len([v for v in chain(starting_conditions.values(), translation.values())
