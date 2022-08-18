@@ -7,7 +7,7 @@ from quasiPolynomial import Polynomial as P
 from quasiPolynomial import QuasiPolynomial as QP
 
 # Defining symbols for testing
-a, b = sym.symbols('a b')
+a, b = sym.symbols('a b',positive=True)
 
 
 class TestPolynomial(unittest.TestCase):
