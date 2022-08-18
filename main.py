@@ -7,7 +7,7 @@ import argparse
 
 import coefficientFunction
 from quasiPolynomial import QuasiPolynomial as qp, is_zero
-from mathematics import Energy, Coeff, Expr, energy, energy_broad, signum, signum_broad, signum_complex, signum_expr
+from mathematics import Energy, Coeff, Expr, energy, energy_broad, energy_broad_expr, signum, signum_broad, signum_complex, signum_expr, signum_broad_expr
 from itertools import product, chain
 from typing import cast, Dict, Union
 from sympy.parsing.sympy_parser import parse_expr
@@ -144,9 +144,14 @@ def main():
         operators_all = [operator for operator_space in operators for operator in operator_space]
 
         if delta > 0:
-            print("Using the broad signum function.")
-            signum_func = lambda l, r: signum_broad(l, r, delta=delta)
-            energy_func = lambda i: energy_broad(i, delta=delta)
+            if len([v for v in translation.values() if isinstance(v, Expr)]) > 0:
+                print("Using the broad signum function for symbolic calculations.")
+                signum_func = lambda l, r: signum_broad_expr(l, r, delta=delta)
+                energy_func = lambda i: energy_broad_expr(i, delta=delta)
+            else:
+                print("Using the broad signum function.")
+                signum_func = lambda l, r: signum_broad(l, r, delta=delta)
+                energy_func = lambda i: energy_broad(i, delta=delta)
         # check if any translation value has a non-vanishing imaginary part
         elif len([v for v in translation.values() if iscomplex(v)]) > 0:
             print("Using the complex signum function.")

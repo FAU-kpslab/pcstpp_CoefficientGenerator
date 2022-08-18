@@ -5,7 +5,7 @@ from mathematics import *
 from quasiPolynomial import QuasiPolynomial as qp
 
 # Defining symbols for testing
-a, b = sym.symbols('a b')
+a, b = sym.symbols('a b', positive=True)
 
 
 class TestHelper(unittest.TestCase):
@@ -39,6 +39,9 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(energy_broad(((Fraction(1, 3), 2.2), ()), 1), Fraction(1, 3) + 2.2)
         self.assertEqual(energy_broad(((2, 2.2, -1.01), ()), 4), 0)
         self.assertEqual(energy_broad(((2, 2. + Fraction(1, 10000000000000)), ()), 4), 0)
+        self.assertEqual(energy_broad_expr(((2, a, -1), ()), 1), 2-1+a)
+        self.assertEqual(energy_broad_expr(((2, a), (-2*a,)), 1), sym.Piecewise((2-a,sym.Abs(2-a)>1),(0,True)))
+        self.assertEqual(energy_broad_expr(((2, -a),), a), sym.Piecewise((2-a,sym.Abs(2-a)>a),(0,True)))
 
     def test_signum(self):
         self.assertEqual(signum(((2,),), ((-2,),)), 2)
@@ -64,9 +67,9 @@ class TestHelper(unittest.TestCase):
         self.assertIsInstance(signum_broad(((2,),), ((-2,),), delta=1), int)
         self.assertEqual(signum_broad(((2.2,), (-1.3,)), ((2,), ()), delta=1), -1)
         self.assertEqual(signum_broad(((Fraction(1, 3),), ()), ((-0.5,), ()), delta=1), 0)
+        self.assertEqual(signum_broad_expr(((2*a,),), ((-2*a,),), delta=5*a), 0)
+        self.assertEqual(signum_broad_expr(((2*a,),), ((-2,),), delta=2*a), -sym.Piecewise((-1,a<1),(0,True)))
 
-    # TODO: Update results for new signum_expr
-    @unittest.expectedFailure
     def test_signum_complex(self):
         self.assertEqual(signum_complex(((2,),), ((-2,),)), 2)
         self.assertEqual(signum_complex(((2j,),), ((-2j,),)), -2j)

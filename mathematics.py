@@ -49,6 +49,20 @@ def energy_broad(indices: Indices[Energy_real], delta: Energy_real) -> Energy_re
     # floating errors
     return e if abs(e) > delta and not are_close(abs(e), delta) else 0
 
+def energy_broad_expr(indices: Indices[Expr], delta: Expr) -> Expr:
+    """
+    energy_broad(indices, delta)
+
+    Returns the 'broadened' sum M(m)*theta(|M(m)|-`delta`) of operator sequence 
+    indices, where theta is the Heaviside step function using sympy functionality.
+
+        Returns
+        -------
+        Expr
+    """
+
+    e = energy(indices)
+    return sym.Piecewise((e,sym.Abs(e)>delta),(0,True))
 
 def signum(indices1: Indices[Energy_real], indices2: Indices[Energy_real]) -> int:
     """
@@ -79,6 +93,21 @@ def signum_broad(indices1: Indices[Energy_real], indices2: Indices[Energy_real],
 
     return int(np.sign(energy_broad(indices1, delta))) - int(np.sign(energy_broad(indices2, delta)))
 
+
+def signum_broad_expr(indices1: Indices[Expr], indices2: Indices[Expr], delta: Expr) -> Expr:
+    """
+    signum_broad_expr(indices1, indices2, delta)
+
+    Returns the prefactor sgn_`delta`(M(m1)) - sgn_`delta`(M(m2)) where sgn_d is
+    the broadened signum function with sgn_d (x) = 0 for |x| <= d and sgn_d (x)=sgn (x)
+    using sympy functionality.
+
+        Returns
+        -------
+        Expr
+    """
+    expr_sgn = lambda z: sym.Piecewise((z.conjugate() / sym.Abs(z), sym.Abs(z)>delta),(0,True))
+    return expr_sgn(energy(indices1)) - expr_sgn(energy(indices2))
 
 # TODO: Update typing (exponent_zero)
 def signum_complex(indices1: Indices[Union[complex, Expr]], indices2: Indices[Union[complex, Expr]]) -> Union[complex,
