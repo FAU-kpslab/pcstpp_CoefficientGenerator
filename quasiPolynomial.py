@@ -7,6 +7,7 @@ if TYPE_CHECKING:
 
 import numpy as np
 from sympy.core.expr import Expr
+import sympy as sym
 
 # ONLY TEMPORARY
 SIMPLIFY_RESULTS = False
@@ -71,6 +72,32 @@ def inverse(scalar: "Coeff"):
     elif isinstance(scalar, (float, complex, Expr)):
         return 1 / scalar
 
+def pretty_factor_print(coeff:"Coeff",leave1:bool = False)->str:
+    """
+    pretty_factor_print(coeff)
+
+    Returns a coefficient into a form suitable to be read by humans.
+    
+        Parameters
+        ----------
+        leave1 : bool
+            If `True` a coefficient of `1` or `-1` will not be
+            simplified.
+
+        Returns
+        -------
+        str
+    """
+    if are_close(coeff, 1) and not leave1:
+        return ""
+    elif are_close(coeff, -1) and not leave1:
+        return "-"
+    elif isinstance(coeff,Expr) and coeff.func == sym.Add:
+        # If the outmost function is an addition, add brackets
+        # around `coeff`
+        return '(' + str(coeff).replace("**","^") + ')'
+    else:
+        return str(coeff).replace("**","^")
 
 class Polynomial:
     """
@@ -280,30 +307,18 @@ class Polynomial:
             return '0'
         # Check whether the polynomial contains only the constant term.
         elif self.__private_coefficients.size == 1:
-            return str(self.__private_coefficients[0])
+            return pretty_factor_print(self.__private_coefficients[0],leave1=True)
         else:
             output = []
             # Check whether the constant term is zero to leave that away.
             if not is_zero(self.__private_coefficients[0]):
-                output.append(str(self.__private_coefficients[0]))
+                output.append(pretty_factor_print(self.__private_coefficients[0],leave1=True))
             if not is_zero(self.__private_coefficients[1]):
-                # Check whether the coefficient is 1 or -1 to leave that away.
-                if are_close(self.__private_coefficients[1], 1):
-                    output.append('x')
-                elif are_close(self.__private_coefficients[1], -1):
-                    output.append('-x')
-                else:
-                    output.append(str(self.__private_coefficients[1]) + 'x')
+                output.append('{}x'.format(pretty_factor_print(self.__private_coefficients[1])))
             for exponent, coefficient in list(enumerate(self.__private_coefficients))[2:]:
                 # Check for the remaining coefficients whether they are zero to leave those away.
                 if not is_zero(coefficient):
-                    # Check for the remaining coefficients whether they are 1 or -1 to leave that away.
-                    if are_close(coefficient, 1):
-                        output.append('x^' + str(exponent))
-                    elif are_close(coefficient, -1):
-                        output.append('-x^' + str(exponent))
-                    else:
-                        output.append(str(coefficient) + 'x^' + str(exponent))
+                    output.append('{}x^{}'.format(pretty_factor_print(coefficient),exponent))
             return '+'.join(output).replace('+-', '-')
 
     def scalar_multiplication(self, scalar: "Coeff") -> 'Polynomial':
@@ -700,17 +715,10 @@ class QuasiPolynomial:
                     exponent = ''
                     polynomial = p.pretty_print()
                 else:
-                    if are_close(e, 1):
-                        exponent = 'exp(-x)'
-                    else:
-                        exponent = 'exp(-' + str(e) + 'x)'
+                    exponent = 'exp(-{}x)'.format(pretty_factor_print(e))
                     # Check whether the polynomial contains only the constant term to leave away the brackets.
                     if p.coefficients().size == 1:
-                        # Check whether the polynomial contains only 1 to leave that away.
-                        if p.coefficients()[0] == 1:
-                            polynomial = ''
-                        else:
-                            polynomial = p.pretty_print()
+                        polynomial = pretty_factor_print(p.coefficients()[0])
                     else:
                         polynomial = '(' + p.pretty_print() + ')'
                 output.append(polynomial + exponent)

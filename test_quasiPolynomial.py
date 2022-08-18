@@ -75,6 +75,9 @@ class TestPolynomial(unittest.TestCase):
         self.assertEqual(P.new([2, 4j - 2, 8]).pretty_print(), '2+(-2+4j)x+8x^2')
         self.assertEqual(P.new([0, 4, 8, 0, 0]).pretty_print(), '4x+8x^2')
         self.assertEqual(P.new([2, 4, 0, 100]).pretty_print(), '2+4x+100x^3')
+        self.assertEqual(P.new([2, 4*a, 0, 1]).pretty_print(), '2+4*ax+x^3')
+        self.assertEqual(P.new([2, 2+4*a**2, 0, 100]).pretty_print(), '2+(4*a^2 + 2)x+100x^3')
+        self.assertEqual(P.new([2, a**5, 0, 0]).pretty_print(), '2+a^5x')
 
     def test_scalar_multiplication(self):
         self.assertEqual(P.new([2, 4, 8]), P.new([1, 2, 4]).scalar_multiplication(2))
@@ -227,6 +230,7 @@ class TestQuasiPolynomial(unittest.TestCase):
         self.assertEqual(QP.new({0: [2], Fraction(1, 2): [4]}).pretty_print(), '2+4exp(-1/2x)')
         self.assertEqual(QP.new({0: [2.], 1. + 1e-15: [4]}).pretty_print(), '2.0+4exp(-x)')
         self.assertEqual(QP.new({0: [2.], 1.: [4j + 1]}).pretty_print(), '2.0+(1+4j)exp(-x)')
+        self.assertEqual(QP.new({0: [2+2*a], a: [a**3]}).pretty_print(), '(2*a + 2)+a^3exp(-ax)')
 
     def test_scalar_multiplication(self):
         self.assertEqual(QP.new_integer([[2, 4, 8], [2, 10, 50]]),
