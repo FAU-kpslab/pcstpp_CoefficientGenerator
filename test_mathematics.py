@@ -85,6 +85,8 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(signum_expr(((2 * a,),), ((0,),)), (2 * a).conjugate() / abs(2 * a))
         self.assertEqual(signum_expr(((2 * a,),), ((-3 * a,),)),
                          (2 * a).conjugate() / abs(2 * a) + (3 * a).conjugate() / abs(3 * a))
+        self.assertEqual(signum_expr(((2 * a,),), ((a -1,),)), 1 - sym.Piecewise(((a - 1)/sym.Abs(a - 1), sym.Ne(a, 1)), (0, True)))
+        self.assertEqual(signum_expr(((a, 2, -2*a),(-3,a,0)), ((a -2,),)), -1 - sym.Piecewise(((a - 2)/sym.Abs(a - 2), sym.Ne(a, 2)), (0, True)))
 
     def test_exponential(self):
         self.assertEqual(exponential(((2, -2), ()), ((2,), ()), ((-2,), ()), energy),

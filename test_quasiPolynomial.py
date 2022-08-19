@@ -210,7 +210,6 @@ class TestQuasiPolynomial(unittest.TestCase):
         self.assertTrue(QP.new_integer([[], [2, 4j - 4j + 2, 8]]) == QP.new({1. + 1e-15: [2, 2, 8]}))
         self.assertTrue(QP.new({1: [a, 2], a**2 + 1: [3]}) == QP.new({a**2 + 1: [3], 1: [a, 2]}))
 
-    # TODO: Test fails due to new `Piecewise` functions -> fix this
     def test_pretty_print(self):
         self.assertEqual(QP.new_integer([]).pretty_print(), '0')
         self.assertEqual(QP.new_integer([[0]]).pretty_print(), '0')
@@ -234,6 +233,8 @@ class TestQuasiPolynomial(unittest.TestCase):
         self.assertEqual(QP.new({0: [2.], 1.: [4j + 1]}).pretty_print(), '2.0+(1+4j)exp(-x)')
         self.assertEqual(QP.new({0: [2 + 2*a], a: [a**3]}).pretty_print(), '(2*a + 2)+a^3exp(-ax)')
         self.assertEqual(QP.new({0: [1 + a - a], 1 + a: [a**3]}).pretty_print(), '1+a^3exp(-(a + 1)x)')
+        self.assertEqual(QP.new({2.2: [sym.Piecewise((2 + 2*a,sym.Ne(a-1,0)),(0,True))]}).pretty_print(),
+                         'Piecewise((2*a + 2, Ne(a, 1)), (0, True))exp(-2.2x)')
 
     def test_scalar_multiplication(self):
         self.assertEqual(QP.new_integer([[2, 4, 8], [2, 10, 50]]),
@@ -310,7 +311,6 @@ class TestQuasiPolynomial(unittest.TestCase):
         self.assertEqual(QP.new({1 + a: [1]}) * QP.new({a: [2]}), QP.new({1 + 2*a: [2]}))
         self.assertEqual(QP.new({1: [a]}) * QP.new({1: [a]}), QP.new({2: [a**2]}))
 
-    # TODO: Test fails due to new `Piecewise` functions -> fix this
     def test_integrate(self):
         self.assertEqual(QP.new_integer([[5, 5, 7]]).integrate(),
                          QP.new_integer([[0, 5, Fraction(5, 2), Fraction(7, 3)]]))
@@ -332,6 +332,10 @@ class TestQuasiPolynomial(unittest.TestCase):
                                                                                -20 / a ** 2, -5 / a]}))
         self.assertEqual(QP.new({2: [a, a ** 3]}).integrate(),
                          QP.new({0: [a ** 3 / 4 + a / 2], 2: [-a ** 3 / 4 - a / 2, -a ** 3 / 2]}))
+        self.assertEqual(QP.new({sym.Abs(a-1): [a]}).integrate(),
+                         QP.new({0: [sym.Piecewise((a / sym.Abs(a-1),sym.Ne(sym.Abs(a-1),0)),(0,True)),
+                                     sym.Piecewise((a,sym.Eq(sym.Abs(a-1),0)),(0,True))],
+                                 sym.Abs(a-1): [sym.Piecewise((- a / sym.Abs(a-1),sym.Ne(sym.Abs(a-1),0)),(0,True))]}))
 
     def test_get_constant(self):
         self.assertEqual(QP.new_integer([[5, 5, 7]]).get_constant(), Fraction(5))

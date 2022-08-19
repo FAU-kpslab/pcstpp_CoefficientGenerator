@@ -66,6 +66,10 @@ class TestBDifferentialEquation(unittest.TestCase):
                          QuasiPolynomial({0: Polynomial([-I/a]), 2*a: Polynomial([I/a])}))
         self.assertEqual(calc(((10, 9), tuple()), collection, translation, a, signum_complex, energy),
                          QuasiPolynomial({0: Polynomial([I/a]), 2*a: Polynomial([-I/a])}))
+        # TODO: When changing the result only slightly (replace 2 -> 2.0) the test fails (see #48)
+        self.assertEqual(calc(((7, 1), tuple()), collection, translation, sym.Abs(a)+2, signum_complex, energy),
+                         QuasiPolynomial({0: Polynomial([sym.Piecewise((2.0/(a - sym.Abs(a - 2) + 2), sym.Ne(a - sym.Abs(a - 2), -2)), (0, True)),sym.Piecewise((2.0, sym.Eq(a - sym.Abs(a - 2), -2)), (0, True))]),
+                                          a - sym.Abs(a - 2) + 2: Polynomial([sym.Piecewise((-2.0/(a - sym.Abs(a - 2) + 2), sym.Ne(a - sym.Abs(a - 2), -2)), (0, True))])}))
 
 
 if __name__ == '__main__':
