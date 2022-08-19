@@ -227,7 +227,7 @@ class FunctionCollection:
         return output
 
 
-def sequence_to_key(sequence: Sequence) -> Sequence:  # TODO The key is supposed to be an integer.
+def sequence_to_key(sequence: Sequence) -> Sequence:  # TODO: The key is supposed to be an integer.
     """
     vector_to_key(sequence)
 
@@ -241,7 +241,7 @@ def sequence_to_key(sequence: Sequence) -> Sequence:  # TODO The key is supposed
     return sequence
 
 
-def key_to_sequence(key: Sequence) -> Sequence:  # TODO The key is supposed to be an integer.
+def key_to_sequence(key: Sequence) -> Sequence:  # TODO: The key is supposed to be an integer.
     """
     key_to_sequence(key)
 
@@ -255,7 +255,7 @@ def key_to_sequence(key: Sequence) -> Sequence:  # TODO The key is supposed to b
     return key
 
 
-def sequence_to_indices(sequence: Sequence, translation: Dict[int,Energy]) -> Indices[Energy]:
+def sequence_to_indices(sequence: Sequence, translation: Dict[int, Energy]) -> Indices[Energy]:
     """
     sequence_to_indices(key)
 
@@ -265,12 +265,14 @@ def sequence_to_indices(sequence: Sequence, translation: Dict[int,Energy]) -> In
         -------
         Tuple[Tuple[Union[int,float,Fraction,complex],...],...]
     """
-    return tuple(tuple(translation[e] for e in s) for s in sequence)
+    return tuple(tuple((translation[e] for e in s)) for s in sequence)
 
-def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[int,Energy],
-         max_energy: Energy_real, signum_func:Union[Callable[[Indices[Energy_real], Indices[Energy_real]],int],
-                                                    Callable[[Indices[complex], Indices[complex]],complex]],
-         energy_func: Callable[[Indices[Energy]],Energy]) -> QuasiPolynomial:
+
+def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[int, Energy],
+         max_energy: Union[Energy_real, Expr], signum_func: Union[
+            Callable[[Indices[Energy_real], Indices[Energy_real]], int], Callable[
+                [Indices[Union[complex, Expr]], Indices[Union[complex, Expr]]], Union[complex, Expr]]],
+         energy_func: Callable[[Indices[Energy]], Energy]) -> QuasiPolynomial:
     """
     calc(sequence)
 
@@ -299,8 +301,29 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
             m1 = sequence_to_indices(s1, translation)
             m2 = sequence_to_indices(s2, translation)
             # Only calculate non-vanishing contributions to the integrand.
-            if (abs(energy_func(m1)) <= max_energy) & (abs(energy_func(m2)) <= max_energy):
-                integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
+            try:
+                if (abs(energy_func(m1)) <= max_energy) & (abs(energy_func(m2)) <= max_energy):
+                    integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
+            except TypeError:
+                # If 'if-clause' can not be determined uniquely, as it depends on the `a`
+                # symbol, try helping the sympy module by checking for a equivalent relation.
+                try:
+                    if ((sym.Abs(energy_func(m1)) ** 2).expand(real=True) <= (max_energy ** 2).expand(real=True)) & (
+                            (sym.Abs(energy_func(m2)) ** 2).expand(real=True) <= (max_energy ** 2).expand(real=True)):
+                        integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
+                except TypeError:
+                    # If 'if-clause' can not be determined again, print the unresolved relational
+                    # and assume that the contribution does not vanish generally
+                    if isinstance(
+                            (sym.Abs(energy_func(m1)) ** 2).expand(real=True) <= (max_energy ** 2).expand(real=True),
+                            sym.core.relational.Relational):
+                        print("Unresolved relational: {}".format((abs(energy_func(m1)) <= max_energy)))
+                    elif isinstance(
+                            (sym.Abs(energy_func(m2)) ** 2).expand(real=True) <= (max_energy ** 2).expand(real=True),
+                            sym.core.relational.Relational):
+                        print("Unresolved relational: {}".format((abs(energy_func(m2)) <= max_energy)))
+                    integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
+
         result = integrand.integrate()
         # Insert the result into the collection.
         collection[sequence] = result
@@ -308,10 +331,10 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
 
 
 def trafo_calc(sequence: Sequence, trafo_collection: FunctionCollection, collection: FunctionCollection,
-               translation: Dict[int,Energy], max_energy: Energy_real,
-               signum_func:Union[Callable[[Indices[Energy_real], Indices[Energy_real]],int],
-                                 Callable[[Indices[complex], Indices[complex]],complex]],
-               energy_func: Callable[[Indices[Energy]],Energy]) -> QuasiPolynomial:
+               translation: Dict[int, Energy], max_energy: Union[Energy_real, Expr],
+               signum_func: Union[Callable[[Indices[Energy_real], Indices[Energy_real]], int], Callable[
+                [Indices[Union[complex, Expr]], Indices[Union[complex, Expr]]], Union[complex, Expr]]],
+               energy_func: Callable[[Indices[Energy]], Energy]) -> QuasiPolynomial:
     """
     trafo_calc(sequence)
 
@@ -328,21 +351,23 @@ def trafo_calc(sequence: Sequence, trafo_collection: FunctionCollection, collect
     else:
         m = sequence_to_indices(sequence, translation)
         # TODO: Why does `signum_func` gives a type checking error?
-        integrand = (exponential(((), ()), ((), ()), m,energy_func) * signum_func(((), ()), m) 
-                        * calc(sequence, collection, translation, max_energy, signum_func, energy_func))
+        integrand = (exponential(((), ()), ((), ()), m, energy_func) * signum_func(((), ()), m)
+                     * calc(sequence, collection, translation, max_energy, signum_func, energy_func))
         partition_list = partitions(sequence)
         for partition in partition_list:
             # Rename the operator sequences.
             s1 = partition[0]
             s2 = partition[1]
             # Check whether the required functions are already calculated.
-            g1 = trafo_calc(partition[0], trafo_collection, collection, translation, max_energy, signum_func, energy_func)
+            g1 = trafo_calc(partition[0], trafo_collection, collection, translation, max_energy, signum_func,
+                            energy_func)
             f2 = calc(partition[1], collection, translation, max_energy, signum_func, energy_func)
             # Translate the operator sequences into its indices.
             m1 = sequence_to_indices(s1, translation)
             m2 = sequence_to_indices(s2, translation)
             # Calculate the contributions to the integrand.
-            integrand = integrand + exponential(((), ()), ((), ()), m2,energy_func) * signum_func(((), ()), m2) * g1 * f2
+            integrand = integrand + exponential(((), ()), ((), ()), m2, energy_func) * signum_func(((), ()),
+                                                                                                   m2) * g1 * f2
         result = integrand.integrate()
         # Insert the result into the collection.
         trafo_collection[sequence] = result
