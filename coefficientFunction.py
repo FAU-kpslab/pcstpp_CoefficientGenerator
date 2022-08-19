@@ -305,11 +305,15 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
                 if (abs(energy_func(m1)) <= max_energy) & (abs(energy_func(m2)) <= max_energy):
                     integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
             except TypeError:
+                # If 'if-clause' can not be determined uniquely, as it depends on the `a`
+                # symbol, try helping the sympy module by checking for a equivalent relation.
                 try:
                     if ((sym.Abs(energy_func(m1)) ** 2).expand(real=True) <= (max_energy ** 2).expand(real=True)) & (
                             (sym.Abs(energy_func(m2)) ** 2).expand(real=True) <= (max_energy ** 2).expand(real=True)):
                         integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
                 except TypeError:
+                    # If 'if-clause' can not be determined again, print the unresolved relational
+                    # and assume that the contribution does not vanish generally
                     if isinstance(
                             (sym.Abs(energy_func(m1)) ** 2).expand(real=True) <= (max_energy ** 2).expand(real=True),
                             sym.core.relational.Relational):

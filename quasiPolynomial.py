@@ -78,7 +78,7 @@ def pretty_factor_print(coeff: "Coeff", leave1: bool = False) -> str:
     
         Parameters
         ----------
-        coeff : coeff
+        coeff : Union[int, float, Fraction, complex, Expr]
         leave1 : bool
             If `True` a coefficient of `1` or `-1` will not be
             simplified.
