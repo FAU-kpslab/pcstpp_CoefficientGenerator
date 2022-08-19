@@ -109,9 +109,7 @@ def signum_broad_expr(indices1: Indices[Expr], indices2: Indices[Expr], delta: E
     expr_sgn = lambda z: sym.Piecewise((z.conjugate() / sym.Abs(z), sym.Abs(z)>delta),(0,True))
     return expr_sgn(energy(indices1)) - expr_sgn(energy(indices2))
 
-# TODO: Update typing (exponent_zero)
-def signum_complex(indices1: Indices[Union[complex, Expr]], indices2: Indices[Union[complex, Expr]]) -> Union[complex,
-                                                                                                              Expr]:
+def signum_complex(indices1: Indices[complex], indices2: Indices[complex]) -> complex:
     """
     signum_complex(indices1, indices2)
 

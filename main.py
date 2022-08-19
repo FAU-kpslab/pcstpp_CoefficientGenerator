@@ -174,7 +174,9 @@ def main():
                 sequence_sorted = tuple(tuple([s for s in sequence if s in o_s]) for o_s in operators)
                 if not args.trafo:
                     indices = coefficientFunction.sequence_to_indices(sequence_sorted, translation)
-                    # Make use of block diagonality.
+                    # Make use of block diagonality. If the energy is of type `Expr`, check
+                    # if the energy can be potentially zero. If yes, we have to consider this
+                    # process.
                     if (coefficientFunction.is_zero(energy_func(indices)) 
                        or (isinstance(energy_func(indices),Expr) and sym.Ne(energy_func(indices),0)!=True)):
                         # As the band diagonality is only fulfilled up to a multiple of delta add + delta * max_order
@@ -192,7 +194,8 @@ def main():
         with open("result.txt", "w") as result:
             act_collection = trafo_collection if args.trafo else collection
             for sequence in act_collection.keys():
-                # Only return the block-diagonal operator sequences.
+                # Only return the block-diagonal operator sequences (including those that can
+                # be potentially zero).
                 energy_value = energy_func(coefficientFunction.sequence_to_indices(sequence, translation)) 
                 if (args.trafo or energy_value == 0
                     or (isinstance(energy_value,Expr) and sym.Ne(energy_value,0)!=True)):

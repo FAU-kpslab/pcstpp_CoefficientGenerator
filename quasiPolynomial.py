@@ -859,6 +859,7 @@ class QuasiPolynomial:
                         resulting_constant = resulting_constant + temp_polynomial.coefficients()[0] * inverse(e) ** (
                                 n + 1)
                     if isinstance(e,Expr) and sym.Eq(e,0)!=False:
+                        # Case e!=0
                         resulting_polynomial = Polynomial.new([sym.Piecewise((r, sym.Ne(e,0)),(0,True)) for r in  resulting_polynomial.coefficients()])
                         output[e] = resulting_polynomial
                         constant = constant + sym.Piecewise((resulting_constant,sym.Ne(e,0)), (0,True))
