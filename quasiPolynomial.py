@@ -72,7 +72,8 @@ def inverse(scalar: "Coeff"):
     elif isinstance(scalar, (float, complex, Expr)):
         return 1 / scalar
 
-def pretty_factor_print(coeff:"Coeff",leave1:bool = False)->str:
+
+def pretty_factor_print(coeff: "Coeff", leave1: bool = False) -> str:
     """
     pretty_factor_print(coeff)
 
@@ -80,6 +81,7 @@ def pretty_factor_print(coeff:"Coeff",leave1:bool = False)->str:
     
         Parameters
         ----------
+        coeff : coeff
         leave1 : bool
             If `True` a coefficient of `1` or `-1` will not be
             simplified.
@@ -88,16 +90,17 @@ def pretty_factor_print(coeff:"Coeff",leave1:bool = False)->str:
         -------
         str
     """
+
     if are_close(coeff, 1) and not leave1:
         return ""
     elif are_close(coeff, -1) and not leave1:
         return "-"
-    elif isinstance(coeff,Expr) and coeff.func == sym.Add:
-        # If the outmost function is an addition, add brackets
-        # around `coeff`
-        return '(' + str(coeff).replace("**","^") + ')'
+    elif isinstance(coeff, Expr) and coeff.func == sym.Add:
+        # If the outmost function is an addition, add brackets around `coeff`
+        return '(' + str(coeff).replace("**", "^") + ')'
     else:
-        return str(coeff).replace("**","^")
+        return str(coeff).replace("**", "^")
+
 
 class Polynomial:
     """
@@ -301,24 +304,23 @@ class Polynomial:
             str
         """
 
-        # TODO: Check if `sym` works
         # Check whether the polynomial is empty.
         if self == Polynomial.zero():
             return '0'
         # Check whether the polynomial contains only the constant term.
         elif self.__private_coefficients.size == 1:
-            return pretty_factor_print(self.__private_coefficients[0],leave1=True)
+            return pretty_factor_print(self.__private_coefficients[0], leave1=True)
         else:
             output = []
             # Check whether the constant term is zero to leave that away.
             if not is_zero(self.__private_coefficients[0]):
-                output.append(pretty_factor_print(self.__private_coefficients[0],leave1=True))
+                output.append(pretty_factor_print(self.__private_coefficients[0], leave1=True))
             if not is_zero(self.__private_coefficients[1]):
                 output.append('{}x'.format(pretty_factor_print(self.__private_coefficients[1])))
             for exponent, coefficient in list(enumerate(self.__private_coefficients))[2:]:
                 # Check for the remaining coefficients whether they are zero to leave those away.
                 if not is_zero(coefficient):
-                    output.append('{}x^{}'.format(pretty_factor_print(coefficient),exponent))
+                    output.append('{}x^{}'.format(pretty_factor_print(coefficient), exponent))
             return '+'.join(output).replace('+-', '-')
 
     def scalar_multiplication(self, scalar: "Coeff") -> 'Polynomial':
