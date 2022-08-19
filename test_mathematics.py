@@ -69,7 +69,6 @@ class TestHelper(unittest.TestCase):
         self.assertEqual(signum_complex(((2,),), ((-2,),)), 2)
         self.assertEqual(signum_complex(((2j,),), ((-2j,),)), -2j)
         self.assertEqual(signum_complex(((2j, -1j),), ((-2j, -3j),)), -2j)
-        # TODO: Is this the correct behaviour for the Uhrig generator?
         self.assertAlmostEqual(signum_complex(((1 + 1j,),), ((-2j - 2,),)),
                                np.exp(-np.pi / 4 * 1j) - np.exp(-5 * np.pi / 4 * 1j))
         self.assertAlmostEqual(signum_complex(((1 + 3j, -2 + 2j),), ((-2j - 2, 1),)),

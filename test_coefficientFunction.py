@@ -2,11 +2,13 @@ import unittest
 
 from quasiPolynomial import Polynomial, QuasiPolynomial as qp
 from coefficientFunction import *
+from sympy import I
 
 # Defining symbols for testing
-a, b = sym.symbols('a b')
+a = sym.symbols('a', positive=True)
 
-translation = dict([(1, -2), (2, 0), (3, 2), (4, -2), (5, 0), (6, 2), (7, a), (8, -a)])
+
+translation = dict([(1, -2), (2, 0), (3, 2), (4, -2), (5, 0), (6, 2), (7, a), (8, -a), (9, I*a), (10, -I*a)])
 collection = FunctionCollection(translation)
 collection[((1,), ())] = qp.new_integer([[1]])
 collection[((2,), ())] = qp.new_integer([[1]])
@@ -16,6 +18,8 @@ collection[((), (5,))] = qp.new_integer([[-1]])
 collection[((), (6,))] = qp.new_integer([[-1]])
 collection[((7,), ())] = qp.new_integer([[1]])
 collection[((8,), ())] = qp.new_integer([[1]])
+collection[((9,), ())] = qp.new_integer([[1]])
+collection[((10,), ())] = qp.new_integer([[1]])
 
 # TODO: Write tests for `sympy`
 
@@ -51,17 +55,18 @@ class TestBDifferentialEquation(unittest.TestCase):
 
     def test_key_sequence(self):
         self.assertEqual(sequence_to_key(collection.keys()[0]), ((1,), ()))
-        self.assertEqual(key_to_sequence(((2,), ())),collection.keys()[1])
+        self.assertEqual(key_to_sequence(((2,), ())), collection.keys()[1])
 
     def test_calc(self):
-        self.assertEqual(calc(((2,2),tuple()),collection,translation,2,signum,energy),QuasiPolynomial.zero())
+        self.assertEqual(calc(((2, 2), tuple()), collection, translation, 2, signum, energy), QuasiPolynomial.zero())
         self.assertEqual(calc(((1, 3), tuple()), collection, translation, 2, signum, energy),
                          QuasiPolynomial({0: Polynomial([Fraction("-1/2")]), 4: Polynomial([Fraction("1/2")])}))
-        # TODO: The following result is not pretty, as `sym.conjugate(a)/sym.Abs(a)**2` should be `a`, but this is not
-        #  found by sympy
-        self.assertEqual(calc(((8, 7), tuple()), collection, translation, sym.Abs(a), signum_complex, energy),
-                         QuasiPolynomial({0: Polynomial([-sym.conjugate(a) / sym.Abs(a) ** 2]),
-                                          2 * sym.Abs(a): Polynomial([sym.conjugate(a) / sym.Abs(a) ** 2])}))
+        self.assertEqual(calc(((8, 7), tuple()), collection, translation, a, signum_complex, energy),
+                         QuasiPolynomial({0: Polynomial([-1/a]), 2*a: Polynomial([1/a])}))
+        self.assertEqual(calc(((9, 10), tuple()), collection, translation, a, signum_complex, energy),
+                         QuasiPolynomial({0: Polynomial([-I/a]), 2*a: Polynomial([I/a])}))
+        self.assertEqual(calc(((10, 9), tuple()), collection, translation, a, signum_complex, energy),
+                         QuasiPolynomial({0: Polynomial([I/a]), 2*a: Polynomial([-I/a])}))
 
 
 if __name__ == '__main__':
