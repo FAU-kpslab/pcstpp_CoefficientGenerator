@@ -5,6 +5,7 @@ import sympy as sym
 from fractions import Fraction
 from quasiPolynomial import Polynomial as P
 from quasiPolynomial import QuasiPolynomial as QP
+import quasiPolynomial
 
 # Defining symbols for testing
 a, b = sym.symbols('a b',positive=True)
@@ -346,6 +347,21 @@ class TestQuasiPolynomial(unittest.TestCase):
         self.assertEqual(QP.new({a - a: [2]}).get_constant(), 2)
         self.assertEqual(QP.new({0: [a**2]}).get_constant(), a**2)
 
+class TestFunctions(unittest.TestCase):
+
+    def test_evaluate_relational(self):
+        self.assertTrue(quasiPolynomial.evaluate_relational(True))
+        self.assertFalse(quasiPolynomial.evaluate_relational(False))
+        self.assertFalse(quasiPolynomial.evaluate_relational(False, rigorous=True))
+        self.assertFalse(quasiPolynomial.evaluate_relational(3==2))
+        self.assertFalse(quasiPolynomial.evaluate_relational(a<-1))
+        self.assertTrue(quasiPolynomial.evaluate_relational(a>1))
+        self.assertFalse(quasiPolynomial.evaluate_relational(a>2, rigorous=True))
+        self.assertTrue(quasiPolynomial.evaluate_relational(sym.Ne(a - sym.sqrt(a**2 + 1) + 1, 0)))
+        self.assertTrue(quasiPolynomial.evaluate_relational(sym.Ne(a - sym.sqrt(a**2 + 1) + 1, 0),rigorous=True))
+        self.assertFalse(quasiPolynomial.evaluate_relational(sym.Eq(a - sym.sqrt(a**2 + 1) + 1, 0)))
+        self.assertFalse(quasiPolynomial.evaluate_relational(sym.Eq(a, 2), rigorous=True))
+        self.assertFalse(quasiPolynomial.evaluate_relational(sym.Eq(3, 2)))
 
 if __name__ == '__main__':
     unittest.main()

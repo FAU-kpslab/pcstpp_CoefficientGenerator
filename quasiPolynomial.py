@@ -99,6 +99,44 @@ def pretty_factor_print(coeff: "Coeff", leave1: bool = False) -> str:
     else:
         return str(coeff).replace("**", "^")
 
+def evaluate_relational(rel:Union[sym.core.relational.Relational,bool],rigorous:bool=False)->bool:
+    """
+    evaluate_relational(rel)
+
+    Returns a boolean value for a sympy relational expression, by trying
+    to solve the expression.
+
+    Parameters
+    ----------
+    rel : Union[Relational,bool]
+        Relational like (in)-equality, e.g., 2<a.
+    rigorous : bool
+        Determines the outcome if `rel` is only fullfilled
+        for some values of `a`. If `True` the function returns
+        `False` and vice versa.
+    
+    Returns
+    -------
+    bool
+    """
+    # If it is an not yet solved relational, try to solve it
+    if isinstance(rel, sym.core.relational.Relational):
+        rel = sym.solve(rel)
+    # If it is still a relational, give up and print the relational
+    # As it is totally undetermined if the relational is True or False
+    # assume that it is fulfilled for some values.
+    if isinstance(rel,sym.core.relational.Relational):
+        print("Unresolved relational: {}".format(rel))
+        return not rigorous
+    # If it is a list, some (or no) solutions were found
+    elif isinstance(rel,list):
+        return (not rigorous) and len(rel) > 0
+    # If it is (already) a boolean, just output the value
+    elif isinstance(rel, (sym.logic.boolalg.Boolean,bool)):
+        return bool(rel)
+    else:
+        raise TypeError("This relational can not be evaluated: {}".format(rel))
+
 
 class Polynomial:
     """
@@ -858,7 +896,7 @@ class QuasiPolynomial:
                         resulting_polynomial = resulting_polynomial - (temp_polynomial * inverse(e) ** (n + 1))
                         resulting_constant = resulting_constant + temp_polynomial.coefficients()[0] * inverse(e) ** (
                                 n + 1)
-                    if isinstance(e,Expr) and sym.Eq(e,0)!=False:
+                    if evaluate_relational(sym.Eq(e,0)):
                         # Case e!=0
                         resulting_polynomial = Polynomial.new([sym.Piecewise((r, sym.Ne(e,0)),(0,True)) for r in  resulting_polynomial.coefficients()])
                         output[e] = resulting_polynomial

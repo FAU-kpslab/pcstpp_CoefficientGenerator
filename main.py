@@ -6,7 +6,7 @@ from yaml.loader import SafeLoader
 import argparse
 
 import coefficientFunction
-from quasiPolynomial import QuasiPolynomial as qp, is_zero
+from quasiPolynomial import QuasiPolynomial as qp, is_zero, evaluate_relational
 from mathematics import Energy, Coeff, Expr, energy, energy_broad, energy_broad_expr, signum, signum_broad, signum_complex, signum_expr, signum_broad_expr
 from itertools import product, chain
 from typing import cast, Dict, Union
@@ -197,10 +197,9 @@ def main():
                 # Only return the block-diagonal operator sequences (including those that can
                 # be potentially zero).
                 energy_value = energy_func(coefficientFunction.sequence_to_indices(sequence, translation)) 
-                if (args.trafo or energy_value == 0
-                    or (isinstance(energy_value,Expr) and sym.Ne(energy_value,0)!=True)):
+                if (args.trafo or evaluate_relational(sym.Eq(energy_value,0))):
                     resulting_constant = act_collection[sequence].function.get_constant()
-                    if isinstance(energy_value, Expr):
+                    if not evaluate_relational(sym.Eq(energy_value,0),rigorous=True):
                         resulting_constant = sym.Piecewise((resulting_constant,sym.Eq(energy_value,0)),(0,True))
                     # Only return the non-vanishing operator sequences.
                     if resulting_constant != 0:

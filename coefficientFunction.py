@@ -1,4 +1,4 @@
-from quasiPolynomial import QuasiPolynomial
+from quasiPolynomial import QuasiPolynomial, evaluate_relational
 from mathematics import *
 from typing import Tuple, Dict, Optional, Callable
 
@@ -301,28 +301,8 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
             m1 = sequence_to_indices(s1, translation)
             m2 = sequence_to_indices(s2, translation)
             # Only calculate non-vanishing contributions to the integrand.
-            try:
-                if (abs(energy_func(m1)) <= max_energy) and (abs(energy_func(m2)) <= max_energy):
-                    integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
-            except TypeError:
-                # If 'if-clause' can not be determined uniquely, as it depends on the `a`
-                # symbol, try helping the sympy module by checking for a equivalent relation.
-                try:
-                    if ((sym.Abs(energy_func(m1)) ** 2).expand(real=True) <= (max_energy ** 2).expand(real=True)) and (
-                            (sym.Abs(energy_func(m2)) ** 2).expand(real=True) <= (max_energy ** 2).expand(real=True)):
-                        integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
-                except TypeError:
-                    # If 'if-clause' can not be determined again, print the unresolved relational
-                    # and assume that the contribution does not vanish generally
-                    if isinstance(
-                            (sym.Abs(energy_func(m1)) ** 2).expand(real=True) <= (max_energy ** 2).expand(real=True),
-                            sym.core.relational.Relational):
-                        print("Unresolved relational: {}".format((abs(energy_func(m1)) <= max_energy)))
-                    elif isinstance(
-                            (sym.Abs(energy_func(m2)) ** 2).expand(real=True) <= (max_energy ** 2).expand(real=True),
-                            sym.core.relational.Relational):
-                        print("Unresolved relational: {}".format((abs(energy_func(m2)) <= max_energy)))
-                    integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
+            if evaluate_relational(abs(energy_func(m1)) <= max_energy) and evaluate_relational(abs(energy_func(m2)) <= max_energy):
+                integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
 
         result = integrand.integrate()
         # Insert the result into the collection.
