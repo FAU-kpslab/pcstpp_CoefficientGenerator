@@ -9,7 +9,7 @@ import coefficientFunction
 from quasiPolynomial import QuasiPolynomial as qp
 from mathematics import Energy, Coeff, Expr, energy, energy_broad, signum, signum_broad, signum_complex
 from itertools import product, chain
-from typing import cast, Dict, Union
+from typing import cast, Dict, Union, Sequence
 from sympy.parsing.sympy_parser import parse_expr
 import sympy as sym
 from sympy import sympify
@@ -18,7 +18,7 @@ from sympy import sympify
 a = sym.Symbol("a", positive=True)
 
 
-def main():
+def main(raw_args:Sequence[str]|None=None):
     my_parser = argparse.ArgumentParser(description='Use pCUT to block-diagonalize a Lindbladian or a Hamiltonian with '
                                                     'two particle types')
     my_parser.add_argument('-t', '--trafo', action='store_true', help='calculate the transformation directly')
@@ -29,7 +29,7 @@ def main():
     my_config.add_argument('-c', '--config', action='store_true',
                            help='Writes an exemplary config file to "config.yml" without performing '
                                 'any calculations.')
-    args = my_parser.parse_args()
+    args = my_parser.parse_args(raw_args)
 
     if args.file is not None:
         print('You have decided to use a config file, titled "{}".'.format(args.file))
