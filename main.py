@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from fractions import Fraction
 from numpy import iscomplex
 import yaml
@@ -22,6 +24,7 @@ def main(raw_args:Sequence[str]|None=None):
     my_parser = argparse.ArgumentParser(description='Use pCUT to block-diagonalize a Lindbladian or a Hamiltonian with '
                                                     'two particle types')
     my_parser.add_argument('-t', '--trafo', action='store_true', help='calculate the transformation directly')
+    my_parser.add_argument('-s', '--simplify', action='store_true', help='Simplify sympy expressions via cancel().')
     my_config = my_parser.add_mutually_exclusive_group()
     my_config.add_argument('-f', '--file', nargs='?', const='config.yml', default=None,
                            help='pass configuration using the config file "config.yml" '
@@ -176,7 +179,8 @@ def main(raw_args:Sequence[str]|None=None):
                         #  one calculation -> implement order-dependent max_energy in `calc` in `coefficientFunction.py`
                         # TODO: Maybe even make max_energy completely automatic?
                         coefficientFunction.calc(sequence_sorted, collection, translation,
-                                                 max_energy + delta * max_order, signum_func, energy_func)
+                                                 max_energy + delta * max_order, signum_func, energy_func,
+                                                 args.simplify)
                 else:
                     coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation,
                                                    max_energy + delta * max_order, signum_func, energy_func)

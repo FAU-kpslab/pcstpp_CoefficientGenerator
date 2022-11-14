@@ -272,7 +272,7 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
          max_energy: Union[Energy_real, Expr], signum_func: Union[
             Callable[[Indices[Energy_real], Indices[Energy_real]], int], Callable[
                 [Indices[Union[complex, Expr]], Indices[Union[complex, Expr]]], Union[complex, Expr]]],
-         energy_func: Callable[[Indices[Energy]], Energy]) -> QuasiPolynomial:
+         energy_func: Callable[[Indices[Energy]], Energy], simplify: bool) -> QuasiPolynomial:
     """
     calc(sequence)
 
@@ -294,8 +294,8 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
             s1 = partition[0]
             s2 = partition[1]
             # Check whether the required functions are already calculated.
-            f1 = calc(partition[0], collection, translation, max_energy, signum_func, energy_func)
-            f2 = calc(partition[1], collection, translation, max_energy, signum_func, energy_func)
+            f1 = calc(partition[0], collection, translation, max_energy, signum_func, energy_func, simplify)
+            f2 = calc(partition[1], collection, translation, max_energy, signum_func, energy_func, simplify)
             # Translate the operator sequences into its indices.
             m = sequence_to_indices(sequence, translation)
             m1 = sequence_to_indices(s1, translation)
@@ -324,7 +324,10 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
                         print("Unresolved relational: {}".format((abs(energy_func(m2)) <= max_energy)))
                     integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
 
-        result = integrand.integrate()
+        if simplify:
+            result = integrand.integrate().simplify_coefficients()
+        else:
+            result = integrand.integrate()
         # Insert the result into the collection.
         collection[sequence] = result
         return result

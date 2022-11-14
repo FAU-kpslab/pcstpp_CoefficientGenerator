@@ -230,6 +230,19 @@ class Polynomial:
                     return Polynomial.zero()
         return self
 
+    def simplify_coefficients(self) -> 'Polynomial':
+        """
+        p.simplify_coefficients()
+
+        Simplifies the coefficients of a sympy polynomial via cancel().
+
+            Returns
+            -------
+            Polynomial
+        """
+
+        return Polynomial([sym.cancel(coefficient) for coefficient in self.__private_coefficients])
+
     @staticmethod
     def new(coefficient_list: List[Union["Coeff", str]]) -> 'Polynomial':
         """
@@ -615,6 +628,19 @@ class QuasiPolynomial:
                 else:
                     output[key_list[i]] = self.polynomial_dict[key_list[i]]
         return QuasiPolynomial({e: p.simplify() for e, p in output.items() if p != Polynomial.zero()})
+
+    def simplify_coefficients(self) -> 'QuasiPolynomial':
+        """
+        qp.simplify_coefficients()
+
+        Simplifies the coefficients of a sympy quasi-polynomials via cancel().
+
+            Returns
+            -------
+            QuasiPolynomial
+        """
+
+        return QuasiPolynomial({e: p.simplify_coefficients() for e, p in self.polynomial_dict.items()})
 
     @staticmethod
     def new_integer(coefficient_list: List[List[Union["Coeff", str]]]) -> 'QuasiPolynomial':
