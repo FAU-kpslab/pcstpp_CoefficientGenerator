@@ -127,6 +127,8 @@ class Polynomial:
             Creates an empty polynomial.
         simplify : Polynomial
             Simplifies a polynomial by *removing* zeros.
+        simplify_coefficients : Polynomial
+            Simplifies the coefficients of a sympy polynomial via cancel().
         new : Polynomial
             Creates a quasi-polynomial using a list of __private_coefficients.
         copy : Polynomial
@@ -516,6 +518,8 @@ class QuasiPolynomial:
             Creates an empty quasi-polynomial.
         simplify : QuasiPolynomial
             Simplifies a quasi-polynomial by *removing* zero polynomials.
+        simplify_coefficients : QuasiPolynomial
+            Simplifies the coefficients of a sympy quasi-polynomials via cancel().
         new_integer : QuasiPolynomial
             Creates a quasi-polynomial with integer exponents using a nested list of __private_coefficients.
         new: QuasiPolynomial
