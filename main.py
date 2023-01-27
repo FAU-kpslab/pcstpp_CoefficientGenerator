@@ -6,7 +6,7 @@ from yaml.loader import SafeLoader
 import argparse
 
 import coefficientFunction
-from quasiPolynomial import QuasiPolynomial as qp, is_zero, evaluate_relational
+from quasiPolynomial import QuasiPolynomial as qp, is_zero, evaluate_relational,relation_dict_count
 from mathematics import Energy, Coeff, Expr, energy, energy_broad, energy_broad_expr, signum, signum_broad, signum_complex, signum_expr, signum_broad_expr
 from itertools import product, chain
 from typing import cast, Dict, Union
@@ -215,6 +215,7 @@ def main():
                         print(' '.join(output), file=result)
             result.close()
 
+    print(relation_dict_count.values())
     # Generate the config file.
     config_file = open("config.yml", "w")
     print('---', file=config_file)

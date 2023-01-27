@@ -99,6 +99,9 @@ def pretty_factor_print(coeff: "Coeff", leave1: bool = False) -> str:
     else:
         return str(coeff).replace("**", "^")
 
+
+relation_dict={}
+relation_dict_count = {}
 def evaluate_relational(rel:Union[sym.core.relational.Relational,bool],rigorous:bool=False)->bool:
     """
     evaluate_relational(rel)
@@ -119,17 +122,24 @@ def evaluate_relational(rel:Union[sym.core.relational.Relational,bool],rigorous:
     -------
     bool
     """
+    if rel in relation_dict.keys():
+        relation_dict_count[rel] += 1
+        rel = relation_dict[rel]
+
     # If it is an not yet solved relational, try to solve it
-#     if isinstance(rel, sym.core.relational.Relational):
-#         try:
-#             rel = sym.solve(rel)
-#         except NotImplementedError:
-#             # Due to unknown reasons there are cases where
-#             # the above attempt fails but the below succeeds (see #53)
-#             try:
-#                 rel = sym.Not(sym.solve(sym.Not(rel)))
-#             except NotImplementedError:
-#                 print("Solving failed: {}".format(rel))
+    elif isinstance(rel, sym.core.relational.Relational):
+        old_rel = rel
+        try:
+            rel = sym.solve(rel)
+        except NotImplementedError:
+            # Due to unknown reasons there are cases where
+            # the above attempt fails but the below succeeds (see #53)
+            try:
+                rel = sym.Not(sym.solve(sym.Not(rel)))
+            except NotImplementedError:
+                print("Solving failed: {}".format(rel))
+        relation_dict[old_rel] = rel
+        relation_dict_count[old_rel] = 1
     # If it is still a relational, give up and print the relational
     # As it is totally undetermined if the relational is True or False
     # assume that it is fulfilled for some values.
