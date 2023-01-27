@@ -215,7 +215,7 @@ def main():
                         print(' '.join(output), file=result)
             result.close()
 
-    print(relation_dict_count.values())
+    print("Number of found duplicates for checked relations (as list for each single relation):{}".format(str(list(relation_dict_count.values()))))
     # Generate the config file.
     config_file = open("config.yml", "w")
     print('---', file=config_file)
