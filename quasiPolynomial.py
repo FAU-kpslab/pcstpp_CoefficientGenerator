@@ -120,16 +120,16 @@ def evaluate_relational(rel:Union[sym.core.relational.Relational,bool],rigorous:
     bool
     """
     # If it is an not yet solved relational, try to solve it
-    if isinstance(rel, sym.core.relational.Relational):
-        try:
-            rel = sym.solve(rel)
-        except NotImplementedError:
-            # Due to unknown reasons there are cases where
-            # the above attempt fails but the below succeeds (see #53)
-            try:
-                rel = sym.Not(sym.solve(sym.Not(rel)))
-            except NotImplementedError:
-                print("Solving failed: {}".format(rel))
+#     if isinstance(rel, sym.core.relational.Relational):
+#         try:
+#             rel = sym.solve(rel)
+#         except NotImplementedError:
+#             # Due to unknown reasons there are cases where
+#             # the above attempt fails but the below succeeds (see #53)
+#             try:
+#                 rel = sym.Not(sym.solve(sym.Not(rel)))
+#             except NotImplementedError:
+#                 print("Solving failed: {}".format(rel))
     # If it is still a relational, give up and print the relational
     # As it is totally undetermined if the relational is True or False
     # assume that it is fulfilled for some values.
