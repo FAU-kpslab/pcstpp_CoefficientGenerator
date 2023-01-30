@@ -207,12 +207,14 @@ def main():
                         inverted_sequence = [str(operator) for s in sequence for operator in s[::-1]]
                         # Return 'order' 'sequence' 'numerator' 'denominator'.
                         if isinstance(resulting_constant, Fraction):
-                            output = [str(sum([len(seq) for seq in sequence]))] + inverted_sequence + [
-                                str(resulting_constant.numerator), str(resulting_constant.denominator)]
+                            pass
+                            #output = [str(sum([len(seq) for seq in sequence]))] + inverted_sequence + [
+                            #    str(resulting_constant.numerator), str(resulting_constant.denominator)]
                         else:
-                            output = [str(sum([len(seq) for seq in sequence]))] + inverted_sequence + [
-                                str(resulting_constant)]
-                        print(' '.join(output), file=result)
+                            pass
+                            #output = [str(sum([len(seq) for seq in sequence]))] + inverted_sequence + [
+                            #    str(resulting_constant)]
+                        #print(' '.join(output), file=result)
             result.close()
 
     print("Number of found duplicates for checked relations (as list for each single relation):{}".format(str(list(relation_dict_count.values()))))
