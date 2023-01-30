@@ -307,7 +307,7 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
                 integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
 
         result = integrand.integrate()
-        result.polynomial_dict = dict([(key, Polynomial([sym.simplify(s) if isinstance(s,Expr) else s for s in value.coefficients()])) for key,value in result.polynomials])
+        result.polynomial_dict = dict([(key, Polynomial([sym.cancel(s) if isinstance(s,Expr) else s for s in value.coefficients()])) for key,value in result.polynomials])
         # Insert the result into the collection.
         collection[sequence] = result
         return result
