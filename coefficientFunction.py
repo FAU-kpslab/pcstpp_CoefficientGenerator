@@ -1,6 +1,8 @@
-from quasiPolynomial import QuasiPolynomial, evaluate_relational
+from quasiPolynomial import QuasiPolynomial, evaluate_relational, Polynomial
 from mathematics import *
 from typing import Tuple, Dict, Optional, Callable
+import sympy as sym
+from sympy.core.expr import Expr
 
 
 class CoefficientFunction:
@@ -305,6 +307,7 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
                 integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
 
         result = integrand.integrate()
+        result.polynomial_dict = dict([(key, Polynomial([sym.simplify(s) if isinstance(s,Expr) else s for s in value.coefficients()])) for key,value in result.polynomials])
         # Insert the result into the collection.
         collection[sequence] = result
         return result
