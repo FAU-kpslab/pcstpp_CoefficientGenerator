@@ -187,10 +187,10 @@ def main(raw_args:Sequence[str]|None=None):
             act_collection = trafo_collection if args.trafo else collection
             for sequence in act_collection.keys():
                 # Only return the block-diagonal operator sequences.
-                if args.trafo or energy_func(coefficientFunction.sequence_to_indices(sequence, translation)) == 0:
+                if args.trafo or coefficientFunction.is_zero(energy_func(coefficientFunction.sequence_to_indices(sequence, translation))):
                     resulting_constant = act_collection[sequence].function.get_constant()
                     # Only return the non-vanishing operator sequences.
-                    if resulting_constant != 0:
+                    if not coefficientFunction.is_zero(resulting_constant):
                         # Reverse the operator sequences, because the Solver thinks from left to right.
                         inverted_sequence = [str(operator) for s in sequence for operator in s[::-1]]
                         # Return 'order' 'sequence' 'numerator' 'denominator'.
