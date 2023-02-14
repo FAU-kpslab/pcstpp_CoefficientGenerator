@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from fractions import Fraction
 from numpy import iscomplex
 import yaml
@@ -18,7 +20,7 @@ from sympy import sympify
 a = sym.Symbol("a", positive=True)
 
 
-def main(raw_args:Sequence[str]|None=None):
+def main(raw_args: Sequence[str] | None = None):
     my_parser = argparse.ArgumentParser(description='Use pCUT to block-diagonalize a Lindbladian or a Hamiltonian with '
                                                     'two particle types')
     my_parser.add_argument('-t', '--trafo', action='store_true', help='calculate the transformation directly')
@@ -172,7 +174,7 @@ def main(raw_args:Sequence[str]|None=None):
                     # Make use of block diagonality.
                     if coefficientFunction.is_zero(energy_func(indices)):
                         # As the band diagonality is only fulfilled up to a multiple of delta add + delta * max_order
-                        # TODO: According to Andis calculations, max_energy should depend on the specific order used in
+                        # TODO: According to Andi's calculations, max_energy should depend on the specific order used in
                         #  one calculation -> implement order-dependent max_energy in `calc` in `coefficientFunction.py`
                         # TODO: Maybe even make max_energy completely automatic?
                         coefficientFunction.calc(sequence_sorted, collection, translation,
@@ -187,10 +189,11 @@ def main(raw_args:Sequence[str]|None=None):
             act_collection = trafo_collection if args.trafo else collection
             for sequence in act_collection.keys():
                 # Only return the block-diagonal operator sequences.
-                if args.trafo or energy_func(coefficientFunction.sequence_to_indices(sequence, translation)) == 0:
+                if args.trafo or coefficientFunction.is_zero(
+                        energy_func(coefficientFunction.sequence_to_indices(sequence, translation))):
                     resulting_constant = act_collection[sequence].function.get_constant()
                     # Only return the non-vanishing operator sequences.
-                    if resulting_constant != 0:
+                    if not coefficientFunction.is_zero(resulting_constant):
                         # Reverse the operator sequences, because the Solver thinks from left to right.
                         inverted_sequence = [str(operator) for s in sequence for operator in s[::-1]]
                         # Return 'order' 'sequence' 'numerator' 'denominator'.
