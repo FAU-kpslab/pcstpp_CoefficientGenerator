@@ -10,6 +10,7 @@ import sympy as sym
 from sympy.core.expr import Expr
 import sympy as sym
 
+exclusions = []
 
 def is_zero(scalar: "Coeff") -> bool:
     """
@@ -919,6 +920,7 @@ class QuasiPolynomial:
                         resulting_polynomial = Polynomial.new([sym.Piecewise((r, sym.Ne(e,0)),(0,True)) for r in  resulting_polynomial.coefficients()])
                         output[e] = resulting_polynomial
                         constant = constant + sym.Piecewise((resulting_constant,sym.Ne(e,0)), (0,True))
+                        # exclusions.append(sym.Eq(e,0))
                         # If e=0, we have to treat p as a simple polynomial, so
                         # we only integrate and add the result to output[0]
                         poly_int = Polynomial.new([sym.Piecewise((r,sym.Eq(e,0)), (0,True)) for r in p.integrate().coefficients()])

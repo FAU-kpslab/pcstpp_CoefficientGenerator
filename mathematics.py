@@ -3,7 +3,7 @@ from functools import reduce
 from itertools import product
 import operator
 
-from quasiPolynomial import QuasiPolynomial, are_close, is_zero
+from quasiPolynomial import QuasiPolynomial, are_close, is_zero, exclusions
 import numpy as np
 import sympy as sym
 from typing import Callable, List, Tuple, Union, TypeVar, cast
@@ -136,7 +136,12 @@ def signum_expr(indices1: Indices[Expr], indices2: Indices[Expr]) -> Expr:
         Expr
     """
 
-    expr_sgn = lambda z: sym.Piecewise((z.conjugate() / sym.Abs(z), sym.Ne(z,0)),(0,True))
+    #expr_sgn = lambda z: sym.Piecewise((z.conjugate() / sym.Abs(z), sym.Ne(z,0)),(0,True))
+    expr_sgn = lambda z: 0 if sym.Eq(z,0)==True else z.conjugate() / sym.Abs(z)
+    if sym.Eq(energy(indices1),0) != True and sym.Eq(energy(indices1),0) not in exclusions:
+        exclusions.append(sym.Eq(energy(indices1),0))
+    if sym.Eq(energy(indices2),0) != True and sym.Eq(energy(indices2),0) not in exclusions:
+        exclusions.append(sym.Eq(energy(indices2),0))
     return expr_sgn(energy(indices1)) - expr_sgn(energy(indices2))
 
 
