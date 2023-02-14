@@ -7,7 +7,9 @@ from wolframclient.language import wl
 import sympy
 from sympy.parsing.sympy_parser import parse_expr
 
-wolfram_session = WolframLanguageSession()
+wolfram_session = WolframLanguageSession('~/.local/lib/python3.7/site-packages/wolframclient')
+
+# Error message: Kernel not found...
 
 print(wolfram_session.evaluate(wl.StringReverse('abc')))
 
