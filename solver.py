@@ -15,7 +15,7 @@ my_parser.add_argument('-f', '--file', nargs='?', const='result.txt', default=No
 my_parser.add_argument('-s', '--solver', nargs='?', const='./', default=None, help='pass the folder containing the '
                                                                                    'solver if not in the same folder')
 my_parser.add_argument('-1', '--step1', action='store_true', help='just calculate the solver results separately, '
-                                                                  'without combining them with the prefactors')
+                                                                  'without combining them with the coefficients')
 args = my_parser.parse_args()
 
 if args.file is not None:

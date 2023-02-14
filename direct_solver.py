@@ -16,8 +16,7 @@ my_parser.add_argument('-s', '--solver', nargs='?', const='./', default=None, he
                                                                                    'solver if not in the same folder')
 my_parser.add_argument('-1', '--step1', action='store_true', help='just calculate the solver results separately, '
                                                                   'without combining them with the coefficients')
-my_parser.add_argument('-b', '--direct', nargs='?', default=None, help='pass the number of bits when using the direct '
-                                                                       'solver')
+my_parser.add_argument('-b', '--direct', nargs='?', default=None, help='pass the number of bits')
 args = my_parser.parse_args()
 
 if args.file is not None:
@@ -50,8 +49,9 @@ with open("result_solver_temp.txt", "w") as solver_results:
         order = int(sequence[0])
         with open("temp.txt", "w") as temp_coefficient:
             temp_coefficient.write((" ".join(sequence.split(' ')[0:order + 1])) + " 1 1\n")
-        result = subprocess.run("cd {}; ./Solver".format(args.solver), capture_output=True, text=True,
-                                shell=True).stdout.replace('^', '**').replace('\n', '').replace(';', '').replace(' ', '').replace('|', '*|')
+        result = subprocess.run(
+            "cd {}; ./Solver".format(args.solver), capture_output=True, text=True, shell=True).stdout.replace(
+            '^', '**').replace('\n', '').replace(';', '').replace(' ', '').replace('|', '*|')
         solver_results.write(result + '\n')
 
 print('The expectation values of the individual T-operator sequences can be found in "result_solver_temp.txt".')
@@ -85,7 +85,8 @@ if not args.step1:
                 if not other_ket == ket:
                     partial_result = partial_result.subs(str(eval('k' + str(other_ket))), 0)
             if not partial_result == 0:
-                result_for_file = result_for_file + '+(' + str(partial_result.subs(eval('k' + str(ket)), 1)) + ')*|' + ket_binary + '>\n'
+                result_for_file = result_for_file + '+(' + str(
+                    partial_result.subs(eval('k' + str(ket)), 1)) + ')*|' + ket_binary + '>\n'
         result_file.write(result_for_file)
     print('The result can be found in "result_solver.txt".')
 
