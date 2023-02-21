@@ -290,8 +290,10 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
         return collection[sequence].function
     else:
         partition_list = partitions(sequence)
-        integrand = QuasiPolynomial.zero()
+        #integrand = QuasiPolynomial.zero()
+        result = QuasiPolynomial.zero()
         for partition in partition_list:
+            integrand = QuasiPolynomial.zero()
             # Rename the operator sequences.
             s1 = partition[0]
             s2 = partition[1]
@@ -305,8 +307,10 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
             # Only calculate non-vanishing contributions to the integrand.
             if evaluate_relational(abs(energy_func(m1)) <= max_energy) and evaluate_relational(abs(energy_func(m2)) <= max_energy):
                 integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
-
-        result = integrand.integrate()
+                integrated = integrand.integrate()
+                integrated = QuasiPolynomial.new(dict([(k, [sym.Piecewise((i, sym.Ne(signum_func(m1, m2),0)),(0,True)) for i in v.coefficients()]) for (k,v) in integrated.polynomial_dict.items()]))
+                result = result + integrated
+        #result = integrand.integrate()
         # result.polynomial_dict = dict([(key, Polynomial([sym.cancel(s) if isinstance(s,Expr) else s for s in value.coefficients()])) for key,value in result.polynomials])
         # Insert the result into the collection.
         collection[sequence] = result

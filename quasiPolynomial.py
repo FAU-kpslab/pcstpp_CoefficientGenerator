@@ -915,19 +915,22 @@ class QuasiPolynomial:
                         resulting_polynomial = resulting_polynomial - (temp_polynomial * inverse(e) ** (n + 1))
                         resulting_constant = resulting_constant + temp_polynomial.coefficients()[0] * inverse(e) ** (
                                 n + 1)
-                    if evaluate_relational(sym.Eq(e,0)):
+                    #if evaluate_relational(sym.Eq(e,0)):
                         # Case e!=0
-                        resulting_polynomial = Polynomial.new([sym.Piecewise((r, sym.Ne(e,0)),(0,True)) for r in  resulting_polynomial.coefficients()])
-                        output[e] = resulting_polynomial
-                        constant = constant + sym.Piecewise((resulting_constant,sym.Ne(e,0)), (0,True))
+                    #resulting_polynomial = Polynomial.new([sym.Piecewise((r, sym.Ne(e,0)),(0,True)) for r in  resulting_polynomial.coefficients()])
+                    #output[e] = resulting_polynomial
+                    #constant = constant + sym.Piecewise((resulting_constant,sym.Ne(e,0)), (0,True))
                         # exclusions.append(sym.Eq(e,0))
                         # If e=0, we have to treat p as a simple polynomial, so
                         # we only integrate and add the result to output[0]
-                        poly_int = Polynomial.new([sym.Piecewise((r,sym.Eq(e,0)), (0,True)) for r in p.integrate().coefficients()])
-                        output[0] = (output[0] if 0 in output.keys() else Polynomial.zero()) + poly_int
-                    else:
-                        constant = constant + resulting_constant
-                        output[e] = resulting_polynomial
+                        # If e=0 for almost all cases the Polynomial vanishes due to
+                        # the cancelation of the to signum functions - so just do
+                        # this at this position and just ignore the zero case
+                        #poly_int = Polynomial.new([sym.Piecewise((r,sym.Eq(e,0)), (0,True)) for r in p.integrate().coefficients()])
+                        #output[0] = (output[0] if 0 in output.keys() else Polynomial.zero()) + poly_int
+                    #else:
+                    constant = constant + resulting_constant
+                    output[e] = resulting_polynomial
             return (QuasiPolynomial(output) + QuasiPolynomial.new_integer([[constant]])).simplify()
 
     def get_constant(self) -> Fraction:
