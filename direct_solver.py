@@ -12,7 +12,7 @@ my_parser = argparse.ArgumentParser(description='Use the solver with sympy expre
 my_parser.add_argument('-f', '--file', nargs='?', const='result.txt', default=None, help='pass the coefficient file '
                                                                                          '"result.txt" or a custom one '
                                                                                          'given as an argument')
-my_parser.add_argument('-s', '--solver', nargs='?', const='./', default=None, help='pass the folder containing the '
+my_parser.add_argument('-p', '--path', nargs='?', const='./', default=None, help='pass the folder containing the '
                                                                                    'solver if not in the same folder')
 my_parser.add_argument('-1', '--step1', action='store_true', help='just calculate the solver results separately, '
                                                                   'without combining them with the coefficients')
@@ -37,8 +37,8 @@ if args.direct is not None:
         exec("k" + str(ket) + " = sympy.symbols('k" + str(ket) + "')")
         variable_dict["k" + str(ket)] = eval("k" + str(ket))
         
-if args.solver is not None:
-    print('The path of the solver is "{}Solver".\n'.format(args.solver))
+if args.path is not None:
+    print('The path of the solver is "{}Solver".\n'.format(args.path))
 else:
     print('The path of the solver is "./Solver".\n')
 
@@ -50,7 +50,7 @@ with open("result_solver_temp.txt", "w") as solver_results:
         with open("temp.txt", "w") as temp_coefficient:
             temp_coefficient.write((" ".join(sequence.split(' ')[0:order + 1])) + " 1 1\n")
         result = subprocess.run(
-            "cd {}; ./Solver".format(args.solver), capture_output=True, text=True, shell=True).stdout.replace(
+            "cd {}; ./Solver".format(args.path), capture_output=True, text=True, shell=True).stdout.replace(
             '^', '**').replace('\n', '').replace(';', '').replace(' ', '').replace('|', '*|')
         solver_results.write(result + '\n')
 

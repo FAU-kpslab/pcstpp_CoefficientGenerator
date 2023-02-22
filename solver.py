@@ -12,10 +12,11 @@ my_parser = argparse.ArgumentParser(description='Use the solver with sympy expre
 my_parser.add_argument('-f', '--file', nargs='?', const='result.txt', default=None, help='pass the coefficient file '
                                                                                          '"result.txt" or a custom one '
                                                                                          'given as an argument')
-my_parser.add_argument('-s', '--solver', nargs='?', const='./', default=None, help='pass the folder containing the '
-                                                                                   'solver if not in the same folder')
+my_parser.add_argument('-p', '--path', nargs='?', const='./', default=None, help='pass the folder containing the '
+                                                                                 'solver if not in the same folder')
 my_parser.add_argument('-1', '--step1', action='store_true', help='just calculate the solver results separately, '
                                                                   'without combining them with the coefficients')
+my_parser.add_argument('-s', '--sympy', action='store_true', help='simplify the results with sympy')
 args = my_parser.parse_args()
 
 if args.file is not None:
@@ -25,8 +26,8 @@ else:
     print('You have decided to use the coefficient file result.txt.')
     file = open("result.txt", "r")
 
-if args.solver is not None:
-    print('The path of the solver is "{}Solver".\n'.format(args.solver))
+if args.path is not None:
+    print('The path of the solver is "{}Solver".\n'.format(args.path))
 else:
     print('The path of the solver is "./Solver".\n')
 
@@ -37,7 +38,7 @@ with open("result_solver_temp.txt", "w") as solver_results:
         order = int(sequence[0])
         with open("temp.txt", "w") as temp_coefficient:
             temp_coefficient.write((" ".join(sequence.split(' ')[0:order + 1])) + " 1 1\n")
-        result = subprocess.run("cd {}; ./Solver".format(args.solver), capture_output=True, text=True,
+        result = subprocess.run("cd {}; ./Solver".format(args.path), capture_output=True, text=True,
                                 shell=True).stdout.replace('^', '**')
         if result[0] == ';':
             solver_results.write(result[2:])
@@ -64,6 +65,9 @@ if not args.step1:
                 expectation_value = parse_expr(prefactors[row], local_dict={"h0": h0})
                 intermediate_results.append(sympy.simplify(prefactor) * expectation_value)
     print("The result reads:")
-    print(sympy.simplify(sum(intermediate_results)))
+    if args.sympy:
+        print(sympy.simplify(sum(intermediate_results)))
+    else:
+        print(sum(intermediate_results))
 
 file.close()
