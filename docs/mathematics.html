@@ -296,142 +296,198 @@ mathematics    </h1>
 
                         <label class="view-source-button" for="mod-mathematics-view-source"><span>View Source</span></label>
 
-                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">  1</span></a><span class="kn">from</span> <span class="nn">fractions</span> <span class="kn">import</span> <span class="n">Fraction</span>
-</span><span id="L-2"><a href="#L-2"><span class="linenos">  2</span></a><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
-</span><span id="L-3"><a href="#L-3"><span class="linenos">  3</span></a><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
-</span><span id="L-4"><a href="#L-4"><span class="linenos">  4</span></a><span class="kn">import</span> <span class="nn">operator</span>
-</span><span id="L-5"><a href="#L-5"><span class="linenos">  5</span></a>
-</span><span id="L-6"><a href="#L-6"><span class="linenos">  6</span></a><span class="kn">from</span> <span class="nn">quasiPolynomial</span> <span class="kn">import</span> <span class="n">QuasiPolynomial</span><span class="p">,</span> <span class="n">are_close</span><span class="p">,</span> <span class="n">is_zero</span>
-</span><span id="L-7"><a href="#L-7"><span class="linenos">  7</span></a><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-</span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a><span class="kn">import</span> <span class="nn">sympy</span> <span class="k">as</span> <span class="nn">sym</span>
-</span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
-</span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a>
-</span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a><span class="n">Expr</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">expr</span><span class="o">.</span><span class="n">Expr</span>
-</span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="n">Coeff</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Fraction</span><span class="p">,</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">Expr</span><span class="p">]</span>
-</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="n">Energy</span> <span class="o">=</span> <span class="n">Coeff</span>
-</span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="n">Energy_real</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Fraction</span><span class="p">]</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a><span class="n">E</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Energy</span><span class="p">)</span>
-</span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a><span class="n">E_real</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;E_real&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Energy_real</span><span class="p">)</span>
-</span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a><span class="n">Indices</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">E</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
-</span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a><span class="n">Sequence</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
-</span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a>
-</span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a>
-</span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a><span class="k">def</span> <span class="nf">energy</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">E</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">E</span><span class="p">:</span>
-</span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a><span class="sd">    energy(indices)</span>
-</span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a>
-</span><span id="L-25"><a href="#L-25"><span class="linenos"> 25</span></a><span class="sd">    Returns the sum M(m) of operator sequence indices.</span>
-</span><span id="L-26"><a href="#L-26"><span class="linenos"> 26</span></a>
-</span><span id="L-27"><a href="#L-27"><span class="linenos"> 27</span></a><span class="sd">    Returns</span>
-</span><span id="L-28"><a href="#L-28"><span class="linenos"> 28</span></a><span class="sd">    -------</span>
-</span><span id="L-29"><a href="#L-29"><span class="linenos"> 29</span></a><span class="sd">    Union[int, float, Fraction, complex, Expr]</span>
-</span><span id="L-30"><a href="#L-30"><span class="linenos"> 30</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-31"><a href="#L-31"><span class="linenos"> 31</span></a>
-</span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a>    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">indices</span><span class="p">),</span> <span class="n">cast</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-</span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a>
+                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">  1</span></a><span class="c1">#__pdoc__ = {}</span>
+</span><span id="L-2"><a href="#L-2"><span class="linenos">  2</span></a><span class="c1">#__pdoc__[&#39;Expr&#39;] = False</span>
+</span><span id="L-3"><a href="#L-3"><span class="linenos">  3</span></a>
+</span><span id="L-4"><a href="#L-4"><span class="linenos">  4</span></a><span class="kn">from</span> <span class="nn">fractions</span> <span class="kn">import</span> <span class="n">Fraction</span>
+</span><span id="L-5"><a href="#L-5"><span class="linenos">  5</span></a><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
+</span><span id="L-6"><a href="#L-6"><span class="linenos">  6</span></a><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos">  7</span></a><span class="kn">import</span> <span class="nn">operator</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a>
+</span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a><span class="kn">from</span> <span class="nn">quasiPolynomial</span> <span class="kn">import</span> <span class="n">QuasiPolynomial</span><span class="p">,</span> <span class="n">are_close</span><span class="p">,</span> <span class="n">is_zero</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a><span class="kn">import</span> <span class="nn">sympy</span> <span class="k">as</span> <span class="nn">sym</span>
+</span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a>
+</span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="n">Expr</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">expr</span><span class="o">.</span><span class="n">Expr</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a><span class="n">Coeff</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Fraction</span><span class="p">,</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">Expr</span><span class="p">]</span>
+</span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a><span class="n">Energy</span> <span class="o">=</span> <span class="n">Coeff</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a><span class="n">Energy_real</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Fraction</span><span class="p">]</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a><span class="n">E</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Energy</span><span class="p">)</span>
+</span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a><span class="n">E_real</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;E_real&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Energy_real</span><span class="p">)</span>
+</span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a><span class="n">Indices</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">E</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
+</span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a><span class="n">Sequence</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a>
+</span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a>
+</span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a><span class="k">def</span> <span class="nf">energy</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">E</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">E</span><span class="p">:</span>
+</span><span id="L-25"><a href="#L-25"><span class="linenos"> 25</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-26"><a href="#L-26"><span class="linenos"> 26</span></a><span class="sd">    energy(indices)</span>
+</span><span id="L-27"><a href="#L-27"><span class="linenos"> 27</span></a>
+</span><span id="L-28"><a href="#L-28"><span class="linenos"> 28</span></a><span class="sd">    Returns the sum M(m) of operator sequence indices.</span>
+</span><span id="L-29"><a href="#L-29"><span class="linenos"> 29</span></a>
+</span><span id="L-30"><a href="#L-30"><span class="linenos"> 30</span></a><span class="sd">    Parameters</span>
+</span><span id="L-31"><a href="#L-31"><span class="linenos"> 31</span></a><span class="sd">    ----------</span>
+</span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a><span class="sd">    indices</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a><span class="sd">        Operator sequence indices.</span>
 </span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a>
-</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a><span class="k">def</span> <span class="nf">energy_broad</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">delta</span><span class="p">:</span> <span class="n">Energy_real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Energy_real</span><span class="p">:</span>
-</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a><span class="sd">    energy_broad(indices)</span>
-</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a>
-</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a><span class="sd">    Returns the &#39;broadened&#39; sum M(m)*theta(|M(m)|-`delta`) of operator sequence </span>
-</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a><span class="sd">    indices, where theta is the Heaviside step function.</span>
-</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a>
-</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a><span class="sd">    Returns</span>
-</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a><span class="sd">    -------</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="sd">    Union[int, float, Fraction]</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a>
-</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a>    <span class="n">e</span> <span class="o">=</span> <span class="n">energy</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a>    <span class="c1"># also return 0 if `abs(e)` is very close to `delta` to deal with</span>
-</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a>    <span class="c1"># floating errors</span>
-</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a>    <span class="k">return</span> <span class="n">e</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">delta</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">are_close</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">delta</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a>
-</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a>
-</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a><span class="k">def</span> <span class="nf">signum</span><span class="p">(</span><span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a><span class="sd">    signum(indices1, indices2)</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a>
-</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a><span class="sd">    Returns the prefactor sgn(M(m1)) - sgn(M(m2)).</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a>
-</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a><span class="sd">    Returns</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a><span class="sd">    -------</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a><span class="sd">    int</span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>
-</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a>    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices1</span><span class="p">)))</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices2</span><span class="p">)))</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>
+</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a><span class="sd">    Returns</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a><span class="sd">    -------</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a><span class="sd">    Union[int, float, Fraction, complex, Expr]</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a><span class="sd">        Sum M(m).</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a>
+</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a>    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">indices</span><span class="p">),</span> <span class="n">cast</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a>
+</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a>
+</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="k">def</span> <span class="nf">energy_broad</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">delta</span><span class="p">:</span> <span class="n">Energy_real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Energy_real</span><span class="p">:</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="sd">    energy_broad(indices)</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a>
+</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a><span class="sd">    Returns the *broadened* sum M(m)*theta(|M(m)|-delta) of operator sequence indices, where theta is the Heaviside</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a><span class="sd">    step function.</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a>
+</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a><span class="sd">    Parameters</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a><span class="sd">    ----------</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a><span class="sd">    indices</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a><span class="sd">        Operator sequence indices.</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a>
+</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a><span class="sd">    Returns</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a><span class="sd">    -------</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a><span class="sd">    Union[int, float, Fraction]</span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a><span class="sd">        Sum M(m)*theta(|M(m)|-delta).</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a>
+</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>    <span class="n">e</span> <span class="o">=</span> <span class="n">energy</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>    <span class="c1"># also return 0 if `abs(e)` is very close to `delta` to deal with</span>
+</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a>    <span class="c1"># floating errors</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>    <span class="k">return</span> <span class="n">e</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">delta</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">are_close</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">delta</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
 </span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>
-</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a><span class="k">def</span> <span class="nf">signum_broad</span><span class="p">(</span><span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">delta</span><span class="p">:</span> <span class="n">Energy_real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a><span class="sd">    signum_broad(indices1, indices2, delta)</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>
-</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="sd">    Returns the prefactor sgn_`delta`(M(m1)) - sgn_`delta`(M(m2)), where sgn_d is</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="sd">    the broadened signum function with sgn_d (x) = 0 for |x| &lt;= d and sgn_d (x)=sgn (x),</span>
-</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a><span class="sd">    otherwise.</span>
-</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a>
-</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a><span class="sd">    Returns</span>
-</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a><span class="sd">    -------</span>
-</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a><span class="sd">    int</span>
-</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>
-</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy_broad</span><span class="p">(</span><span class="n">indices1</span><span class="p">,</span> <span class="n">delta</span><span class="p">)))</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy_broad</span><span class="p">(</span><span class="n">indices2</span><span class="p">,</span> <span class="n">delta</span><span class="p">)))</span>
-</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a>
-</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>
-</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a><span class="k">def</span> <span class="nf">signum_complex</span><span class="p">(</span><span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">Expr</span><span class="p">]],</span> <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">Expr</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>                                                                                                              <span class="n">Expr</span><span class="p">]:</span>
-</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a><span class="sd">    signum_complex(indices1, indices2)</span>
-</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>
-</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a><span class="sd">    Returns the prefactor sgn(M(m1)) - sgn(M(m2)) with the definition sgn(z) = z / |z|</span>
-</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a><span class="sd">    as used in the Ferkinghoff, Uhrig paper.</span>
-</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>
-</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a><span class="sd">    Returns</span>
-</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a><span class="sd">    -------</span>
-</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a><span class="sd">    Union[complex, Expr]</span>
-</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>
-</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>    <span class="n">complex_sgn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">is_zero</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="k">else</span> <span class="n">z</span><span class="o">.</span><span class="n">conjugate</span><span class="p">()</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
-</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>    <span class="k">return</span> <span class="n">complex_sgn</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices1</span><span class="p">))</span> <span class="o">-</span> <span class="n">complex_sgn</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices2</span><span class="p">))</span>
-</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>
-</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>
-</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a><span class="k">def</span> <span class="nf">exponential</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">],</span>
-</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>                <span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">],</span>
-</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>                <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">],</span>
-</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>                <span class="n">energy_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">]],</span> <span class="n">Energy</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">QuasiPolynomial</span><span class="p">:</span>
-</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a><span class="sd">    exponential(indices, indices1, indices2)</span>
-</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>
-</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a><span class="sd">    Returns the exponential exp(- alpha x) with alpha = - (|M(sequence)| - |M(m1)| - |M(m2)|).</span>
-</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>
-</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a><span class="sd">    Returns</span>
-</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a><span class="sd">    -------</span>
-</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a><span class="sd">    QuasiPolynomial</span>
-</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>
-</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>    <span class="n">alpha</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">energy_func</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">energy_func</span><span class="p">(</span><span class="n">indices1</span><span class="p">))</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">energy_func</span><span class="p">(</span><span class="n">indices2</span><span class="p">))</span>
-</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>    <span class="k">return</span> <span class="n">QuasiPolynomial</span><span class="o">.</span><span class="n">new</span><span class="p">({</span><span class="o">-</span><span class="n">alpha</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]})</span>
-</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>
+</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a><span class="k">def</span> <span class="nf">signum</span><span class="p">(</span><span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a><span class="sd">    signum(indices1, indices2)</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a>
+</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="sd">    Returns the prefactor sgn(M(m1)) - sgn(M(m2)).</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a>
+</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a><span class="sd">    Parameters</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a><span class="sd">    ----------</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a><span class="sd">    indices1</span>
+</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a><span class="sd">        Operator sequence indices whose sgn(M(m1)) is to be added.</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a><span class="sd">    indices2</span>
+</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a><span class="sd">        Operator sequence indices whose sgn(M(m2)) is to be substracted.</span>
+</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="sd">    Returns</span>
+</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a><span class="sd">    -------</span>
+</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a><span class="sd">    int</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a><span class="sd">        Difference of signum functions.</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices1</span><span class="p">)))</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices2</span><span class="p">)))</span>
+</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>
+</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a><span class="k">def</span> <span class="nf">signum_broad</span><span class="p">(</span><span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">delta</span><span class="p">:</span> <span class="n">Energy_real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a><span class="sd">    signum_broad(indices1, indices2, delta)</span>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a><span class="sd">    Returns the prefactor sgn_`delta`(M(m1)) - sgn_delta(M(m2)), where sgn_d is the broadened signum function with</span>
+</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a><span class="sd">    sgn_d(x) = 0 for |x| &lt;= d and sgn_d(x) = sgn(x), otherwise.</span>
+</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a><span class="sd">    Parameters</span>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a><span class="sd">    ----------</span>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a><span class="sd">    indices1</span>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a><span class="sd">        Operator sequence indices whose sgn_d(M(m1)) is to be added.</span>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a><span class="sd">    indices2</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a><span class="sd">        Operator sequence indices whose sgn_d(M(m2)) is to be substracted.</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a><span class="sd">    Returns</span>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a><span class="sd">    -------</span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a><span class="sd">    int</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a><span class="sd">        Difference of broad signum functions.</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy_broad</span><span class="p">(</span><span class="n">indices1</span><span class="p">,</span> <span class="n">delta</span><span class="p">)))</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy_broad</span><span class="p">(</span><span class="n">indices2</span><span class="p">,</span> <span class="n">delta</span><span class="p">)))</span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>
+</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a><span class="k">def</span> <span class="nf">signum_complex</span><span class="p">(</span><span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">Expr</span><span class="p">]],</span> <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">Expr</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span>
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>                                                                                                              <span class="n">Expr</span><span class="p">]:</span>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a><span class="sd">    signum_complex(indices1, indices2)</span>
 </span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>
-</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a><span class="k">def</span> <span class="nf">partitions</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]]:</span>
-</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a><span class="sd">    partitions(sequence)</span>
-</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>
-</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a><span class="sd">    Returns all partitions of the operator sequence (m, n, o, ...) into ((m1, n1, o1, ...), (m2, n2, o2, ...)).</span>
-</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>
-</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a><span class="sd">    Returns</span>
-</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a><span class="sd">    -------</span>
-</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a><span class="sd">    List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]</span>
-</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>
-</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>    <span class="c1"># TODO: Why we have to look at all possible partitions, especially those where</span>
-</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>    <span class="c1"># we have different amount of terms on the left side for commuting Hilbert spaces?</span>
-</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>    <span class="c1"># Should this depend on the starting conditions e.g. is this needed for the Dicke model?</span>
-</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>    <span class="c1"># -&gt; Maybe add an option to restrict partitions depending on the model</span>
-</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>    <span class="n">partitions</span> <span class="o">=</span> <span class="p">[[(</span><span class="n">s</span><span class="p">[:</span><span class="n">i</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">:])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sequence</span><span class="p">]</span>
-</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>    <span class="c1"># skip edge cases of completely empty left or right side</span>
-</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>    <span class="n">valid_partitions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">partitions</span><span class="p">))[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>    <span class="k">return</span> <span class="p">[(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">pr</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">pr</span><span class="p">))</span> <span class="k">for</span> <span class="n">pr</span> <span class="ow">in</span> <span class="n">valid_partitions</span><span class="p">]</span>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a><span class="sd">    Returns the prefactor sgn(M(m1)) - sgn(M(m2)) with the definition sgn(z) = z / |z| as used in the Schmiedinghoff,</span>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a><span class="sd">    Uhrig paper.</span>
+</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>
+</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a><span class="sd">    Parameters</span>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a><span class="sd">    ----------</span>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a><span class="sd">    indices1</span>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a><span class="sd">        Operator sequence indices whose complex sgn(M(m1)) is to be added.</span>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a><span class="sd">    indices2</span>
+</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a><span class="sd">        Operator sequence indices whose complex sgn(M(m2)) is to be subtracted.</span>
+</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>
+</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a><span class="sd">    Returns</span>
+</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a><span class="sd">    -------</span>
+</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a><span class="sd">    Union[complex, Expr]</span>
+</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a><span class="sd">        Difference of complex signum functions.</span>
+</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>
+</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>    <span class="n">complex_sgn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">is_zero</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="k">else</span> <span class="n">z</span><span class="o">.</span><span class="n">conjugate</span><span class="p">()</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>    <span class="k">return</span> <span class="n">complex_sgn</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices1</span><span class="p">))</span> <span class="o">-</span> <span class="n">complex_sgn</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices2</span><span class="p">))</span>
+</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>
+</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>
+</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a><span class="k">def</span> <span class="nf">exponential</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">],</span>
+</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>                <span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">],</span>
+</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>                <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">],</span>
+</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>                <span class="n">energy_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">]],</span> <span class="n">Energy</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">QuasiPolynomial</span><span class="p">:</span>
+</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a><span class="sd">    exponential(indices, indices1, indices2)</span>
+</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>
+</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a><span class="sd">    Returns the exponential exp(- alpha x) with alpha = - (|M(m)| - |M(m1)| - |M(m2)|).</span>
+</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>
+</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a><span class="sd">    Parameters</span>
+</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a><span class="sd">    ----------</span>
+</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a><span class="sd">    indices</span>
+</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a><span class="sd">        Operator sequence indices whose |M(m)| is to be added in the exponential.</span>
+</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a><span class="sd">    indices1</span>
+</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a><span class="sd">        First operator sequence indices whose |M(m1)| is to be subtracted in the exponential.</span>
+</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a><span class="sd">    indices2</span>
+</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a><span class="sd">        Second operator sequence indices whose |M(m2)| is to be subtracted in the exponential.</span>
+</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a><span class="sd">    energy_func</span>
+</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a><span class="sd">        Energy function to be used (normal or broad).</span>
+</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a>
+</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a><span class="sd">    Returns</span>
+</span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a><span class="sd">    -------</span>
+</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a><span class="sd">    QuasiPolynomial</span>
+</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a><span class="sd">        Resulting quasi-polynomial.</span>
+</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a>
+</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a>    <span class="n">alpha</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">energy_func</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">energy_func</span><span class="p">(</span><span class="n">indices1</span><span class="p">))</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">energy_func</span><span class="p">(</span><span class="n">indices2</span><span class="p">))</span>
+</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>    <span class="k">return</span> <span class="n">QuasiPolynomial</span><span class="o">.</span><span class="n">new</span><span class="p">({</span><span class="o">-</span><span class="n">alpha</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]})</span>
+</span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a>
+</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a>
+</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a><span class="k">def</span> <span class="nf">partitions</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]]:</span>
+</span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a><span class="sd">    partitions(sequence)</span>
+</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a>
+</span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a><span class="sd">    Returns all partitions of the operator sequence (m, n, o, ...) into ((m1, n1, o1, ...), (m2, n2, o2, ...)).</span>
+</span><span id="L-173"><a href="#L-173"><span class="linenos">173</span></a>
+</span><span id="L-174"><a href="#L-174"><span class="linenos">174</span></a><span class="sd">    Parameters</span>
+</span><span id="L-175"><a href="#L-175"><span class="linenos">175</span></a><span class="sd">    ----------</span>
+</span><span id="L-176"><a href="#L-176"><span class="linenos">176</span></a><span class="sd">    sequence</span>
+</span><span id="L-177"><a href="#L-177"><span class="linenos">177</span></a><span class="sd">        Operator sequence to be partitioned.</span>
+</span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a>
+</span><span id="L-179"><a href="#L-179"><span class="linenos">179</span></a><span class="sd">    Returns</span>
+</span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a><span class="sd">    -------</span>
+</span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a><span class="sd">    List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]</span>
+</span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a><span class="sd">        List of partitions.</span>
+</span><span id="L-183"><a href="#L-183"><span class="linenos">183</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-184"><a href="#L-184"><span class="linenos">184</span></a>
+</span><span id="L-185"><a href="#L-185"><span class="linenos">185</span></a>    <span class="c1"># TODO: Why we have to look at all possible partitions, especially those where we have different amount of terms on</span>
+</span><span id="L-186"><a href="#L-186"><span class="linenos">186</span></a>    <span class="c1">#  the left side for commuting Hilbert spaces? Should this depend on the starting conditions e.g. is this needed for</span>
+</span><span id="L-187"><a href="#L-187"><span class="linenos">187</span></a>    <span class="c1">#  the Dicke model?</span>
+</span><span id="L-188"><a href="#L-188"><span class="linenos">188</span></a>    <span class="c1">#  -&gt; Maybe add an option to restrict partitions depending on the model</span>
+</span><span id="L-189"><a href="#L-189"><span class="linenos">189</span></a>    <span class="n">partitions</span> <span class="o">=</span> <span class="p">[[(</span><span class="n">s</span><span class="p">[:</span><span class="n">i</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">:])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sequence</span><span class="p">]</span>
+</span><span id="L-190"><a href="#L-190"><span class="linenos">190</span></a>    <span class="c1"># skip edge cases of completely empty left or right side</span>
+</span><span id="L-191"><a href="#L-191"><span class="linenos">191</span></a>    <span class="n">valid_partitions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">partitions</span><span class="p">))[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span id="L-192"><a href="#L-192"><span class="linenos">192</span></a>    <span class="k">return</span> <span class="p">[(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">pr</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">pr</span><span class="p">))</span> <span class="k">for</span> <span class="n">pr</span> <span class="ow">in</span> <span class="n">valid_partitions</span><span class="p">]</span>
 </span></pre></div>
 
 
@@ -10333,18 +10389,24 @@ will always return a SymPy number (not a Python float or int):</p>
 
     </div>
     <a class="headerlink" href="#energy"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="energy-22"><a href="#energy-22"><span class="linenos">22</span></a><span class="k">def</span> <span class="nf">energy</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">E</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">E</span><span class="p">:</span>
-</span><span id="energy-23"><a href="#energy-23"><span class="linenos">23</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="energy-24"><a href="#energy-24"><span class="linenos">24</span></a><span class="sd">    energy(indices)</span>
-</span><span id="energy-25"><a href="#energy-25"><span class="linenos">25</span></a>
-</span><span id="energy-26"><a href="#energy-26"><span class="linenos">26</span></a><span class="sd">    Returns the sum M(m) of operator sequence indices.</span>
-</span><span id="energy-27"><a href="#energy-27"><span class="linenos">27</span></a>
-</span><span id="energy-28"><a href="#energy-28"><span class="linenos">28</span></a><span class="sd">    Returns</span>
-</span><span id="energy-29"><a href="#energy-29"><span class="linenos">29</span></a><span class="sd">    -------</span>
-</span><span id="energy-30"><a href="#energy-30"><span class="linenos">30</span></a><span class="sd">    Union[int, float, Fraction, complex, Expr]</span>
-</span><span id="energy-31"><a href="#energy-31"><span class="linenos">31</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="energy-32"><a href="#energy-32"><span class="linenos">32</span></a>
-</span><span id="energy-33"><a href="#energy-33"><span class="linenos">33</span></a>    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">indices</span><span class="p">),</span> <span class="n">cast</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="energy-25"><a href="#energy-25"><span class="linenos">25</span></a><span class="k">def</span> <span class="nf">energy</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">E</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">E</span><span class="p">:</span>
+</span><span id="energy-26"><a href="#energy-26"><span class="linenos">26</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="energy-27"><a href="#energy-27"><span class="linenos">27</span></a><span class="sd">    energy(indices)</span>
+</span><span id="energy-28"><a href="#energy-28"><span class="linenos">28</span></a>
+</span><span id="energy-29"><a href="#energy-29"><span class="linenos">29</span></a><span class="sd">    Returns the sum M(m) of operator sequence indices.</span>
+</span><span id="energy-30"><a href="#energy-30"><span class="linenos">30</span></a>
+</span><span id="energy-31"><a href="#energy-31"><span class="linenos">31</span></a><span class="sd">    Parameters</span>
+</span><span id="energy-32"><a href="#energy-32"><span class="linenos">32</span></a><span class="sd">    ----------</span>
+</span><span id="energy-33"><a href="#energy-33"><span class="linenos">33</span></a><span class="sd">    indices</span>
+</span><span id="energy-34"><a href="#energy-34"><span class="linenos">34</span></a><span class="sd">        Operator sequence indices.</span>
+</span><span id="energy-35"><a href="#energy-35"><span class="linenos">35</span></a>
+</span><span id="energy-36"><a href="#energy-36"><span class="linenos">36</span></a><span class="sd">    Returns</span>
+</span><span id="energy-37"><a href="#energy-37"><span class="linenos">37</span></a><span class="sd">    -------</span>
+</span><span id="energy-38"><a href="#energy-38"><span class="linenos">38</span></a><span class="sd">    Union[int, float, Fraction, complex, Expr]</span>
+</span><span id="energy-39"><a href="#energy-39"><span class="linenos">39</span></a><span class="sd">        Sum M(m).</span>
+</span><span id="energy-40"><a href="#energy-40"><span class="linenos">40</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="energy-41"><a href="#energy-41"><span class="linenos">41</span></a>
+</span><span id="energy-42"><a href="#energy-42"><span class="linenos">42</span></a>    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">indices</span><span class="p">),</span> <span class="n">cast</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 </span></pre></div>
 
 
@@ -10352,10 +10414,16 @@ will always return a SymPy number (not a Python float or int):</p>
 
 <p>Returns the sum M(m) of operator sequence indices.</p>
 
+<h6 id="parameters">Parameters</h6>
+
+<ul>
+<li><strong>indices</strong>: Operator sequence indices.</li>
+</ul>
+
 <h6 id="returns">Returns</h6>
 
 <ul>
-<li><strong>Union[int, float, Fraction, complex, Expr]</strong></li>
+<li><strong>Union[int, float, Fraction, complex, Expr]</strong>: Sum M(m).</li>
 </ul>
 </div>
 
@@ -10372,34 +10440,46 @@ will always return a SymPy number (not a Python float or int):</p>
 
     </div>
     <a class="headerlink" href="#energy_broad"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="energy_broad-36"><a href="#energy_broad-36"><span class="linenos">36</span></a><span class="k">def</span> <span class="nf">energy_broad</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">delta</span><span class="p">:</span> <span class="n">Energy_real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Energy_real</span><span class="p">:</span>
-</span><span id="energy_broad-37"><a href="#energy_broad-37"><span class="linenos">37</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="energy_broad-38"><a href="#energy_broad-38"><span class="linenos">38</span></a><span class="sd">    energy_broad(indices)</span>
-</span><span id="energy_broad-39"><a href="#energy_broad-39"><span class="linenos">39</span></a>
-</span><span id="energy_broad-40"><a href="#energy_broad-40"><span class="linenos">40</span></a><span class="sd">    Returns the &#39;broadened&#39; sum M(m)*theta(|M(m)|-`delta`) of operator sequence </span>
-</span><span id="energy_broad-41"><a href="#energy_broad-41"><span class="linenos">41</span></a><span class="sd">    indices, where theta is the Heaviside step function.</span>
-</span><span id="energy_broad-42"><a href="#energy_broad-42"><span class="linenos">42</span></a>
-</span><span id="energy_broad-43"><a href="#energy_broad-43"><span class="linenos">43</span></a><span class="sd">    Returns</span>
-</span><span id="energy_broad-44"><a href="#energy_broad-44"><span class="linenos">44</span></a><span class="sd">    -------</span>
-</span><span id="energy_broad-45"><a href="#energy_broad-45"><span class="linenos">45</span></a><span class="sd">    Union[int, float, Fraction]</span>
-</span><span id="energy_broad-46"><a href="#energy_broad-46"><span class="linenos">46</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="energy_broad-47"><a href="#energy_broad-47"><span class="linenos">47</span></a>
-</span><span id="energy_broad-48"><a href="#energy_broad-48"><span class="linenos">48</span></a>    <span class="n">e</span> <span class="o">=</span> <span class="n">energy</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
-</span><span id="energy_broad-49"><a href="#energy_broad-49"><span class="linenos">49</span></a>    <span class="c1"># also return 0 if `abs(e)` is very close to `delta` to deal with</span>
-</span><span id="energy_broad-50"><a href="#energy_broad-50"><span class="linenos">50</span></a>    <span class="c1"># floating errors</span>
-</span><span id="energy_broad-51"><a href="#energy_broad-51"><span class="linenos">51</span></a>    <span class="k">return</span> <span class="n">e</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">delta</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">are_close</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">delta</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="energy_broad-45"><a href="#energy_broad-45"><span class="linenos">45</span></a><span class="k">def</span> <span class="nf">energy_broad</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">delta</span><span class="p">:</span> <span class="n">Energy_real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Energy_real</span><span class="p">:</span>
+</span><span id="energy_broad-46"><a href="#energy_broad-46"><span class="linenos">46</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="energy_broad-47"><a href="#energy_broad-47"><span class="linenos">47</span></a><span class="sd">    energy_broad(indices)</span>
+</span><span id="energy_broad-48"><a href="#energy_broad-48"><span class="linenos">48</span></a>
+</span><span id="energy_broad-49"><a href="#energy_broad-49"><span class="linenos">49</span></a><span class="sd">    Returns the *broadened* sum M(m)*theta(|M(m)|-delta) of operator sequence indices, where theta is the Heaviside</span>
+</span><span id="energy_broad-50"><a href="#energy_broad-50"><span class="linenos">50</span></a><span class="sd">    step function.</span>
+</span><span id="energy_broad-51"><a href="#energy_broad-51"><span class="linenos">51</span></a>
+</span><span id="energy_broad-52"><a href="#energy_broad-52"><span class="linenos">52</span></a><span class="sd">    Parameters</span>
+</span><span id="energy_broad-53"><a href="#energy_broad-53"><span class="linenos">53</span></a><span class="sd">    ----------</span>
+</span><span id="energy_broad-54"><a href="#energy_broad-54"><span class="linenos">54</span></a><span class="sd">    indices</span>
+</span><span id="energy_broad-55"><a href="#energy_broad-55"><span class="linenos">55</span></a><span class="sd">        Operator sequence indices.</span>
+</span><span id="energy_broad-56"><a href="#energy_broad-56"><span class="linenos">56</span></a>
+</span><span id="energy_broad-57"><a href="#energy_broad-57"><span class="linenos">57</span></a><span class="sd">    Returns</span>
+</span><span id="energy_broad-58"><a href="#energy_broad-58"><span class="linenos">58</span></a><span class="sd">    -------</span>
+</span><span id="energy_broad-59"><a href="#energy_broad-59"><span class="linenos">59</span></a><span class="sd">    Union[int, float, Fraction]</span>
+</span><span id="energy_broad-60"><a href="#energy_broad-60"><span class="linenos">60</span></a><span class="sd">        Sum M(m)*theta(|M(m)|-delta).</span>
+</span><span id="energy_broad-61"><a href="#energy_broad-61"><span class="linenos">61</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="energy_broad-62"><a href="#energy_broad-62"><span class="linenos">62</span></a>
+</span><span id="energy_broad-63"><a href="#energy_broad-63"><span class="linenos">63</span></a>    <span class="n">e</span> <span class="o">=</span> <span class="n">energy</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+</span><span id="energy_broad-64"><a href="#energy_broad-64"><span class="linenos">64</span></a>    <span class="c1"># also return 0 if `abs(e)` is very close to `delta` to deal with</span>
+</span><span id="energy_broad-65"><a href="#energy_broad-65"><span class="linenos">65</span></a>    <span class="c1"># floating errors</span>
+</span><span id="energy_broad-66"><a href="#energy_broad-66"><span class="linenos">66</span></a>    <span class="k">return</span> <span class="n">e</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">delta</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">are_close</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">delta</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
 </span></pre></div>
 
 
             <div class="docstring"><p>energy_broad(indices)</p>
 
-<p>Returns the 'broadened' sum M(m)*theta(|M(m)|-<code>delta</code>) of operator sequence 
-indices, where theta is the Heaviside step function.</p>
+<p>Returns the <em>broadened</em> sum M(m)*theta(|M(m)|-delta) of operator sequence indices, where theta is the Heaviside
+step function.</p>
+
+<h6 id="parameters">Parameters</h6>
+
+<ul>
+<li><strong>indices</strong>: Operator sequence indices.</li>
+</ul>
 
 <h6 id="returns">Returns</h6>
 
 <ul>
-<li><strong>Union[int, float, Fraction]</strong></li>
+<li><strong>Union[int, float, Fraction]</strong>: Sum M(m)*theta(|M(m)|-delta).</li>
 </ul>
 </div>
 
@@ -10416,18 +10496,26 @@ indices, where theta is the Heaviside step function.</p>
 
     </div>
     <a class="headerlink" href="#signum"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="signum-54"><a href="#signum-54"><span class="linenos">54</span></a><span class="k">def</span> <span class="nf">signum</span><span class="p">(</span><span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span id="signum-55"><a href="#signum-55"><span class="linenos">55</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="signum-56"><a href="#signum-56"><span class="linenos">56</span></a><span class="sd">    signum(indices1, indices2)</span>
-</span><span id="signum-57"><a href="#signum-57"><span class="linenos">57</span></a>
-</span><span id="signum-58"><a href="#signum-58"><span class="linenos">58</span></a><span class="sd">    Returns the prefactor sgn(M(m1)) - sgn(M(m2)).</span>
-</span><span id="signum-59"><a href="#signum-59"><span class="linenos">59</span></a>
-</span><span id="signum-60"><a href="#signum-60"><span class="linenos">60</span></a><span class="sd">    Returns</span>
-</span><span id="signum-61"><a href="#signum-61"><span class="linenos">61</span></a><span class="sd">    -------</span>
-</span><span id="signum-62"><a href="#signum-62"><span class="linenos">62</span></a><span class="sd">    int</span>
-</span><span id="signum-63"><a href="#signum-63"><span class="linenos">63</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="signum-64"><a href="#signum-64"><span class="linenos">64</span></a>
-</span><span id="signum-65"><a href="#signum-65"><span class="linenos">65</span></a>    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices1</span><span class="p">)))</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices2</span><span class="p">)))</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="signum-69"><a href="#signum-69"><span class="linenos">69</span></a><span class="k">def</span> <span class="nf">signum</span><span class="p">(</span><span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="signum-70"><a href="#signum-70"><span class="linenos">70</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="signum-71"><a href="#signum-71"><span class="linenos">71</span></a><span class="sd">    signum(indices1, indices2)</span>
+</span><span id="signum-72"><a href="#signum-72"><span class="linenos">72</span></a>
+</span><span id="signum-73"><a href="#signum-73"><span class="linenos">73</span></a><span class="sd">    Returns the prefactor sgn(M(m1)) - sgn(M(m2)).</span>
+</span><span id="signum-74"><a href="#signum-74"><span class="linenos">74</span></a>
+</span><span id="signum-75"><a href="#signum-75"><span class="linenos">75</span></a><span class="sd">    Parameters</span>
+</span><span id="signum-76"><a href="#signum-76"><span class="linenos">76</span></a><span class="sd">    ----------</span>
+</span><span id="signum-77"><a href="#signum-77"><span class="linenos">77</span></a><span class="sd">    indices1</span>
+</span><span id="signum-78"><a href="#signum-78"><span class="linenos">78</span></a><span class="sd">        Operator sequence indices whose sgn(M(m1)) is to be added.</span>
+</span><span id="signum-79"><a href="#signum-79"><span class="linenos">79</span></a><span class="sd">    indices2</span>
+</span><span id="signum-80"><a href="#signum-80"><span class="linenos">80</span></a><span class="sd">        Operator sequence indices whose sgn(M(m2)) is to be substracted.</span>
+</span><span id="signum-81"><a href="#signum-81"><span class="linenos">81</span></a>
+</span><span id="signum-82"><a href="#signum-82"><span class="linenos">82</span></a><span class="sd">    Returns</span>
+</span><span id="signum-83"><a href="#signum-83"><span class="linenos">83</span></a><span class="sd">    -------</span>
+</span><span id="signum-84"><a href="#signum-84"><span class="linenos">84</span></a><span class="sd">    int</span>
+</span><span id="signum-85"><a href="#signum-85"><span class="linenos">85</span></a><span class="sd">        Difference of signum functions.</span>
+</span><span id="signum-86"><a href="#signum-86"><span class="linenos">86</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="signum-87"><a href="#signum-87"><span class="linenos">87</span></a>
+</span><span id="signum-88"><a href="#signum-88"><span class="linenos">88</span></a>    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices1</span><span class="p">)))</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices2</span><span class="p">)))</span>
 </span></pre></div>
 
 
@@ -10435,10 +10523,17 @@ indices, where theta is the Heaviside step function.</p>
 
 <p>Returns the prefactor sgn(M(m1)) - sgn(M(m2)).</p>
 
+<h6 id="parameters">Parameters</h6>
+
+<ul>
+<li><strong>indices1</strong>: Operator sequence indices whose sgn(M(m1)) is to be added.</li>
+<li><strong>indices2</strong>: Operator sequence indices whose sgn(M(m2)) is to be substracted.</li>
+</ul>
+
 <h6 id="returns">Returns</h6>
 
 <ul>
-<li><strong>int</strong></li>
+<li><strong>int</strong>: Difference of signum functions.</li>
 </ul>
 </div>
 
@@ -10455,33 +10550,46 @@ indices, where theta is the Heaviside step function.</p>
 
     </div>
     <a class="headerlink" href="#signum_broad"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="signum_broad-68"><a href="#signum_broad-68"><span class="linenos">68</span></a><span class="k">def</span> <span class="nf">signum_broad</span><span class="p">(</span><span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">delta</span><span class="p">:</span> <span class="n">Energy_real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span id="signum_broad-69"><a href="#signum_broad-69"><span class="linenos">69</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="signum_broad-70"><a href="#signum_broad-70"><span class="linenos">70</span></a><span class="sd">    signum_broad(indices1, indices2, delta)</span>
-</span><span id="signum_broad-71"><a href="#signum_broad-71"><span class="linenos">71</span></a>
-</span><span id="signum_broad-72"><a href="#signum_broad-72"><span class="linenos">72</span></a><span class="sd">    Returns the prefactor sgn_`delta`(M(m1)) - sgn_`delta`(M(m2)), where sgn_d is</span>
-</span><span id="signum_broad-73"><a href="#signum_broad-73"><span class="linenos">73</span></a><span class="sd">    the broadened signum function with sgn_d (x) = 0 for |x| &lt;= d and sgn_d (x)=sgn (x),</span>
-</span><span id="signum_broad-74"><a href="#signum_broad-74"><span class="linenos">74</span></a><span class="sd">    otherwise.</span>
-</span><span id="signum_broad-75"><a href="#signum_broad-75"><span class="linenos">75</span></a>
-</span><span id="signum_broad-76"><a href="#signum_broad-76"><span class="linenos">76</span></a><span class="sd">    Returns</span>
-</span><span id="signum_broad-77"><a href="#signum_broad-77"><span class="linenos">77</span></a><span class="sd">    -------</span>
-</span><span id="signum_broad-78"><a href="#signum_broad-78"><span class="linenos">78</span></a><span class="sd">    int</span>
-</span><span id="signum_broad-79"><a href="#signum_broad-79"><span class="linenos">79</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="signum_broad-80"><a href="#signum_broad-80"><span class="linenos">80</span></a>
-</span><span id="signum_broad-81"><a href="#signum_broad-81"><span class="linenos">81</span></a>    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy_broad</span><span class="p">(</span><span class="n">indices1</span><span class="p">,</span> <span class="n">delta</span><span class="p">)))</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy_broad</span><span class="p">(</span><span class="n">indices2</span><span class="p">,</span> <span class="n">delta</span><span class="p">)))</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="signum_broad-91"><a href="#signum_broad-91"><span class="linenos"> 91</span></a><span class="k">def</span> <span class="nf">signum_broad</span><span class="p">(</span><span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy_real</span><span class="p">],</span> <span class="n">delta</span><span class="p">:</span> <span class="n">Energy_real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="signum_broad-92"><a href="#signum_broad-92"><span class="linenos"> 92</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="signum_broad-93"><a href="#signum_broad-93"><span class="linenos"> 93</span></a><span class="sd">    signum_broad(indices1, indices2, delta)</span>
+</span><span id="signum_broad-94"><a href="#signum_broad-94"><span class="linenos"> 94</span></a>
+</span><span id="signum_broad-95"><a href="#signum_broad-95"><span class="linenos"> 95</span></a><span class="sd">    Returns the prefactor sgn_`delta`(M(m1)) - sgn_delta(M(m2)), where sgn_d is the broadened signum function with</span>
+</span><span id="signum_broad-96"><a href="#signum_broad-96"><span class="linenos"> 96</span></a><span class="sd">    sgn_d(x) = 0 for |x| &lt;= d and sgn_d(x) = sgn(x), otherwise.</span>
+</span><span id="signum_broad-97"><a href="#signum_broad-97"><span class="linenos"> 97</span></a>
+</span><span id="signum_broad-98"><a href="#signum_broad-98"><span class="linenos"> 98</span></a><span class="sd">    Parameters</span>
+</span><span id="signum_broad-99"><a href="#signum_broad-99"><span class="linenos"> 99</span></a><span class="sd">    ----------</span>
+</span><span id="signum_broad-100"><a href="#signum_broad-100"><span class="linenos">100</span></a><span class="sd">    indices1</span>
+</span><span id="signum_broad-101"><a href="#signum_broad-101"><span class="linenos">101</span></a><span class="sd">        Operator sequence indices whose sgn_d(M(m1)) is to be added.</span>
+</span><span id="signum_broad-102"><a href="#signum_broad-102"><span class="linenos">102</span></a><span class="sd">    indices2</span>
+</span><span id="signum_broad-103"><a href="#signum_broad-103"><span class="linenos">103</span></a><span class="sd">        Operator sequence indices whose sgn_d(M(m2)) is to be substracted.</span>
+</span><span id="signum_broad-104"><a href="#signum_broad-104"><span class="linenos">104</span></a>
+</span><span id="signum_broad-105"><a href="#signum_broad-105"><span class="linenos">105</span></a><span class="sd">    Returns</span>
+</span><span id="signum_broad-106"><a href="#signum_broad-106"><span class="linenos">106</span></a><span class="sd">    -------</span>
+</span><span id="signum_broad-107"><a href="#signum_broad-107"><span class="linenos">107</span></a><span class="sd">    int</span>
+</span><span id="signum_broad-108"><a href="#signum_broad-108"><span class="linenos">108</span></a><span class="sd">        Difference of broad signum functions.</span>
+</span><span id="signum_broad-109"><a href="#signum_broad-109"><span class="linenos">109</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="signum_broad-110"><a href="#signum_broad-110"><span class="linenos">110</span></a>
+</span><span id="signum_broad-111"><a href="#signum_broad-111"><span class="linenos">111</span></a>    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy_broad</span><span class="p">(</span><span class="n">indices1</span><span class="p">,</span> <span class="n">delta</span><span class="p">)))</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">energy_broad</span><span class="p">(</span><span class="n">indices2</span><span class="p">,</span> <span class="n">delta</span><span class="p">)))</span>
 </span></pre></div>
 
 
             <div class="docstring"><p>signum_broad(indices1, indices2, delta)</p>
 
-<p>Returns the prefactor sgn_<code>delta</code>(M(m1)) - sgn_<code>delta</code>(M(m2)), where sgn_d is
-the broadened signum function with sgn_d (x) = 0 for |x| &lt;= d and sgn_d (x)=sgn (x),
-otherwise.</p>
+<p>Returns the prefactor sgn_<code>delta</code>(M(m1)) - sgn_delta(M(m2)), where sgn_d is the broadened signum function with
+sgn_d(x) = 0 for |x| &lt;= d and sgn_d(x) = sgn(x), otherwise.</p>
+
+<h6 id="parameters">Parameters</h6>
+
+<ul>
+<li><strong>indices1</strong>: Operator sequence indices whose sgn_d(M(m1)) is to be added.</li>
+<li><strong>indices2</strong>: Operator sequence indices whose sgn_d(M(m2)) is to be substracted.</li>
+</ul>
 
 <h6 id="returns">Returns</h6>
 
 <ul>
-<li><strong>int</strong></li>
+<li><strong>int</strong>: Difference of broad signum functions.</li>
 </ul>
 </div>
 
@@ -10498,33 +10606,48 @@ otherwise.</p>
 
     </div>
     <a class="headerlink" href="#signum_complex"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="signum_complex-84"><a href="#signum_complex-84"><span class="linenos">84</span></a><span class="k">def</span> <span class="nf">signum_complex</span><span class="p">(</span><span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">Expr</span><span class="p">]],</span> <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">Expr</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span>
-</span><span id="signum_complex-85"><a href="#signum_complex-85"><span class="linenos">85</span></a>                                                                                                              <span class="n">Expr</span><span class="p">]:</span>
-</span><span id="signum_complex-86"><a href="#signum_complex-86"><span class="linenos">86</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="signum_complex-87"><a href="#signum_complex-87"><span class="linenos">87</span></a><span class="sd">    signum_complex(indices1, indices2)</span>
-</span><span id="signum_complex-88"><a href="#signum_complex-88"><span class="linenos">88</span></a>
-</span><span id="signum_complex-89"><a href="#signum_complex-89"><span class="linenos">89</span></a><span class="sd">    Returns the prefactor sgn(M(m1)) - sgn(M(m2)) with the definition sgn(z) = z / |z|</span>
-</span><span id="signum_complex-90"><a href="#signum_complex-90"><span class="linenos">90</span></a><span class="sd">    as used in the Ferkinghoff, Uhrig paper.</span>
-</span><span id="signum_complex-91"><a href="#signum_complex-91"><span class="linenos">91</span></a>
-</span><span id="signum_complex-92"><a href="#signum_complex-92"><span class="linenos">92</span></a><span class="sd">    Returns</span>
-</span><span id="signum_complex-93"><a href="#signum_complex-93"><span class="linenos">93</span></a><span class="sd">    -------</span>
-</span><span id="signum_complex-94"><a href="#signum_complex-94"><span class="linenos">94</span></a><span class="sd">    Union[complex, Expr]</span>
-</span><span id="signum_complex-95"><a href="#signum_complex-95"><span class="linenos">95</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="signum_complex-96"><a href="#signum_complex-96"><span class="linenos">96</span></a>
-</span><span id="signum_complex-97"><a href="#signum_complex-97"><span class="linenos">97</span></a>    <span class="n">complex_sgn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">is_zero</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="k">else</span> <span class="n">z</span><span class="o">.</span><span class="n">conjugate</span><span class="p">()</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
-</span><span id="signum_complex-98"><a href="#signum_complex-98"><span class="linenos">98</span></a>    <span class="k">return</span> <span class="n">complex_sgn</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices1</span><span class="p">))</span> <span class="o">-</span> <span class="n">complex_sgn</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices2</span><span class="p">))</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="signum_complex-114"><a href="#signum_complex-114"><span class="linenos">114</span></a><span class="k">def</span> <span class="nf">signum_complex</span><span class="p">(</span><span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">Expr</span><span class="p">]],</span> <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">Expr</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span>
+</span><span id="signum_complex-115"><a href="#signum_complex-115"><span class="linenos">115</span></a>                                                                                                              <span class="n">Expr</span><span class="p">]:</span>
+</span><span id="signum_complex-116"><a href="#signum_complex-116"><span class="linenos">116</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="signum_complex-117"><a href="#signum_complex-117"><span class="linenos">117</span></a><span class="sd">    signum_complex(indices1, indices2)</span>
+</span><span id="signum_complex-118"><a href="#signum_complex-118"><span class="linenos">118</span></a>
+</span><span id="signum_complex-119"><a href="#signum_complex-119"><span class="linenos">119</span></a><span class="sd">    Returns the prefactor sgn(M(m1)) - sgn(M(m2)) with the definition sgn(z) = z / |z| as used in the Schmiedinghoff,</span>
+</span><span id="signum_complex-120"><a href="#signum_complex-120"><span class="linenos">120</span></a><span class="sd">    Uhrig paper.</span>
+</span><span id="signum_complex-121"><a href="#signum_complex-121"><span class="linenos">121</span></a>
+</span><span id="signum_complex-122"><a href="#signum_complex-122"><span class="linenos">122</span></a><span class="sd">    Parameters</span>
+</span><span id="signum_complex-123"><a href="#signum_complex-123"><span class="linenos">123</span></a><span class="sd">    ----------</span>
+</span><span id="signum_complex-124"><a href="#signum_complex-124"><span class="linenos">124</span></a><span class="sd">    indices1</span>
+</span><span id="signum_complex-125"><a href="#signum_complex-125"><span class="linenos">125</span></a><span class="sd">        Operator sequence indices whose complex sgn(M(m1)) is to be added.</span>
+</span><span id="signum_complex-126"><a href="#signum_complex-126"><span class="linenos">126</span></a><span class="sd">    indices2</span>
+</span><span id="signum_complex-127"><a href="#signum_complex-127"><span class="linenos">127</span></a><span class="sd">        Operator sequence indices whose complex sgn(M(m2)) is to be subtracted.</span>
+</span><span id="signum_complex-128"><a href="#signum_complex-128"><span class="linenos">128</span></a>
+</span><span id="signum_complex-129"><a href="#signum_complex-129"><span class="linenos">129</span></a><span class="sd">    Returns</span>
+</span><span id="signum_complex-130"><a href="#signum_complex-130"><span class="linenos">130</span></a><span class="sd">    -------</span>
+</span><span id="signum_complex-131"><a href="#signum_complex-131"><span class="linenos">131</span></a><span class="sd">    Union[complex, Expr]</span>
+</span><span id="signum_complex-132"><a href="#signum_complex-132"><span class="linenos">132</span></a><span class="sd">        Difference of complex signum functions.</span>
+</span><span id="signum_complex-133"><a href="#signum_complex-133"><span class="linenos">133</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="signum_complex-134"><a href="#signum_complex-134"><span class="linenos">134</span></a>
+</span><span id="signum_complex-135"><a href="#signum_complex-135"><span class="linenos">135</span></a>    <span class="n">complex_sgn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">is_zero</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="k">else</span> <span class="n">z</span><span class="o">.</span><span class="n">conjugate</span><span class="p">()</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+</span><span id="signum_complex-136"><a href="#signum_complex-136"><span class="linenos">136</span></a>    <span class="k">return</span> <span class="n">complex_sgn</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices1</span><span class="p">))</span> <span class="o">-</span> <span class="n">complex_sgn</span><span class="p">(</span><span class="n">energy</span><span class="p">(</span><span class="n">indices2</span><span class="p">))</span>
 </span></pre></div>
 
 
             <div class="docstring"><p>signum_complex(indices1, indices2)</p>
 
-<p>Returns the prefactor sgn(M(m1)) - sgn(M(m2)) with the definition sgn(z) = z / |z|
-as used in the Ferkinghoff, Uhrig paper.</p>
+<p>Returns the prefactor sgn(M(m1)) - sgn(M(m2)) with the definition sgn(z) = z / |z| as used in the Schmiedinghoff,
+Uhrig paper.</p>
+
+<h6 id="parameters">Parameters</h6>
+
+<ul>
+<li><strong>indices1</strong>: Operator sequence indices whose complex sgn(M(m1)) is to be added.</li>
+<li><strong>indices2</strong>: Operator sequence indices whose complex sgn(M(m2)) is to be subtracted.</li>
+</ul>
 
 <h6 id="returns">Returns</h6>
 
 <ul>
-<li><strong>Union[complex, Expr]</strong></li>
+<li><strong>Union[complex, Expr]</strong>: Difference of complex signum functions.</li>
 </ul>
 </div>
 
@@ -10541,33 +10664,54 @@ as used in the Ferkinghoff, Uhrig paper.</p>
 
     </div>
     <a class="headerlink" href="#exponential"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="exponential-101"><a href="#exponential-101"><span class="linenos">101</span></a><span class="k">def</span> <span class="nf">exponential</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">],</span>
-</span><span id="exponential-102"><a href="#exponential-102"><span class="linenos">102</span></a>                <span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">],</span>
-</span><span id="exponential-103"><a href="#exponential-103"><span class="linenos">103</span></a>                <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">],</span>
-</span><span id="exponential-104"><a href="#exponential-104"><span class="linenos">104</span></a>                <span class="n">energy_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">]],</span> <span class="n">Energy</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">QuasiPolynomial</span><span class="p">:</span>
-</span><span id="exponential-105"><a href="#exponential-105"><span class="linenos">105</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="exponential-106"><a href="#exponential-106"><span class="linenos">106</span></a><span class="sd">    exponential(indices, indices1, indices2)</span>
-</span><span id="exponential-107"><a href="#exponential-107"><span class="linenos">107</span></a>
-</span><span id="exponential-108"><a href="#exponential-108"><span class="linenos">108</span></a><span class="sd">    Returns the exponential exp(- alpha x) with alpha = - (|M(sequence)| - |M(m1)| - |M(m2)|).</span>
-</span><span id="exponential-109"><a href="#exponential-109"><span class="linenos">109</span></a>
-</span><span id="exponential-110"><a href="#exponential-110"><span class="linenos">110</span></a><span class="sd">    Returns</span>
-</span><span id="exponential-111"><a href="#exponential-111"><span class="linenos">111</span></a><span class="sd">    -------</span>
-</span><span id="exponential-112"><a href="#exponential-112"><span class="linenos">112</span></a><span class="sd">    QuasiPolynomial</span>
-</span><span id="exponential-113"><a href="#exponential-113"><span class="linenos">113</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="exponential-114"><a href="#exponential-114"><span class="linenos">114</span></a>
-</span><span id="exponential-115"><a href="#exponential-115"><span class="linenos">115</span></a>    <span class="n">alpha</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">energy_func</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">energy_func</span><span class="p">(</span><span class="n">indices1</span><span class="p">))</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">energy_func</span><span class="p">(</span><span class="n">indices2</span><span class="p">))</span>
-</span><span id="exponential-116"><a href="#exponential-116"><span class="linenos">116</span></a>    <span class="k">return</span> <span class="n">QuasiPolynomial</span><span class="o">.</span><span class="n">new</span><span class="p">({</span><span class="o">-</span><span class="n">alpha</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]})</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="exponential-139"><a href="#exponential-139"><span class="linenos">139</span></a><span class="k">def</span> <span class="nf">exponential</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">],</span>
+</span><span id="exponential-140"><a href="#exponential-140"><span class="linenos">140</span></a>                <span class="n">indices1</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">],</span>
+</span><span id="exponential-141"><a href="#exponential-141"><span class="linenos">141</span></a>                <span class="n">indices2</span><span class="p">:</span> <span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">],</span>
+</span><span id="exponential-142"><a href="#exponential-142"><span class="linenos">142</span></a>                <span class="n">energy_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Indices</span><span class="p">[</span><span class="n">Energy</span><span class="p">]],</span> <span class="n">Energy</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">QuasiPolynomial</span><span class="p">:</span>
+</span><span id="exponential-143"><a href="#exponential-143"><span class="linenos">143</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="exponential-144"><a href="#exponential-144"><span class="linenos">144</span></a><span class="sd">    exponential(indices, indices1, indices2)</span>
+</span><span id="exponential-145"><a href="#exponential-145"><span class="linenos">145</span></a>
+</span><span id="exponential-146"><a href="#exponential-146"><span class="linenos">146</span></a><span class="sd">    Returns the exponential exp(- alpha x) with alpha = - (|M(m)| - |M(m1)| - |M(m2)|).</span>
+</span><span id="exponential-147"><a href="#exponential-147"><span class="linenos">147</span></a>
+</span><span id="exponential-148"><a href="#exponential-148"><span class="linenos">148</span></a><span class="sd">    Parameters</span>
+</span><span id="exponential-149"><a href="#exponential-149"><span class="linenos">149</span></a><span class="sd">    ----------</span>
+</span><span id="exponential-150"><a href="#exponential-150"><span class="linenos">150</span></a><span class="sd">    indices</span>
+</span><span id="exponential-151"><a href="#exponential-151"><span class="linenos">151</span></a><span class="sd">        Operator sequence indices whose |M(m)| is to be added in the exponential.</span>
+</span><span id="exponential-152"><a href="#exponential-152"><span class="linenos">152</span></a><span class="sd">    indices1</span>
+</span><span id="exponential-153"><a href="#exponential-153"><span class="linenos">153</span></a><span class="sd">        First operator sequence indices whose |M(m1)| is to be subtracted in the exponential.</span>
+</span><span id="exponential-154"><a href="#exponential-154"><span class="linenos">154</span></a><span class="sd">    indices2</span>
+</span><span id="exponential-155"><a href="#exponential-155"><span class="linenos">155</span></a><span class="sd">        Second operator sequence indices whose |M(m2)| is to be subtracted in the exponential.</span>
+</span><span id="exponential-156"><a href="#exponential-156"><span class="linenos">156</span></a><span class="sd">    energy_func</span>
+</span><span id="exponential-157"><a href="#exponential-157"><span class="linenos">157</span></a><span class="sd">        Energy function to be used (normal or broad).</span>
+</span><span id="exponential-158"><a href="#exponential-158"><span class="linenos">158</span></a>
+</span><span id="exponential-159"><a href="#exponential-159"><span class="linenos">159</span></a><span class="sd">    Returns</span>
+</span><span id="exponential-160"><a href="#exponential-160"><span class="linenos">160</span></a><span class="sd">    -------</span>
+</span><span id="exponential-161"><a href="#exponential-161"><span class="linenos">161</span></a><span class="sd">    QuasiPolynomial</span>
+</span><span id="exponential-162"><a href="#exponential-162"><span class="linenos">162</span></a><span class="sd">        Resulting quasi-polynomial.</span>
+</span><span id="exponential-163"><a href="#exponential-163"><span class="linenos">163</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="exponential-164"><a href="#exponential-164"><span class="linenos">164</span></a>
+</span><span id="exponential-165"><a href="#exponential-165"><span class="linenos">165</span></a>    <span class="n">alpha</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">energy_func</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">energy_func</span><span class="p">(</span><span class="n">indices1</span><span class="p">))</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">energy_func</span><span class="p">(</span><span class="n">indices2</span><span class="p">))</span>
+</span><span id="exponential-166"><a href="#exponential-166"><span class="linenos">166</span></a>    <span class="k">return</span> <span class="n">QuasiPolynomial</span><span class="o">.</span><span class="n">new</span><span class="p">({</span><span class="o">-</span><span class="n">alpha</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]})</span>
 </span></pre></div>
 
 
             <div class="docstring"><p>exponential(indices, indices1, indices2)</p>
 
-<p>Returns the exponential exp(- alpha x) with alpha = - (|M(sequence)| - |M(m1)| - |M(m2)|).</p>
+<p>Returns the exponential exp(- alpha x) with alpha = - (|M(m)| - |M(m1)| - |M(m2)|).</p>
+
+<h6 id="parameters">Parameters</h6>
+
+<ul>
+<li><strong>indices</strong>: Operator sequence indices whose |M(m)| is to be added in the exponential.</li>
+<li><strong>indices1</strong>: First operator sequence indices whose |M(m1)| is to be subtracted in the exponential.</li>
+<li><strong>indices2</strong>: Second operator sequence indices whose |M(m2)| is to be subtracted in the exponential.</li>
+<li><strong>energy_func</strong>: Energy function to be used (normal or broad).</li>
+</ul>
 
 <h6 id="returns">Returns</h6>
 
 <ul>
-<li><strong>QuasiPolynomial</strong></li>
+<li><strong>QuasiPolynomial</strong>: Resulting quasi-polynomial.</li>
 </ul>
 </div>
 
@@ -10584,25 +10728,31 @@ as used in the Ferkinghoff, Uhrig paper.</p>
 
     </div>
     <a class="headerlink" href="#partitions"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="partitions-119"><a href="#partitions-119"><span class="linenos">119</span></a><span class="k">def</span> <span class="nf">partitions</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]]:</span>
-</span><span id="partitions-120"><a href="#partitions-120"><span class="linenos">120</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="partitions-121"><a href="#partitions-121"><span class="linenos">121</span></a><span class="sd">    partitions(sequence)</span>
-</span><span id="partitions-122"><a href="#partitions-122"><span class="linenos">122</span></a>
-</span><span id="partitions-123"><a href="#partitions-123"><span class="linenos">123</span></a><span class="sd">    Returns all partitions of the operator sequence (m, n, o, ...) into ((m1, n1, o1, ...), (m2, n2, o2, ...)).</span>
-</span><span id="partitions-124"><a href="#partitions-124"><span class="linenos">124</span></a>
-</span><span id="partitions-125"><a href="#partitions-125"><span class="linenos">125</span></a><span class="sd">    Returns</span>
-</span><span id="partitions-126"><a href="#partitions-126"><span class="linenos">126</span></a><span class="sd">    -------</span>
-</span><span id="partitions-127"><a href="#partitions-127"><span class="linenos">127</span></a><span class="sd">    List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]</span>
-</span><span id="partitions-128"><a href="#partitions-128"><span class="linenos">128</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="partitions-129"><a href="#partitions-129"><span class="linenos">129</span></a>
-</span><span id="partitions-130"><a href="#partitions-130"><span class="linenos">130</span></a>    <span class="c1"># TODO: Why we have to look at all possible partitions, especially those where</span>
-</span><span id="partitions-131"><a href="#partitions-131"><span class="linenos">131</span></a>    <span class="c1"># we have different amount of terms on the left side for commuting Hilbert spaces?</span>
-</span><span id="partitions-132"><a href="#partitions-132"><span class="linenos">132</span></a>    <span class="c1"># Should this depend on the starting conditions e.g. is this needed for the Dicke model?</span>
-</span><span id="partitions-133"><a href="#partitions-133"><span class="linenos">133</span></a>    <span class="c1"># -&gt; Maybe add an option to restrict partitions depending on the model</span>
-</span><span id="partitions-134"><a href="#partitions-134"><span class="linenos">134</span></a>    <span class="n">partitions</span> <span class="o">=</span> <span class="p">[[(</span><span class="n">s</span><span class="p">[:</span><span class="n">i</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">:])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sequence</span><span class="p">]</span>
-</span><span id="partitions-135"><a href="#partitions-135"><span class="linenos">135</span></a>    <span class="c1"># skip edge cases of completely empty left or right side</span>
-</span><span id="partitions-136"><a href="#partitions-136"><span class="linenos">136</span></a>    <span class="n">valid_partitions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">partitions</span><span class="p">))[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-</span><span id="partitions-137"><a href="#partitions-137"><span class="linenos">137</span></a>    <span class="k">return</span> <span class="p">[(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">pr</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">pr</span><span class="p">))</span> <span class="k">for</span> <span class="n">pr</span> <span class="ow">in</span> <span class="n">valid_partitions</span><span class="p">]</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="partitions-169"><a href="#partitions-169"><span class="linenos">169</span></a><span class="k">def</span> <span class="nf">partitions</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]]:</span>
+</span><span id="partitions-170"><a href="#partitions-170"><span class="linenos">170</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="partitions-171"><a href="#partitions-171"><span class="linenos">171</span></a><span class="sd">    partitions(sequence)</span>
+</span><span id="partitions-172"><a href="#partitions-172"><span class="linenos">172</span></a>
+</span><span id="partitions-173"><a href="#partitions-173"><span class="linenos">173</span></a><span class="sd">    Returns all partitions of the operator sequence (m, n, o, ...) into ((m1, n1, o1, ...), (m2, n2, o2, ...)).</span>
+</span><span id="partitions-174"><a href="#partitions-174"><span class="linenos">174</span></a>
+</span><span id="partitions-175"><a href="#partitions-175"><span class="linenos">175</span></a><span class="sd">    Parameters</span>
+</span><span id="partitions-176"><a href="#partitions-176"><span class="linenos">176</span></a><span class="sd">    ----------</span>
+</span><span id="partitions-177"><a href="#partitions-177"><span class="linenos">177</span></a><span class="sd">    sequence</span>
+</span><span id="partitions-178"><a href="#partitions-178"><span class="linenos">178</span></a><span class="sd">        Operator sequence to be partitioned.</span>
+</span><span id="partitions-179"><a href="#partitions-179"><span class="linenos">179</span></a>
+</span><span id="partitions-180"><a href="#partitions-180"><span class="linenos">180</span></a><span class="sd">    Returns</span>
+</span><span id="partitions-181"><a href="#partitions-181"><span class="linenos">181</span></a><span class="sd">    -------</span>
+</span><span id="partitions-182"><a href="#partitions-182"><span class="linenos">182</span></a><span class="sd">    List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]</span>
+</span><span id="partitions-183"><a href="#partitions-183"><span class="linenos">183</span></a><span class="sd">        List of partitions.</span>
+</span><span id="partitions-184"><a href="#partitions-184"><span class="linenos">184</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="partitions-185"><a href="#partitions-185"><span class="linenos">185</span></a>
+</span><span id="partitions-186"><a href="#partitions-186"><span class="linenos">186</span></a>    <span class="c1"># TODO: Why we have to look at all possible partitions, especially those where we have different amount of terms on</span>
+</span><span id="partitions-187"><a href="#partitions-187"><span class="linenos">187</span></a>    <span class="c1">#  the left side for commuting Hilbert spaces? Should this depend on the starting conditions e.g. is this needed for</span>
+</span><span id="partitions-188"><a href="#partitions-188"><span class="linenos">188</span></a>    <span class="c1">#  the Dicke model?</span>
+</span><span id="partitions-189"><a href="#partitions-189"><span class="linenos">189</span></a>    <span class="c1">#  -&gt; Maybe add an option to restrict partitions depending on the model</span>
+</span><span id="partitions-190"><a href="#partitions-190"><span class="linenos">190</span></a>    <span class="n">partitions</span> <span class="o">=</span> <span class="p">[[(</span><span class="n">s</span><span class="p">[:</span><span class="n">i</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">:])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sequence</span><span class="p">]</span>
+</span><span id="partitions-191"><a href="#partitions-191"><span class="linenos">191</span></a>    <span class="c1"># skip edge cases of completely empty left or right side</span>
+</span><span id="partitions-192"><a href="#partitions-192"><span class="linenos">192</span></a>    <span class="n">valid_partitions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">partitions</span><span class="p">))[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span id="partitions-193"><a href="#partitions-193"><span class="linenos">193</span></a>    <span class="k">return</span> <span class="p">[(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">pr</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">pr</span><span class="p">))</span> <span class="k">for</span> <span class="n">pr</span> <span class="ow">in</span> <span class="n">valid_partitions</span><span class="p">]</span>
 </span></pre></div>
 
 
@@ -10610,10 +10760,16 @@ as used in the Ferkinghoff, Uhrig paper.</p>
 
 <p>Returns all partitions of the operator sequence (m, n, o, ...) into ((m1, n1, o1, ...), (m2, n2, o2, ...)).</p>
 
+<h6 id="parameters">Parameters</h6>
+
+<ul>
+<li><strong>sequence</strong>: Operator sequence to be partitioned.</li>
+</ul>
+
 <h6 id="returns">Returns</h6>
 
 <ul>
-<li><strong>List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]</strong></li>
+<li><strong>List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]</strong>: List of partitions.</li>
 </ul>
 </div>
 
