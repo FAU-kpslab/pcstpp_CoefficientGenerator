@@ -24,9 +24,9 @@ def energy(indices: Indices[E]) -> E:
 
     Returns the sum M(m) of operator sequence indices.
 
-        Returns
-        -------
-        Union[int, float, Fraction, complex, Expr]
+    Returns
+    -------
+    Union[int, float, Fraction, complex, Expr]
     """
 
     return sum(reduce(operator.add, indices), cast(E, 0))
@@ -39,9 +39,9 @@ def energy_broad(indices: Indices[Energy_real], delta: Energy_real) -> Energy_re
     Returns the 'broadened' sum M(m)*theta(|M(m)|-`delta`) of operator sequence 
     indices, where theta is the Heaviside step function.
 
-        Returns
-        -------
-        Union[int, float, Fraction]
+    Returns
+    -------
+    Union[int, float, Fraction]
     """
 
     e = energy(indices)
@@ -56,9 +56,9 @@ def signum(indices1: Indices[Energy_real], indices2: Indices[Energy_real]) -> in
 
     Returns the prefactor sgn(M(m1)) - sgn(M(m2)).
 
-        Returns
-        -------
-        int
+    Returns
+    -------
+    int
     """
 
     return int(np.sign(energy(indices1))) - int(np.sign(energy(indices2)))
@@ -72,9 +72,9 @@ def signum_broad(indices1: Indices[Energy_real], indices2: Indices[Energy_real],
     the broadened signum function with sgn_d (x) = 0 for |x| <= d and sgn_d (x)=sgn (x),
     otherwise.
 
-        Returns
-        -------
-        int
+    Returns
+    -------
+    int
     """
 
     return int(np.sign(energy_broad(indices1, delta))) - int(np.sign(energy_broad(indices2, delta)))
@@ -88,9 +88,9 @@ def signum_complex(indices1: Indices[Union[complex, Expr]], indices2: Indices[Un
     Returns the prefactor sgn(M(m1)) - sgn(M(m2)) with the definition sgn(z) = z / |z|
     as used in the Ferkinghoff, Uhrig paper.
 
-        Returns
-        -------
-        Union[complex, Expr]
+    Returns
+    -------
+    Union[complex, Expr]
     """
 
     complex_sgn = lambda z: 0 if is_zero(z) else z.conjugate() / abs(z)
@@ -106,9 +106,9 @@ def exponential(indices: Indices[Energy],
 
     Returns the exponential exp(- alpha x) with alpha = - (|M(sequence)| - |M(m1)| - |M(m2)|).
 
-        Returns
-        -------
-        QuasiPolynomial
+    Returns
+    -------
+    QuasiPolynomial
     """
 
     alpha = abs(energy_func(indices)) - abs(energy_func(indices1)) - abs(energy_func(indices2))
@@ -121,9 +121,9 @@ def partitions(sequence: Sequence) -> List[Tuple[Sequence, Sequence]]:
 
     Returns all partitions of the operator sequence (m, n, o, ...) into ((m1, n1, o1, ...), (m2, n2, o2, ...)).
 
-        Returns
-        -------
-        List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]
+    Returns
+    -------
+    List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]
     """
 
     # TODO: Why we have to look at all possible partitions, especially those where

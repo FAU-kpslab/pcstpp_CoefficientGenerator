@@ -16,9 +16,9 @@ def is_zero(scalar: "Coeff") -> bool:
 
     Checks for exact numbers whether they are equal to zero and for floats whether they are close to zero.
 
-        Returns
-        -------
-        bool
+    Returns
+    -------
+    bool
     """
 
     # Assuming `scalar` of type `Expr` to be exact
@@ -36,9 +36,9 @@ def are_close(scalar1: "Coeff", scalar2: "Coeff") -> bool:
 
     Checks for non-zero exact numbers whether they are equal and for non-zero floats whether they are close.
 
-        Returns
-        -------
-        bool
+    Returns
+    -------
+    bool
     """
 
     # Assuming `scalar` of type `Expr` to be exact
@@ -59,9 +59,9 @@ def inverse(scalar: "Coeff"):
 
     Calculates 1/scalar either exactly or approximately.
 
-        Returns
-        -------
-        bool
+    Returns
+    -------
+    bool
     """
 
     if isinstance(scalar, (int, Fraction)):
@@ -76,16 +76,16 @@ def pretty_factor_print(coeff: "Coeff", leave1: bool = False) -> str:
 
     Returns a coefficient into a form suitable to be read by humans.
     
-        Parameters
-        ----------
-        coeff : Union[int, float, Fraction, complex, Expr]
-        leave1 : bool
-            If `True` a coefficient of `1` or `-1` will not be
-            simplified.
+    Parameters
+    ----------
+    coeff : Union[int, float, Fraction, complex, Expr]
+    leave1 : bool
+        If `True` a coefficient of `1` or `-1` will not be
+        simplified.
 
-        Returns
-        -------
-        str
+    Returns
+    -------
+    str
     """
 
     if are_close(coeff, 1) and not leave1:
@@ -105,63 +105,26 @@ class Polynomial:
 
     A class used to represent a polynomial.
 
-        Parameters
-        ----------
-        coefficient_list : List[Union[int, float, Fraction, complex, Expr]]
-            The list of coefficients.
-            The coefficient of x^n is coefficient_array[n].
+    Parameters
+    ----------
+    coefficient_list : List[Union[int, float, Fraction, complex, Expr]]
+        The list of coefficients.
+        The coefficient of x^n is coefficient_array[n].
 
-        Attributes
-        ----------
-        __private_coefficients : np.ndarray[Union[int, float, Fraction, complex, Expr]]
-            The numpy array of coefficients.
-            The coefficient of x^n is __private_coefficients[n].
-
-        Methods
-        -------
-        __str__ : str
-            Prints the coefficient array.
-        coefficients : np.ndarray[Union[int, float, Fraction, complex, Expr]]
-            Gets the coefficient array.
-        zero : Polynomial
-            Creates an empty polynomial.
-        simplify : Polynomial
-            Simplifies a polynomial by *removing* zeros.
-        new : Polynomial
-            Creates a quasi-polynomial using a list of __private_coefficients.
-        copy : Polynomial
-            Copies a polynomial.
-        __eq__ : bool
-            Checks whether two polynomials are mathematically equal.
-        pretty_print : str
-            Transform a polynomial in the mathematical form suitable to be read by humans.
-        scalar_multiplication : Polynomial
-            Multiplies a polynomial with a scalar.
-        __neg__ : Polynomial
-            Multiplies a polynomial with -1.
-        __add__ : Polynomial
-            Adds two polynomials.
-        __sub__ : Polynomials
-            Subtracts a polynomial from another.
-        __mul__ : Polynomial
-            Multiplies two polynomials or a polynomial with a scalar.
-        __rmul__ : Polynomial
-            Multiplies a scalar with a polynomial.
-        integrate : Polynomial
-            Integrate a polynomial with starting condition 0.
-        diff : Polynomial
-            Perform the derivative of a polynomial.
-        get_constant : Union[int, float, Fraction, complex, Expr]
-            Returns the constant coefficient.
+    Attributes
+    ----------
+    __private_coefficients : np.ndarray[Union[int, float, Fraction, complex, Expr]]
+        The numpy array of coefficients.
+        The coefficient of x^n is __private_coefficients[n].
     """
 
     def __init__(self, coefficient_list: Union[List["Coeff"], np.ndarray]) -> None:
         """
-            Parameters
-            ----------
-            coefficient_list : List[Union[int, float, Fraction, complex, Expr]]
-                The list of coefficients.
-                The coefficient of x^n is coefficient_dict[n].
+        Parameters
+        ----------
+        coefficient_list : List[Union[int, float, Fraction, complex, Expr]]
+            The list of coefficients.
+            The coefficient of x^n is coefficient_dict[n].
         """
 
         if len(coefficient_list) == 0:
@@ -175,9 +138,9 @@ class Polynomial:
 
         Prints the coefficient array.
 
-            Returns
-            -------
-            str
+        Returns
+        -------
+        str
         """
 
         return str([str(coeff) for coeff in self.__private_coefficients])
@@ -188,9 +151,9 @@ class Polynomial:
 
         Gets the coefficient array.
 
-            Returns
-            -------
-            np.ndarray[Union[int, float, Fraction, complex, Expr]]
+        Returns
+        -------
+        np.ndarray[Union[int, float, Fraction, complex, Expr]]
         """
 
         return self.__private_coefficients.copy()
@@ -203,9 +166,9 @@ class Polynomial:
 
         Creates an empty polynomial.
 
-            Returns
-            -------
-            Polynomial
+        Returns
+        -------
+        Polynomial
         """
         return Polynomial([])
 
@@ -215,9 +178,9 @@ class Polynomial:
 
         Simplifies a polynomial by *removing* zeros.
 
-            Returns
-            -------
-            Polynomial
+        Returns
+        -------
+        Polynomial
         """
 
         # Check whether the polynomial is empty.
@@ -237,13 +200,13 @@ class Polynomial:
 
         Creates a quasi-polynomial using a list of __private_coefficients.
 
-            Parameters
-            ----------
-            coefficient_list
+        Parameters
+        ----------
+        coefficient_list
 
-            Returns
-            -------
-            Polynomial
+        Returns
+        -------
+        Polynomial
         """
 
         coefficients = []
@@ -262,9 +225,9 @@ class Polynomial:
 
         Copies a polynomial.
 
-            Returns
-            -------
-            Polynomial
+        Returns
+        -------
+        Polynomial
         """
 
         return Polynomial(self.__private_coefficients.copy())
@@ -275,9 +238,9 @@ class Polynomial:
 
         Checks whether two polynomials are mathematically equal.
 
-            Returns
-            -------
-            bool
+        Returns
+        -------
+        bool
         """
 
         if len(self.simplify().__private_coefficients) != len(other.simplify().__private_coefficients):
@@ -296,9 +259,9 @@ class Polynomial:
 
         Transform a polynomial in the mathematical form suitable to be read by humans.
 
-            Returns
-            -------
-            str
+        Returns
+        -------
+        str
         """
 
         # Check whether the polynomial is empty.
@@ -326,13 +289,13 @@ class Polynomial:
 
         Multiplies a polynomial with a scalar.
 
-            Parameters
-            ----------
-            scalar
+        Parameters
+        ----------
+        scalar
 
-            Returns
-            -------
-            Polynomial
+        Returns
+        -------
+        Polynomial
         """
 
         return Polynomial(scalar * self.__private_coefficients).simplify()
@@ -343,9 +306,9 @@ class Polynomial:
 
         Multiplies a polynomial with -1.
 
-            Returns
-            -------
-            Polynomial
+        Returns
+        -------
+        Polynomial
         """
 
         return self.scalar_multiplication(-1)
@@ -356,9 +319,9 @@ class Polynomial:
 
         Adds two polynomials.
 
-            Returns
-            -------
-            Polynomial
+        Returns
+        -------
+        Polynomial
         """
 
         left_size = self.__private_coefficients.size
@@ -378,9 +341,9 @@ class Polynomial:
 
         Subtracts a polynomial from another.
 
-            Returns
-            -------
-            QuasiPolynomial
+        Returns
+        -------
+        QuasiPolynomial
         """
 
         return self + (-other)
@@ -391,9 +354,9 @@ class Polynomial:
 
         Multiplies two polynomials or a polynomial with a scalar.
 
-            Returns
-            -------
-            Polynomial
+        Returns
+        -------
+        Polynomial
         """
 
         # Check whether the second object is a polynomial.
@@ -419,9 +382,9 @@ class Polynomial:
 
         Multiplies a scalar with a polynomial.
 
-            Returns
-            -------
-            Polynomial
+        Returns
+        -------
+        Polynomial
         """
 
         return self * other
@@ -432,9 +395,9 @@ class Polynomial:
 
         Integrate a polynomial with starting condition 0.
 
-            Returns
-            -------
-            Polynomial
+        Returns
+        -------
+        Polynomial
         """
 
         prefactors = np.array([Fraction(1, n + 1) for n in np.arange(self.__private_coefficients.size)])
@@ -447,9 +410,9 @@ class Polynomial:
 
         Perform the derivative of a polynomial.
 
-            Returns
-            -------
-            Polynomial
+        Returns
+        -------
+        Polynomial
         """
 
         prefactors = np.arange(1, self.__private_coefficients.size)
@@ -462,9 +425,9 @@ class Polynomial:
 
         Returns the constant coefficient.
 
-            Returns
-            -------
-            Union[int, float, Fraction, complex, Expr]
+        Returns
+        -------
+        Union[int, float, Fraction, complex, Expr]
         """
 
         if self == Polynomial.zero():
@@ -479,65 +442,28 @@ class QuasiPolynomial:
 
     A class used to represent a quasi-polynomial.
 
+    Parameters
+    ----------
+    polynomial_dict : Dict[Union[int, float, Fraction, Expr], Polynomial]
+        The dictionary containing all polynomials.
+        The coefficient polynomial of exp(- alpha x) is polynomial_dict[alpha].
+
+    Attributes
+    ----------
+    polynomial_dict : Dict[Union[int, float, Fraction, Expr], Polynomial]
+        The dictionary containing all polynomials.
+        The coefficient polynomial of exp(- alpha x) is polynomial[alpha].
+    polynomials : List[Tuple[Union[int, float, Fraction, Expr], Polynomial]]
+        The list containing tuples of all exponents and their polynomials.
+    """
+
+    def __init__(self, polynomial_dict: Dict[Union["Energy_real", Expr], Polynomial]) -> None:
+        """
         Parameters
         ----------
         polynomial_dict : Dict[Union[int, float, Fraction, Expr], Polynomial]
             The dictionary containing all polynomials.
             The coefficient polynomial of exp(- alpha x) is polynomial_dict[alpha].
-
-        Attributes
-        ----------
-        polynomial_dict : Dict[Union[int, float, Fraction, Expr], Polynomial]
-            The dictionary containing all polynomials.
-            The coefficient polynomial of exp(- alpha x) is polynomial[alpha].
-        polynomials : List[Tuple[Union[int, float, Fraction, Expr], Polynomial]]
-            The list containing tuples of all exponents and their polynomials.
-
-        Methods
-        -------
-        sort : QuasiPolynomial
-            Sorts a quasi-polynomial by exponent alpha.
-        __str__ : str
-            Prints the coefficients.
-        zero : QuasiPolynomial
-            Creates an empty quasi-polynomial.
-        simplify : QuasiPolynomial
-            Simplifies a quasi-polynomial by *removing* zero polynomials.
-        new_integer : QuasiPolynomial
-            Creates a quasi-polynomial with integer exponents using a nested list of __private_coefficients.
-        new: QuasiPolynomial
-            Creates a quasi-polynomial using a nested list of (exponential, __private_coefficients).
-        copy : QuasiPolynomial
-            Copies a quasi-polynomial.
-        __eq__ : bool
-            Checks whether two quasi-polynomials are mathematically equal.
-        pretty_print : str
-            Transform a quasi-polynomial in the mathematical form suitable to be read by humans.
-        scalar_multiplication
-            Multiplies a quasi-polynomial with a scalar.
-        __neg__ : QuasiPolynomial
-            Multiplies a quasi-polynomial with -1.
-        __add__ : QuasiPolynomial
-            Adds two quasi-polynomials.
-        __sub__ : QuasiPolynomial
-            Subtracts a quasi-polynomial from another.
-        __mul__ : QuasiPolynomial
-            Multiplies two quasi-polynomials, a quasi-polynomial with a polynomial or a quasi-polynomial with a scalar.
-        __rmul__ : QuasiPolynomial
-            Multiplies a polynomial with a quasi-polynomial or a scalar with a quasi-polynomial.
-        integrate : QuasiPolynomial
-            Integrate a quasi-polynomial with starting condition 0.
-        get_constant : Union[int, float, Fraction, complex, Expr]
-            Returns the constant coefficient of the constant polynomial (alpha = 0).
-    """
-
-    def __init__(self, polynomial_dict: Dict[Union["Energy_real", Expr], Polynomial]) -> None:
-        """
-            Parameters
-            ----------
-            polynomial_dict : Dict[Union[int, float, Fraction, Expr], Polynomial]
-                The dictionary containing all polynomials.
-                The coefficient polynomial of exp(- alpha x) is polynomial_dict[alpha].
         """
 
         self.polynomial_dict = polynomial_dict
@@ -549,9 +475,9 @@ class QuasiPolynomial:
 
         Sorts a quasi-polynomial by exponent alpha.
 
-            Returns
-            -------
-            QuasiPolynomial
+        Returns
+        -------
+        QuasiPolynomial
         """
 
         # Sort alphabetically when using `sympy`.
@@ -566,9 +492,9 @@ class QuasiPolynomial:
 
             Prints the coefficients.
 
-                Returns
-                -------
-                str
+            Returns
+            -------
+            str
         """
 
         return str([(e, [str(coeff) for coeff in p.coefficients()]) for e, p in self.sort().polynomials])
@@ -580,9 +506,9 @@ class QuasiPolynomial:
 
         Creates an empty quasi-polynomial.
 
-            Returns
-            -------
-            QuasiPolynomial
+        Returns
+        -------
+        QuasiPolynomial
         """
 
         return QuasiPolynomial({})
@@ -593,9 +519,9 @@ class QuasiPolynomial:
 
         Simplifies a quasi-polynomial by *removing* zero polynomials.
 
-            Returns
-            -------
-            QuasiPolynomial
+        Returns
+        -------
+        QuasiPolynomial
         """
 
         output = {}
@@ -623,13 +549,13 @@ class QuasiPolynomial:
 
         Creates a quasi-polynomial with integer exponents using a nested list of __private_coefficients.
 
-            Parameters
-            ----------
-            coefficient_list
+        Parameters
+        ----------
+        coefficient_list
 
-            Returns
-            -------
-            QuasiPolynomial
+        Returns
+        -------
+        QuasiPolynomial
         """
 
         polynomial_list: Dict[Energy_real, Polynomial] = {e: Polynomial.new(coefficient_list[e]) for e in
@@ -643,13 +569,13 @@ class QuasiPolynomial:
 
         Creates a quasi-polynomial using a nested list of (exponential, __private_coefficients).
 
-            Parameters
-            ----------
-            coefficient_dict
+        Parameters
+        ----------
+        coefficient_dict
 
-            Returns
-            -------
-            QuasiPolynomial
+        Returns
+        -------
+        QuasiPolynomial
         """
 
         polynomial_dict = {e: Polynomial.new(p) for e, p in coefficient_dict.items()}
@@ -661,9 +587,9 @@ class QuasiPolynomial:
 
         Copies a quasi-polynomial.
 
-            Returns
-            -------
-            quasi-Polynomial
+        Returns
+        -------
+        quasi-Polynomial
         """
 
         return QuasiPolynomial({e: p.copy() for e, p in self.polynomials})
@@ -674,9 +600,9 @@ class QuasiPolynomial:
 
         Checks whether two quasi-polynomials are mathematically equal.
 
-            Returns
-            -------
-            bool
+        Returns
+        -------
+        bool
         """
 
         if len(self.polynomial_dict) != len(other.polynomial_dict):
@@ -699,9 +625,9 @@ class QuasiPolynomial:
 
         Transform a quasi-polynomial in the mathematical form suitable to be read by humans.
 
-            Returns
-            -------
-            str
+        Returns
+        -------
+        str
         """
 
         if self == QuasiPolynomial.zero():
@@ -728,13 +654,13 @@ class QuasiPolynomial:
 
         Multiplies a quasi-polynomial with a scalar.
 
-            Parameters
-            ----------
-            scalar
+        Parameters
+        ----------
+        scalar
 
-            Returns
-            -------
-            QuasiPolynomial
+        Returns
+        -------
+        QuasiPolynomial
         """
 
         return QuasiPolynomial({e: scalar * p for e, p in self.polynomials}).simplify()
@@ -745,9 +671,9 @@ class QuasiPolynomial:
 
         Multiplies a quasi-polynomial with -1.
 
-            Returns
-            -------
-            QuasiPolynomial
+        Returns
+        -------
+        QuasiPolynomial
         """
 
         return self.scalar_multiplication(Fraction(-1))
@@ -758,9 +684,9 @@ class QuasiPolynomial:
 
         Adds two quasi-polynomials.
 
-            Returns
-            -------
-            QuasiPolynomial
+        Returns
+        -------
+        QuasiPolynomial
         """
 
         keys = set(self.polynomial_dict.keys())
@@ -775,9 +701,9 @@ class QuasiPolynomial:
 
         Subtracts a quasi-polynomial from another.
 
-            Returns
-            -------
-            QuasiPolynomial
+        Returns
+        -------
+        QuasiPolynomial
         """
 
         return self + (-other)
@@ -789,9 +715,9 @@ class QuasiPolynomial:
 
         Multiplies two quasi-polynomials, a quasi-polynomial with a polynomial or a quasi-polynomial with a scalar.
 
-            Returns
-            -------
-            QuasiPolynomial
+        Returns
+        -------
+        QuasiPolynomial
         """
 
         # Check whether the second object is a quasi-polynomial.
@@ -816,9 +742,9 @@ class QuasiPolynomial:
 
         Multiplies a polynomial with a quasi-polynomial or a scalar with a quasi-polynomial.
 
-            Returns
-            -------
-            QuasiPolynomial
+        Returns
+        -------
+        QuasiPolynomial
         """
 
         return self * other
@@ -829,9 +755,9 @@ class QuasiPolynomial:
 
         Integrate a polynomial with starting condition 0.
 
-            Returns
-            -------
-            QuasiPolynomial
+        Returns
+        -------
+        QuasiPolynomial
         """
 
         # Check whether the quasi-polynomial is empty.
@@ -867,9 +793,9 @@ class QuasiPolynomial:
 
         Returns the constant coefficient of the constant polynomial (alpha = 0).
 
-            Returns
-            -------
-            Union[int, float, Fraction, complex, Expr]
+        Returns
+        -------
+        Union[int, float, Fraction, complex, Expr]
         """
 
         return self.polynomial_dict.get(0, Polynomial.zero()).get_constant()

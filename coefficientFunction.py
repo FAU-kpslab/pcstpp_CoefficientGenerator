@@ -9,29 +9,19 @@ class CoefficientFunction:
 
     A class used to define the coefficient functions f(ell; m), encoded by a tuple m denoting the operator sequence.
 
-        Parameters
-        ----------
-        sequence : Tuple[Tuple[int,...],...]
-            The operator sequence m identifying the function f(ell; m).
-        function : QuasiPolynomial
-            The corresponding coefficient function f(ell; m).
+    Parameters
+    ----------
+    sequence : Tuple[Tuple[int,...],...]
+        The operator sequence m identifying the function f(ell; m).
+    function : QuasiPolynomial
+        The corresponding coefficient function f(ell; m).
 
-        Attributes
-        ----------
-        __private_key : Tuple[Tuple[int,...],...]
-            The number corresponding to the sequence of operators.
-        function : QuasiPolynomial
-            The corresponding coefficient function f(ell; m).
-
-        Methods
-        -------
-        sequence : Tuple[Tuple[int,...],...]
-            Gets the operator sequence m identifying the function f(ell; m).
-        __str__ : str
-            Prints the operator sequence m and the coefficient array of the corresponding coefficient function
-            f(ell; m).
-        pretty_print() : str
-            Prints the operator sequence m and corresponding coefficient function f(ell; m).
+    Attributes
+    ----------
+    __private_key : Tuple[Tuple[int,...],...]
+        The number corresponding to the sequence of operators.
+    function : QuasiPolynomial
+        The corresponding coefficient function f(ell; m).
     """
 
     def __init__(self, sequence: Sequence, function: QuasiPolynomial) -> None:
@@ -53,9 +43,9 @@ class CoefficientFunction:
 
         Gets the operator sequence m identifying the function f(ell; m).
 
-            Returns
-            -------
-            Tuple[Tuple[int,...],...]
+        Returns
+        -------
+        Tuple[Tuple[int,...],...]
         """
 
         return key_to_sequence(self.__private_key)
@@ -66,9 +56,9 @@ class CoefficientFunction:
 
         Prints the operator sequence m and the coefficient array of the corresponding coefficient function f(ell; m).
 
-            Returns
-            -------
-            str
+        Returns
+        -------
+        str
         """
 
         return str(self.sequence()) + ': ' + str(self.function)
@@ -79,9 +69,9 @@ class CoefficientFunction:
 
         Prints the operator sequence m and corresponding coefficient function f(ell; m).
 
-            Returns
-            -------
-            str
+        Returns
+        -------
+        str
         """
 
         return str(self.sequence()) + ': ' + self.function.pretty_print()
@@ -93,32 +83,17 @@ class FunctionCollection:
 
     A class used to store all calculated coefficient functions f(ell; m).
 
-        Parameters
-        ----------
-        translation : Dict
-            The dictionary assigning an index to every operator.
+    Parameters
+    ----------
+    translation : Dict
+        The dictionary assigning an index to every operator.
 
-        Attributes
-        ----------
-        __private_collection : Dict
-            The dictionary storing keys sequence_to_key(m) and values f(ell; m).
-        translation : Dict
-            The dictionary assigning an index to every operator.
-
-        Methods
-        -------
-        __contains__ : bool
-            Checks for the operator sequence m whether the function f(ell; m) is already calculated.
-        __setitem__ : None
-            Saves the function f(ell; m) if it is not already saved.
-        __getitem__ : CoefficientFunction
-            Returns for the operator sequence m the function f(ell; m) or None.
-        keys :
-            Returns all calculated operator sequences m.
-        __str__ : str
-            Prints the collection.
-        pretty_print() : str
-            Transform the collection in a form suitable to be read by humans.
+    Attributes
+    ----------
+    __private_collection : Dict
+        The dictionary storing keys sequence_to_key(m) and values f(ell; m).
+    translation : Dict
+        The dictionary assigning an index to every operator.
     """
 
     def __init__(self, translation: Dict[int, Energy]) -> None:
@@ -131,14 +106,14 @@ class FunctionCollection:
 
         Checks for the operator sequence m whether the function f(ell; m) is already calculated.
 
-            Parameters
-            ----------
-            sequence : Tuple[Tuple[int,...],...]
-                The operator sequence m identifying the function f(ell; m).
+        Parameters
+        ----------
+        sequence : Tuple[Tuple[int,...],...]
+            The operator sequence m identifying the function f(ell; m).
 
-            Returns
-            -------
-            bool
+        Returns
+        -------
+        bool
         """
 
         return sequence_to_key(sequence) in self.__private_collection
@@ -149,12 +124,12 @@ class FunctionCollection:
 
         Saves the function f(ell; m) if it is not already saved.
 
-            Parameters
-            ----------
-            sequence : Tuple[Tuple[int,...],...]
-                The operator sequence m identifying the function f(ell; m).
-            function : QuasiPolynomial
-                The function f(ell; m).
+        Parameters
+        ----------
+        sequence : Tuple[Tuple[int,...],...]
+            The operator sequence m identifying the function f(ell; m).
+        function : QuasiPolynomial
+            The function f(ell; m).
         """
 
         if sequence not in self:
@@ -166,14 +141,14 @@ class FunctionCollection:
 
         Returns for the operator sequence m the function f(ell; m) or None.
 
-            Parameters
-            ----------
-            sequence : Tuple[Tuple[int,...],...]
-                The operator sequence m.
+        Parameters
+        ----------
+        sequence : Tuple[Tuple[int,...],...]
+            The operator sequence m.
 
-            Returns
-            -------
-            CoefficientFunction
+        Returns
+        -------
+        CoefficientFunction
         """
 
         if sequence in self:
@@ -187,9 +162,9 @@ class FunctionCollection:
 
         Returns all calculated operator sequences m.
 
-            Returns
-            -------
-            List[Tuple[Tuple[int,...],...]]
+        Returns
+        -------
+        List[Tuple[Tuple[int,...],...]]
         """
 
         return [key_to_sequence(key) for key in self.__private_collection.keys()]
@@ -200,9 +175,9 @@ class FunctionCollection:
 
         Prints the collection.
 
-            Returns
-            -------
-            str
+        Returns
+        -------
+        str
         """
 
         output = []
@@ -216,9 +191,9 @@ class FunctionCollection:
 
         Transform the collection in a form suitable to be read by humans.
 
-            Returns
-            -------
-            str
+        Returns
+        -------
+        str
         """
 
         output = str()
@@ -233,9 +208,9 @@ def sequence_to_key(sequence: Sequence) -> Sequence:  # TODO: The key is suppose
 
     Converts the operator sequence m into the key.
 
-        Returns
-        -------
-        Tuple[Tuple[int,...],...]
+    Returns
+    -------
+    Tuple[Tuple[int,...],...]
     """
 
     return sequence
@@ -247,9 +222,9 @@ def key_to_sequence(key: Sequence) -> Sequence:  # TODO: The key is supposed to 
 
     Converts the key into the operator sequence m.
 
-        Returns
-        -------
-        Tuple[Tuple[int,...],...]
+    Returns
+    -------
+    Tuple[Tuple[int,...],...]
     """
 
     return key
@@ -261,9 +236,9 @@ def sequence_to_indices(sequence: Sequence, translation: Dict[int, Energy]) -> I
 
     Converts the operator sequence into the indices of the operator sequence m.
 
-        Returns
-        -------
-        Tuple[Tuple[Union[int,float,Fraction,complex],...],...]
+    Returns
+    -------
+    Tuple[Tuple[Union[int,float,Fraction,complex],...],...]
     """
     return tuple(tuple((translation[e] for e in s)) for s in sequence)
 
@@ -278,9 +253,9 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
 
     Returns or calculates the function f(ell; m) corresponding to the operator sequence m.
 
-        Returns
-        -------
-        QuasiPolynomial
+    Returns
+    -------
+    QuasiPolynomial
     """
 
     # Check whether the function is already calculated.
@@ -340,9 +315,9 @@ def trafo_calc(sequence: Sequence, trafo_collection: FunctionCollection, collect
 
     Calculates the function G(ell; m) corresponding to the operator sequence m.
 
-        Returns
-        -------
-        QuasiPolynomial
+    Returns
+    -------
+    QuasiPolynomial
     """
 
     # Check whether the function is already calculated.
