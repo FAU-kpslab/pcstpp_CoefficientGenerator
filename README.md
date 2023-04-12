@@ -7,28 +7,28 @@ closed and open quantum many-body systems with multiple quasiparticle types", (2
 ## Table of contents
 
 - [Instructions](#instructions)
-  - [Configuration](#config)
-  - [Output format](#output)
-  - [Post production](#post)
-- [Available modules](#api)
+  - [Configuration](#configuration)
+  - [Output format](#output-format)
+  - [Post production](#post-production)
+- [Available modules](#available-modules)
 - [Credits](#credits)
 - [License](#license)
 
-## Instructions <a name="instructions"></a>
+## Instructions
 
-### Configuration <a name="config"></a>
-
-TODO
-
-### Output format <a name="output"></a>
+### Configuration
 
 TODO
 
-### Post production <a name="post"></a>
+### Output format
 
 TODO
 
-## Available modules <a name="api"></a>
+### Post production
+
+TODO
+
+## Available modules
 
 - [Index](./docs/index.html)
   - [main](./docs/main.html)
@@ -36,10 +36,10 @@ TODO
   - [quasiPolynomial](./docs/quasiPolynomial.html)
   - [mathematics](./docs/mathematics.html)
 
-## Credits <a name="credits"></a>
+## Credits
 
 TODO
 
-## License <a name="license"></a>
+## License
 
 TODO
