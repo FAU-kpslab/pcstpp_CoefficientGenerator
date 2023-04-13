@@ -21,8 +21,8 @@ a = sym.Symbol("a", positive=True)
 
 
 def main(raw_args: Sequence[str] | None = None):
-    my_parser = argparse.ArgumentParser(description='Use pCUT to block-diagonalize a Lindbladian or a Hamiltonian with '
-                                                    'two particle types')
+    my_parser = argparse.ArgumentParser(description='Use pcst++ to block-diagonalize a Lindbladian or a Hamiltonian'
+                                                    'with multiple particle types')
     my_parser.add_argument('-t', '--trafo', action='store_true', help='calculate the transformation directly')
     my_config = my_parser.add_mutually_exclusive_group()
     my_config.add_argument('-f', '--file', nargs='?', const='config.yml', default=None,
@@ -67,8 +67,8 @@ def main(raw_args: Sequence[str] | None = None):
         # index as its name, provided that they are unique. The operators can be separated in arbitrarily different
         # lists which marks them as groups whose operators commute pairwise with those of other groups.
         operators = [[-1, -2, -3, -4, -5], [1, 2, 3, 4, 5]]
-        # Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the operators.
-        # In Lea's case, enter the indices of the operators prior to transposition.
+        # Enter the operator indices, i.e., the unperturbed energy differences caused by the operators.
+        # The indices can be of type integer, float, Fraction (e.g. '1/2') or complex (e.g. (1+2j)).
         translation = {
             -1: -2,
             -2: -1,
@@ -217,14 +217,12 @@ def main(raw_args: Sequence[str] | None = None):
     print('max_order: ' + str(max_order), file=config_file)
     print("# Give a unique name (integer) to every operator, so that you can distinguish them. You can take the "
           "operator index as\n"
-          "# its name, provided that they are unique. The operators can separated in arbitrarily different lists "
-          "which marks them\n"
-          "# as groups whose operators commute pairwise with those of other groups. ",
+          "# its name, provided that they are unique. The operators can be separated in arbitrarily different lists "
+          "which marks\n"
+          "# them as groups whose operators commute pairwise with those of other groups. ",
           file=config_file)
     print('operators: ' + str(list(operators)), file=config_file)
-    print("# Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the "
-          "operators. In Lea's\n"
-          "# case, enter the indices of the operators prior to transposition.\n"
+    print("# Enter the operator indices, i.e., the unperturbed energy differences caused by the operators.\n"
           "# The indices can be of type integer, float, Fraction (e.g. '1/2') or complex (e.g. (1+2j)).",
           file=config_file)
     print('indices:', file=config_file)

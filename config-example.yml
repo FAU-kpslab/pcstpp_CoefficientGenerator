@@ -1,16 +1,15 @@
 ---
-# This is an exemplary config file. If you use this program for the first time, you can also specify everything step
-# by step in the command line; the program will then generate the correct config file.
+# This is an exemplary config file. Following the comments in this file, you can modify it for your purpose and rerun
+# the program with the flag '--file'. For more infos, use flag '--help'.
 
 # Enter the total order.
-max_order: 2
+max_order: 4
 # Give a unique name (integer) to every operator, so that you can distinguish them. You can take the operator index as
-# its name, provided that they are unique. The list 'operators_left' contains all operators on the left side of the
-# tensor product and the list 'operators_right' all operators on the right side of the tensor product.
-operators_left: [-1, -2, -3, -4, -5]
-operators_right: [1, 2, 3, 4, 5]
-# Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the operators. In Lea's
-# case, enter the indices of the operators prior to transposition.
+# its name, provided that they are unique. The operators can be separated in arbitrarily different lists which marks
+# them as groups whose operators commute pairwise with those of other groups.
+operators: [[-1, -2, -3, -4, -5], [1, 2, 3, 4, 5]]
+# Enter the operator indices, i.e., the unperturbed energy differences caused by the operators.
+# The indices can be of type integer, float, Fraction (e.g. '1/2') or complex (e.g. (1+2j)).
 indices:
   -1: -2
   -2: -1
@@ -22,7 +21,8 @@ indices:
   3: 0
   4: 1
   5: 2
-# Manually insert the solution for the coefficient functions with non-vanishing starting condition as strings.
+# Manually insert the solution for the coefficient functions with non-vanishing starting condition as string, integer,
+# float or complex (e.g. (1+2j)).
 starting_conditions:
   ((-1,), ()): '1'
   ((-3,), ()): '1'
@@ -33,6 +33,9 @@ starting_conditions:
   ((-2,), (4,)): '1'
   ((-4, -2), ()): '-1/2'
   ((), (2, 4)): '-1/2'
-# Introduce band-diagonality, i.e., write down the largest sum of indices occurring in the starting conditions.
+# Introduce band-diagonality, i.e., write down the largest absolute value of possible index sums occurring in the
+# starting conditions.
 max_energy: 2
+# Optionally, specify the delta value for the 'broad signum' function, i.e., half of the width of the 0 level.
+delta: 0
 ...
