@@ -135,6 +135,7 @@ Depending on the data types you use in the configuration, the program will use d
 | `sympy.core.expr.Expr`     | Exact                            | Complex         |
 
 - `sympy.core.expr.Expr` are assumed to be exact.
+- Numbers of type `fraction.Fraction` should be given as strings, so that they aren't evaluated as floats.
 - If at least one value in `indices` or `starting_conditions` in the configuration is of type `sympy.core.expr.Expr`,
   all of them will be converted into that type.
 - Elif at least one of those values are of type `complex`, all of them will be converted into that type.
