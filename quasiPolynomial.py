@@ -364,7 +364,7 @@ class Polynomial:
                     output.append('{}x^{}'.format(pretty_factor_print(coefficient), exponent))
             return '+'.join(output).replace('+-', '-')
 
-    def scalar_multiplication(self, scalar: "Coeff") -> 'Polynomial':
+    def __scalar_multiplication(self, scalar: "Coeff") -> 'Polynomial':
         """
         p.scalar_multiplication(scalar)
 
@@ -395,7 +395,7 @@ class Polynomial:
             Negated polynomial.
         """
 
-        return self.scalar_multiplication(-1)
+        return self.__scalar_multiplication(-1)
 
     def __add__(self, other: 'Polynomial') -> 'Polynomial':
         """
@@ -477,7 +477,7 @@ class Polynomial:
             return Polynomial(output).simplify()
         # Check whether the second object is a scalar and call scalar_multiplication.
         elif isinstance(other, (Fraction, int, float, complex, Expr)):
-            return self.scalar_multiplication(other)
+            return self.__scalar_multiplication(other)
         # If the second polynomial is not a polynomial (but e.g. a quasi-polynomial) return NotImplemented to trigger
         # the function __rmul__ of the other class.
         else:
@@ -819,7 +819,7 @@ class QuasiPolynomial:
                 output.append(polynomial + exponent)
             return '+'.join(output).replace('+-', '-')
 
-    def scalar_multiplication(self, scalar: "Coeff") -> 'QuasiPolynomial':
+    def __scalar_multiplication(self, scalar: "Coeff") -> 'QuasiPolynomial':
         """
         qp.scalar_multiplication(scalar)
 
@@ -850,7 +850,7 @@ class QuasiPolynomial:
             Negated quasi-polynomial.
         """
 
-        return self.scalar_multiplication(Fraction(-1))
+        return self.__scalar_multiplication(Fraction(-1))
 
     def __add__(self, other: 'QuasiPolynomial') -> 'QuasiPolynomial':
         """
@@ -929,7 +929,7 @@ class QuasiPolynomial:
             return self * QuasiPolynomial({0: other})
         # Check whether the second object is a scalar and call scalar_multiplication.
         if isinstance(other, (Fraction, int, float, complex, Expr)):
-            return self.scalar_multiplication(other)
+            return self.__scalar_multiplication(other)
         else:
             return NotImplemented
 

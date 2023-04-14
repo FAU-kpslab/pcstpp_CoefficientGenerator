@@ -76,7 +76,7 @@ def signum(indices1: Indices[Energy_real], indices2: Indices[Energy_real]) -> in
     indices1
         Operator sequence indices whose sgn(M(m1)) is to be added.
     indices2
-        Operator sequence indices whose sgn(M(m2)) is to be substracted.
+        Operator sequence indices whose sgn(M(m2)) is to be subtracted.
 
     Returns
     -------
@@ -99,7 +99,7 @@ def signum_broad(indices1: Indices[Energy_real], indices2: Indices[Energy_real],
     indices1
         Operator sequence indices whose sgn_d(M(m1)) is to be added.
     indices2
-        Operator sequence indices whose sgn_d(M(m2)) is to be substracted.
+        Operator sequence indices whose sgn_d(M(m2)) is to be subtracted.
 
     Returns
     -------
@@ -115,8 +115,7 @@ def signum_complex(indices1: Indices[Union[complex, Expr]], indices2: Indices[Un
     """
     signum_complex(indices1, indices2)
 
-    Returns the prefactor sgn(M(m1)) - sgn(M(m2)) with the definition sgn(z) = z / |z| as used in the Schmiedinghoff,
-    Uhrig paper.
+    Returns the prefactor sgn(M(m1)) - sgn(M(m2)) with the definition sgn(z) = z / |z|.
 
     Parameters
     ----------
@@ -182,10 +181,6 @@ def partitions(sequence: Sequence) -> List[Tuple[Sequence, Sequence]]:
         List of partitions.
     """
 
-    # TODO: Why we have to look at all possible partitions, especially those where we have different amount of terms on
-    #  the left side for commuting Hilbert spaces? Should this depend on the starting conditions e.g. is this needed for
-    #  the Dicke model?
-    #  -> Maybe add an option to restrict partitions depending on the model
     partitions = [[(s[:i], s[i:]) for i in range(len(s) + 1)] for s in sequence]
     # skip edge cases of completely empty left or right side
     valid_partitions = list(product(*partitions))[1:-1]

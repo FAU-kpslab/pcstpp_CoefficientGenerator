@@ -238,7 +238,7 @@ class FunctionCollection:
         return output
 
 
-def sequence_to_key(sequence: Sequence) -> Sequence:  # TODO: The key is supposed to be an integer.
+def sequence_to_key(sequence: Sequence) -> Sequence:  
     """
     vector_to_key(sequence)
 
@@ -249,11 +249,12 @@ def sequence_to_key(sequence: Sequence) -> Sequence:  # TODO: The key is suppose
     Tuple[Tuple[int,...],...]
         Key.
     """
-
+    
+    # To reduce memory consumption, the key could be of type `int`
     return sequence
 
 
-def key_to_sequence(key: Sequence) -> Sequence:  # TODO: The key is supposed to be an integer.
+def key_to_sequence(key: Sequence) -> Sequence:
     """
     key_to_sequence(key)
 
@@ -279,6 +280,7 @@ def sequence_to_indices(sequence: Sequence, translation: Dict[int, Energy]) -> I
     Tuple[Tuple[Union[int,float,Fraction,complex],...],...]
         Operator sequence indices.
     """
+
     return tuple(tuple((translation[e] for e in s)) for s in sequence)
 
 
@@ -301,7 +303,7 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
     translation
         Dictionary translating operator indices to energy values.
     max_energy
-        Width of the band diagonality band.
+        Width of the band-diagonality band.
     signum_func
         Signum function to be used (normal, broad or complex).
     energy_func
@@ -332,8 +334,10 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
             m2 = sequence_to_indices(s2, translation)
             # Only calculate non-vanishing contributions to the integrand.
             try:
+                # TODO: Replace `max_energy` by `band_diagonality_func` which gets argument `m1`, `m2`
                 if (abs(energy_func(m1)) <= max_energy) and (abs(energy_func(m2)) <= max_energy):
                     integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
+            # TODO: Remove these checks after implementing the `band_diagonality_func`
             except TypeError:
                 # If 'if-clause' can not be determined uniquely, as it depends on the `a`
                 # symbol, try helping the sympy module by checking for a equivalent relation.

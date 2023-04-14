@@ -81,14 +81,14 @@ class TestPolynomial(unittest.TestCase):
         self.assertEqual(P.new([2, 1, 0]).pretty_print(), '2+x')
 
     def test_scalar_multiplication(self):
-        self.assertEqual(P.new([2, 4, 8]), P.new([1, 2, 4]).scalar_multiplication(2))
-        self.assertEqual(P.zero(), P.new([1, 2, 4]).scalar_multiplication(0))
-        self.assertEqual(P.new([1, 3 / 2, 2]), P.new([2, 3, 4]).scalar_multiplication(Fraction(1, 2)))
-        self.assertEqual(P.new([1, 3 / 2, 2]), P.new([2, 3, 4]).scalar_multiplication(1 / 2))
-        self.assertEqual(P.new([1, 3 / 2, 2]), P.new([2, 3, 4]).scalar_multiplication(0.5))
-        self.assertEqual(P.new([1j, 3j / 2, 2j]), P.new([2, 3, 4]).scalar_multiplication(0.5j))
-        self.assertEqual(P.new([4, 6, 2 * a]), P.new([2, 3, a]).scalar_multiplication(2))
-        self.assertEqual(P.new([4 * a, 6 * a, 2 * a ** 2]), P.new([2, 3, a]).scalar_multiplication(2 * a))
+        self.assertEqual(P.new([2, 4, 8]), P.new([1, 2, 4]) * 2)
+        self.assertEqual(P.zero(), P.new([1, 2, 4])* 0)
+        self.assertEqual(P.new([1, 3 / 2, 2]), P.new([2, 3, 4])* Fraction(1, 2))
+        self.assertEqual(P.new([1, 3 / 2, 2]), P.new([2, 3, 4])* (1 / 2))
+        self.assertEqual(P.new([1, 3 / 2, 2]), P.new([2, 3, 4])* 0.5)
+        self.assertEqual(P.new([1j, 3j / 2, 2j]), P.new([2, 3, 4])* 0.5j)
+        self.assertEqual(P.new([4, 6, 2 * a]), P.new([2, 3, a])* 2)
+        self.assertEqual(P.new([4 * a, 6 * a, 2 * a ** 2]), P.new([2, 3, a])* 2 * a)
 
     def test_negation(self):
         self.assertEqual(-P.new([2, 4, 8]), P.new([-2, -4, -8]))
@@ -236,17 +236,17 @@ class TestQuasiPolynomial(unittest.TestCase):
 
     def test_scalar_multiplication(self):
         self.assertEqual(QP.new_integer([[2, 4, 8], [2, 10, 50]]),
-                         QP.new_integer([[1, 2, 4], [1, 5, 25]]).scalar_multiplication(2))
+                         QP.new_integer([[1, 2, 4], [1, 5, 25]])* 2)
         self.assertEqual(QP.new({0: [4], Fraction(1, 2): [8]}),
-                         QP.new({0: [2], Fraction(1, 2): [4]}).scalar_multiplication(2))
-        self.assertEqual(QP.new_integer([]), QP.new_integer([[2, 4, 8], [1, 5, 25]]).scalar_multiplication(0))
-        self.assertEqual(QP.new_integer([]), QP.new_integer([]).scalar_multiplication(2))
+                         QP.new({0: [2], Fraction(1, 2): [4]})* 2)
+        self.assertEqual(QP.new_integer([]), QP.new_integer([[2, 4, 8], [1, 5, 25]])* 0)
+        self.assertEqual(QP.new_integer([]), QP.new_integer([])* 2)
         temp = QP.new_integer([[2, 4, 8], [0, 0, 0], [3, 9]])
         temp_times_1 = 1 * temp
         self.assertNotEqual(id(temp), id(temp_times_1))
         self.assertNotEqual(id(temp.polynomial_dict[0]), id(temp_times_1.polynomial_dict[0]))
         self.assertEqual(QP.new({0: [4*a], Fraction(1, 2): [8*a]}),
-                         QP.new({0: [2], Fraction(1, 2): [4]}).scalar_multiplication(2*a))
+                         QP.new({0: [2], Fraction(1, 2): [4]})* 2*a)
 
     def test_negation(self):
         self.assertEqual(-QP.new_integer([[2, 4, 8], [2, 10, 50]]), QP.new_integer([[-2, -4, -8], [-2, -10, -50]]))
