@@ -136,3 +136,4 @@ pip-selfcheck.json
 *.pdf
 *.txt
 /config.yml
+/config.yaml

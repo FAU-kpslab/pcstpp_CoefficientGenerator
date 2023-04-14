@@ -23,11 +23,11 @@ def main(raw_args: Union[Sequence[str],None] = None):
                                                     'with multiple particle types')
     my_parser.add_argument('-t', '--trafo', action='store_true', help='calculate the transformation directly')
     my_config = my_parser.add_mutually_exclusive_group()
-    my_config.add_argument('-f', '--file', nargs='?', const='config.yml', default=None,
-                           help='pass configuration using the config file "config.yml" '
+    my_config.add_argument('-f', '--file', nargs='?', const='config.yaml', default=None,
+                           help='pass configuration using the config file "config.yaml" '
                                 'or a custom one given as an argument')
     my_config.add_argument('-c', '--config', action='store_true',
-                           help='Writes an exemplary config file to "config.yml" without performing '
+                           help='Writes an exemplary config file to "config.yaml" without performing '
                                 'any calculations.')
     args = my_parser.parse_args(raw_args)
 
@@ -209,7 +209,7 @@ def main(raw_args: Union[Sequence[str],None] = None):
             result.close()
 
     # Generate the config file.
-    config_file = open("config.yml", "w")
+    config_file = open("config.yaml", "w")
     print('---', file=config_file)
     print("# This is an exemplary config file. Following the comments in this file, you can modify it for your "
           "purpose and rerun\n"
@@ -252,10 +252,10 @@ def main(raw_args: Union[Sequence[str],None] = None):
     if not args.config:
         print('The calculations are done. Your coefficient file is "result.txt". If you want to keep it, store it under'
               ' a different name before executing the program again.')
-        print('The used configuration is found in "config.yml", you can store that together with the results.')
+        print('The used configuration is found in "config.yaml", you can store that together with the results.')
     else:
         print(
-            'The default configuration file is found in "config.yml". It will be overwritten when rerunning the program'
+            'The default configuration file is found in "config.yaml". It will be overwritten when rerunning the program'
             '.')
 
 

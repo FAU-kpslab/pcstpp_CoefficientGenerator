@@ -6,15 +6,18 @@ closed and open quantum many-body systems with multiple quasiparticle types", (2
 
 ## Table of contents
 
-- [Description](#description)
-- [Instructions](#instructions)
-  - [How to run this program](#how-to-run-this-program)
-  - [Notation in code and documentation](#notation-in-code-and-documentation)
-  - [Configuration](#configuration)
-  - [Functionality](#functionality)
-  - [Output format](#output-format)
-- [Module specification](#module-specification)
-- [License](#license)
+- [Coefficient generator for pcst++](#coefficient-generator-for-pcst)
+  - [Table of contents](#table-of-contents)
+  - [Description](#description)
+  - [Instructions](#instructions)
+    - [How to run this program](#how-to-run-this-program)
+    - [Notation in code and documentation](#notation-in-code-and-documentation)
+    - [Configuration](#configuration)
+      - [Further remarks:](#further-remarks)
+    - [Functionality](#functionality)
+    - [Output format](#output-format)
+  - [Module specification](#module-specification)
+  - [License](#license)
 
 > Both program and documentation rely on the mathematical notation used in our paper
 > [arXiv:2302.01000](https://doi.org/10.48550/arXiv.2302.01000).
@@ -40,7 +43,7 @@ $ python main.py
 It accepts with multiple optional arguments:
 - `-h` to show the help message.
 - `-t` to calculate the coefficients of the transformation.
-- `-f [FILE]` to use an external file for configuration. Default value is `Config.yml`.
+- `-f [FILE]` to use an external file for configuration. Default value is `config.yaml`.
 - `-c` to generate an exemplary config file instead of running the program.
 - Without any argument to run the program with the hard-coded default configuration.
 
@@ -63,7 +66,7 @@ It accepts with multiple optional arguments:
 
 ### Configuration
 
-The descriptive configuration file reads as follows and can be found in `config-example.yml`. 
+The descriptive configuration file reads as follows and can be found in `config-example.yaml`. 
 ```YAML
 # This is an exemplary config file. Following the comments in this file, you can modify it for your purpose and rerun
 # the program with the flag '--file'. For more infos, use flag '--help'.
@@ -121,8 +124,8 @@ delta: 0
   you want to calculate the coefficient functions of the transformation $G(\ell, \mathbf{m})$.
 - TODO: Something about band-diagonality.
 - If you don't want to use the broad signum function you can either specify `delta: 0` or don't specify delta at all.
-- After running, the program will save the used input in a new file `config.yml` for you to store with your result.
-  This will overwrite any existing file `config.yml`.
+- After running, the program will save the used input in a new file `config.yaml` for you to store with your result.
+  This will overwrite any existing file `config.yaml`.
   You can use this file to check that you configured what you wanted to configure.
 
 Depending on the data types you use in the configuration, the program will use different functions:
