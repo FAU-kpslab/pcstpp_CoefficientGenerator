@@ -1,3 +1,8 @@
+"""
+Defines classes to store and calculate a single coefficient function $f(ell; m)$ 
+and the collection of all $f(ell; m)$.
+"""
+
 from quasiPolynomial import QuasiPolynomial
 from mathematics import *
 from typing import Tuple, Dict, Optional, Callable

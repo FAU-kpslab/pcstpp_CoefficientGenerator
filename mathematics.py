@@ -1,3 +1,8 @@
+"""
+Defines basic mathematical functions for calculating the coefficient functions,
+like the unperturbed eigenvalue change $M(m)$ and the occurring exponents in the
+modified coefficient functions.
+"""
 #__pdoc__ = {}
 #__pdoc__['Expr'] = False
 

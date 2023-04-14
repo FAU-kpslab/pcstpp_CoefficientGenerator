@@ -1,3 +1,10 @@
+"""
+Defines `Polynomial` and `QuasiPolynomial` as basic type to store the
+modified coefficient functions $f(ell; m)$. The concrete $f(ell; m)$ are stored
+with `CoefficientFunction` from the `coefficientFunction.py` module using
+the classes defined in this module.
+"""
+
 from fractions import Fraction
 from typing import List, Union, Dict, TYPE_CHECKING
 from cmath import isclose
