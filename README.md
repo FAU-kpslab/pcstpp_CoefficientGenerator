@@ -16,7 +16,9 @@ closed and open quantum many-body systems with multiple quasiparticle types", (2
       - [Further remarks:](#further-remarks)
     - [Functionality](#functionality)
     - [Output format](#output-format)
+    - [Examples](#examples)  
   - [Module specification](#module-specification)
+  - [Authors](#authors) 
   - [License](#license)
 
 > Both program and documentation rely on the mathematical notation used in our paper
@@ -49,20 +51,20 @@ It accepts with multiple optional arguments:
 
 ### Notation in code and documentation
 
-| Name                                       | Meaning (Equation in [arXiv:2302.01000](https://doi.org/10.48550/arXiv.2302.01000)) |
-|--------------------------------------------|-------------------------------------------------------------------------------------|
-| Index of operator sequence                 | $\textbf{m}$ (9)                                                                    |
-| Operator sequence                          | Unique name of $T_\textbf{m}$ (9)                                                   |
-| Key of operator sequence                   | Unique key of $T_\textbf{m}$, same as name                                          |
-| Coefficient function                       | $F(\ell; \textbf{m})$ (9)                                                           |
-| Starting condition                         | $F(0; \textbf{m})$ (13)                                                             |
-| Coefficient                                | $C_\textbf{m} = F(\infty; \textbf{m})$                                              |
-| Transformation                             | $\mathcal{S}(\infty)$ (16)                                                          |
-| Coefficient function of the transformation | $G(\ell; \textbf{m})$ (16)                                                          |
-| Standard signum function                   | $\textrm{sgn}$ for Hermitian operators                                              |
-| complex signum function                    | $\textrm{sgn}$ for non-Hermitian operators (5)                                      |
-| Broad signum function                      | $\textrm{sgn}_D$ (17)                                                               |
-| Delta                                      | $D$ (17)                                                                            |
+| Name                                       | Meaning                                    | (Equation in [arXiv:2302.01000](https://doi.org/10.48550/arXiv.2302.01000)) |
+|--------------------------------------------|--------------------------------------------| --------------------------------------------------------------------------- | 
+| Index of operator sequence                 | $\textbf{m}$                               | (9)                                                                         | 
+| Operator sequence                          | Unique name of $T_\textbf{m}$              | (9)                                                                         |
+| Key of operator sequence                   | Unique key of $T_\textbf{m}$, same as name |                                                                             |
+| Coefficient function                       | $F(\ell; \textbf{m})$                      | (9)                                                                         |
+| Starting condition                         | $F(0; \textbf{m})$                         | (13)                                                                        |
+| Coefficient                                | $C_\textbf{m} = F(\infty; \textbf{m})$     |                                                                             |
+| Transformation                             | $\mathcal{S}(\infty)$                      | (16)                                                                        |
+| Coefficient function of the transformation | $G(\ell; \textbf{m})$                      | (16)                                                                        |
+| Standard signum function                   | $\textrm{sgn}$ for Hermitian operators     |                                                                             |
+| complex signum function                    | $\textrm{sgn}$ for non-Hermitian operators | (5)                                                                         |
+| Broad signum function                      | $\textrm{sgn}_D$                           | (17)                                                                        |
+| Delta                                      | $D$                                        | (17)                                                                        |
 
 ### Configuration
 
@@ -185,6 +187,15 @@ order mk ... m2 m1 coefficient
 > We found that `sympy` quickly reaches its limits, even when using `sympy.cancel()`.
 > In such cases we converted the `sympy` expressions to `mathematica` and simplified them there.
 
+### Examples
+
+Config files for all exemplary models in our paper [arXiv:2302.01000](https://doi.org/10.48550/arXiv.2302.01000) are in the folder [config-examples](./config-examples/).
+This includes the [staggered transverse-field Ising model](TODO),
+the [non-Hermitian staggered transverse-field Ising model](./config-examples/config-NHTFIM.yaml),
+the [spin-one transverse-field Ising model with single-ion anisotropy](TODO)
+and the [Dissipative transverse-field Ising model](./config-examples/config-DTFIM.yaml).
+
+
 ## Module specification
 
 - [Index](./docs/index.html)
@@ -193,11 +204,15 @@ order mk ... m2 m1 coefficient
   - [quasiPolynomial](./docs/quasiPolynomial.html)
   - [mathematics](./docs/mathematics.html)
 
+## Authors
+
+Lea Lenke and Andreas Schellenberger
+
 ## License
 
 MIT License
 
-Copyright (c) [2023] [Lea Lenke, Andreas Schellenberger]
+Copyright (c) [2023] [Kai Phillip Schmidt]
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

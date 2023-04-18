@@ -1,0 +1,30 @@
+---
+# This is an exemplary config file. Following the comments in this file, you can modify it for your purpose and rerun
+# the program with the flag '--file'. For more infos, use flag '--help'.
+
+# Enter the total order.
+max_order: 2
+# Give a unique name (integer) to every operator, so that you can distinguish them. You can take the operator index as
+# its name, provided that they are unique. The operators can be separated in arbitrarily different lists which marks
+# them as groups whose operators commute pairwise with those of other groups. 
+operators: [[1, 2, 3, 4]]
+# Enter the operator indices, i.e., the unperturbed energy differences caused by the operators.
+# The indices can be of type integer, float, Fraction (e.g. '1/2') or complex (e.g. (1+2j)).
+indices:
+  1: -1
+  2: -I*a
+  3: I*a
+  4: 1
+# Manually insert the solution for the coefficient functions with non-vanishing starting condition as string, integer,
+# float or complex (e.g. (1+2j)).
+starting_conditions:
+  ((1,),): 1
+  ((2,),): 1
+  ((3,),): 1
+  ((4,),): 1
+# Introduce band-diagonality, i.e., write down the largest absolute value of possible index sums occurring in the
+# starting conditions.
+max_energy: sqrt(a**2 + 1)
+# Optionally, specify the delta value for the 'broad signum' function, i.e., half of the width of the 0 level.
+delta: 0
+...
