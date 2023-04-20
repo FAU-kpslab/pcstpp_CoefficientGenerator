@@ -57,14 +57,14 @@ class TestBDifferentialEquation(unittest.TestCase):
         self.assertEqual(key_to_sequence(((2,), ())), collection.keys()[1])
 
     def test_calc(self):
-        self.assertEqual(calc(((2, 2), tuple()), collection, translation, 2, signum, energy), QuasiPolynomial.zero())
-        self.assertEqual(calc(((1, 3), tuple()), collection, translation, 2, signum, energy),
+        self.assertEqual(calc(((2, 2), tuple()), collection, translation, signum, energy,lambda i: band_diagonality(i,2)), QuasiPolynomial.zero())
+        self.assertEqual(calc(((1, 3), tuple()), collection, translation, signum, energy, lambda i: band_diagonality(i,2)),
                          QuasiPolynomial({0: Polynomial([Fraction("-1/2")]), 4: Polynomial([Fraction("1/2")])}))
-        self.assertEqual(calc(((8, 7), tuple()), collection, translation, a, signum_complex, energy),
+        self.assertEqual(calc(((8, 7), tuple()), collection, translation, signum_complex, energy, band_diagonality_complex),
                          QuasiPolynomial({0: Polynomial([-1/a]), 2*a: Polynomial([1/a])}))
-        self.assertEqual(calc(((9, 10), tuple()), collection, translation, a, signum_complex, energy),
+        self.assertEqual(calc(((9, 10), tuple()), collection, translation, signum_complex, energy, band_diagonality_complex),
                          QuasiPolynomial({0: Polynomial([-I/a]), 2*a: Polynomial([I/a])}))
-        self.assertEqual(calc(((10, 9), tuple()), collection, translation, a, signum_complex, energy),
+        self.assertEqual(calc(((10, 9), tuple()), collection, translation, signum_complex, energy, band_diagonality_complex),
                          QuasiPolynomial({0: Polynomial([I/a]), 2*a: Polynomial([-I/a])}))
 
 

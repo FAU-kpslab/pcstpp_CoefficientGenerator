@@ -7,7 +7,8 @@ import argparse
 
 import coefficientFunction
 from quasiPolynomial import QuasiPolynomial as qp
-from mathematics import Energy, Coeff, Expr, energy, energy_broad, signum, signum_broad, signum_complex
+from mathematics import Energy, Coeff, Expr, energy, energy_broad, signum, signum_broad, signum_complex,\
+                        band_diagonality, band_diagonality_broad, band_diagonality_complex
 from itertools import product, chain
 from typing import cast, Dict, Union, Sequence
 from sympy.parsing.sympy_parser import parse_expr
@@ -148,19 +149,23 @@ def main(raw_args: Union[Sequence[str],None] = None):
             print("Using the broad signum function.")
             signum_func = lambda l, r: signum_broad(l, r, delta=delta)
             energy_func = lambda i: energy_broad(i, delta=delta)
+            band_diagonality_func = lambda i: band_diagonality_broad(i, max_energy, delta)
         # check if any translation value has a non-vanishing imaginary part
         elif len([v for v in translation.values() if iscomplex(v)]) > 0:
             print("Using the complex signum function.")
             signum_func = signum_complex
             energy_func = energy
+            band_diagonality_func = band_diagonality_complex
         elif len([v for v in translation.values() if isinstance(v, Expr)]) > 0:
             print("Using the complex signum function for symbolic calculations.")
             signum_func = signum_complex
             energy_func = energy
+            band_diagonality_func = band_diagonality_complex
         else:
             print("Using the standard signum function.")
             signum_func = signum
             energy_func = energy
+            band_diagonality_func = lambda i: band_diagonality(i, max_energy)
 
         # Combine all elements in `operators` to one list
         operators_all = [operator for operator_space in operators for operator in operator_space]
@@ -174,15 +179,11 @@ def main(raw_args: Union[Sequence[str],None] = None):
                     indices = coefficientFunction.sequence_to_indices(sequence_sorted, translation)
                     # Make use of block diagonality.
                     if coefficientFunction.is_zero(energy_func(indices)):
-                        # As the band diagonality is only fulfilled up to a multiple of delta add + delta * max_order
-                        # TODO: For the broad signum, max_energy should depend on the specific order used in
-                        #  one calculation -> implement order-dependent max_energy in `calc` in `coefficientFunction.py`
-                        # TODO: Maybe even make max_energy completely automatic?
                         coefficientFunction.calc(sequence_sorted, collection, translation,
-                                                 max_energy + delta * max_order, signum_func, energy_func)
+                                                signum_func, energy_func, band_diagonality_func)
                 else:
                     coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation,
-                                                   max_energy + delta * max_order, signum_func, energy_func)
+                                                   signum_func, energy_func, band_diagonality_func)
 
         print('Starting writing process.')
         # Write the results in a file.

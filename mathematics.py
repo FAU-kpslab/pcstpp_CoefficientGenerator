@@ -67,7 +67,6 @@ def energy_broad(indices: Indices[Energy_real], delta: Energy_real) -> Energy_re
     # floating errors
     return e if abs(e) > delta and not are_close(abs(e), delta) else 0
 
-
 def signum(indices1: Indices[Energy_real], indices2: Indices[Energy_real]) -> int:
     """
     signum(indices1, indices2)
@@ -188,3 +187,15 @@ def partitions(sequence: Sequence) -> List[Tuple[Sequence, Sequence]]:
     # skip edge cases of completely empty left or right side
     valid_partitions = list(product(*partitions))[1:-1]
     return [(tuple(l[0] for l in pr), tuple(r[1] for r in pr)) for pr in valid_partitions]
+
+
+def band_diagonality(indices: Indices[Energy_real],max_energy:Energy_real)->bool:
+    return abs(energy(indices)) <= abs(max_energy)
+
+def band_diagonality_broad(indices: Indices[Energy_real],max_energy:Energy_real, delta:Energy_real)->bool:
+    # TODO: Is `delta * len(indices)` the correct factor or has it to depend on the
+    # complete indices list
+    return abs(energy(indices)) <= abs(max_energy) + delta * len(indices)
+
+def band_diagonality_complex(indices: Indices[Energy])->bool:
+    return True
