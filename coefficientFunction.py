@@ -1,3 +1,8 @@
+"""
+Defines classes to store and calculate a single coefficient function $f(ell; m)$ 
+and the collection of all $f(ell; m)$.
+"""
+
 from quasiPolynomial import QuasiPolynomial
 from mathematics import *
 from typing import Tuple, Dict, Optional, Callable
@@ -22,6 +27,13 @@ class CoefficientFunction:
         The number corresponding to the sequence of operators.
     function : QuasiPolynomial
         The corresponding coefficient function f(ell; m).
+
+    Examples
+    --------
+    >>> print(CoefficientFunction(((1, 2), (0,)), QuasiPolynomial.new({0: [1, 2], 3: [4, 5]})))
+    ((-1, 1), (0,)): [(0, ['1', '2']), (3, ['4', '5'])]
+
+    Prints the operator sequence m and the coefficient array of the corresponding coefficient function f(ell; m).
     """
 
     def __init__(self, sequence: Sequence, function: QuasiPolynomial) -> None:
@@ -46,6 +58,7 @@ class CoefficientFunction:
         Returns
         -------
         Tuple[Tuple[int,...],...]
+            Operator sequence.
         """
 
         return key_to_sequence(self.__private_key)
@@ -59,6 +72,7 @@ class CoefficientFunction:
         Returns
         -------
         str
+            Operator sequence and coefficient array as string.
         """
 
         return str(self.sequence()) + ': ' + str(self.function)
@@ -72,6 +86,7 @@ class CoefficientFunction:
         Returns
         -------
         str
+            Operator sequence and human-readable quasi-polynomial.
         """
 
         return str(self.sequence()) + ': ' + self.function.pretty_print()
@@ -94,6 +109,27 @@ class FunctionCollection:
         The dictionary storing keys sequence_to_key(m) and values f(ell; m).
     translation : Dict
         The dictionary assigning an index to every operator.
+
+    Examples
+    --------
+    >>> collection = FunctionCollection({1: -1, 2: 0, 3: 1})
+    ... ((1,), ()) in collection
+    False
+
+    Checks for the operator sequence m whether the function f(ell; m) is already calculated.
+
+    >>> collection[((1,), ())] = QuasiPolynomial.new({0: [1, 2], 3: [4, 5]})
+
+    Saves the function f(ell; m) if it is not already saved.
+
+    >>> collection[((1,), ())]
+
+    Returns for the operator sequence m the function f(ell; m) or None.
+
+    >>> print(collection)
+    ["((1,), ()): [(0, ['1', '2']), (3, ['4', '5'])]"]
+
+    Prints the collection.
     """
 
     def __init__(self, translation: Dict[int, Energy]) -> None:
@@ -114,6 +150,7 @@ class FunctionCollection:
         Returns
         -------
         bool
+            `True` if function already in collection.
         """
 
         return sequence_to_key(sequence) in self.__private_collection
@@ -149,6 +186,7 @@ class FunctionCollection:
         Returns
         -------
         CoefficientFunction
+            Function or none (if not in collection).
         """
 
         if sequence in self:
@@ -165,6 +203,7 @@ class FunctionCollection:
         Returns
         -------
         List[Tuple[Tuple[int,...],...]]
+            List of operator sequences in collection.
         """
 
         return [key_to_sequence(key) for key in self.__private_collection.keys()]
@@ -178,6 +217,7 @@ class FunctionCollection:
         Returns
         -------
         str
+            Collection as string.
         """
 
         output = []
@@ -194,6 +234,7 @@ class FunctionCollection:
         Returns
         -------
         str
+            Collection as human-readable string.
         """
 
         output = str()
@@ -202,7 +243,7 @@ class FunctionCollection:
         return output
 
 
-def sequence_to_key(sequence: Sequence) -> Sequence:  # TODO: The key is supposed to be an integer.
+def sequence_to_key(sequence: Sequence) -> Sequence:  
     """
     vector_to_key(sequence)
 
@@ -211,12 +252,14 @@ def sequence_to_key(sequence: Sequence) -> Sequence:  # TODO: The key is suppose
     Returns
     -------
     Tuple[Tuple[int,...],...]
+        Key.
     """
-
+    
+    # To reduce memory consumption, the key could be of type `int`
     return sequence
 
 
-def key_to_sequence(key: Sequence) -> Sequence:  # TODO: The key is supposed to be an integer.
+def key_to_sequence(key: Sequence) -> Sequence:
     """
     key_to_sequence(key)
 
@@ -225,6 +268,7 @@ def key_to_sequence(key: Sequence) -> Sequence:  # TODO: The key is supposed to 
     Returns
     -------
     Tuple[Tuple[int,...],...]
+        Operator sequence.
     """
 
     return key
@@ -239,7 +283,9 @@ def sequence_to_indices(sequence: Sequence, translation: Dict[int, Energy]) -> I
     Returns
     -------
     Tuple[Tuple[Union[int,float,Fraction,complex],...],...]
+        Operator sequence indices.
     """
+
     return tuple(tuple((translation[e] for e in s)) for s in sequence)
 
 
@@ -253,9 +299,25 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
 
     Returns or calculates the function f(ell; m) corresponding to the operator sequence m.
 
+    Parameters
+    ----------
+    sequence
+        Operator sequence whose function is to be calculated.
+    collection
+        Function collection where the result is to be stored in.
+    translation
+        Dictionary translating operator indices to energy values.
+    max_energy
+        Width of the band-diagonality band.
+    signum_func
+        Signum function to be used (normal, broad or complex).
+    energy_func
+        Energy function to be used (normal or broad).
+
     Returns
     -------
     QuasiPolynomial
+        Calculated function f(ell; m).
     """
 
     # Check whether the function is already calculated.
@@ -277,8 +339,10 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
             m2 = sequence_to_indices(s2, translation)
             # Only calculate non-vanishing contributions to the integrand.
             try:
+                # TODO: Replace `max_energy` by `band_diagonality_func` which gets argument `m1`, `m2`
                 if (abs(energy_func(m1)) <= max_energy) and (abs(energy_func(m2)) <= max_energy):
                     integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
+            # TODO: Remove these checks after implementing the `band_diagonality_func`
             except TypeError:
                 # If 'if-clause' can not be determined uniquely, as it depends on the `a`
                 # symbol, try helping the sympy module by checking for a equivalent relation.
@@ -315,9 +379,27 @@ def trafo_calc(sequence: Sequence, trafo_collection: FunctionCollection, collect
 
     Calculates the function G(ell; m) corresponding to the operator sequence m.
 
+    Parameters
+    ----------
+    sequence
+        Operator sequence whose function is to be calculated.
+    trafo_collection
+        Function collection where the result is to be stored in.
+    collection
+        Function collection where the resulting f(ell; m) are to be stored in.
+    translation
+        Dictionary translating operator indices to energy values.
+    max_energy
+        Width of the band diagonality band.
+    signum_func
+        Signum function to be used (normal, broad or complex).
+    energy_func
+        Energy function to be used (normal or broad).
+
     Returns
     -------
     QuasiPolynomial
+        Calculated function G(ell; m).
     """
 
     # Check whether the function is already calculated.

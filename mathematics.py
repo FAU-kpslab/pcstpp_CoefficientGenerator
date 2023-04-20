@@ -1,3 +1,9 @@
+"""
+Defines basic mathematical functions for calculating the coefficient functions,
+like the unperturbed eigenvalue change $M(m)$ and the occurring exponents in the
+modified coefficient functions.
+"""
+
 from fractions import Fraction
 from functools import reduce
 from itertools import product
@@ -7,8 +13,8 @@ from quasiPolynomial import QuasiPolynomial, are_close, is_zero
 import numpy as np
 import sympy as sym
 from typing import Callable, List, Tuple, Union, TypeVar, cast
+from sympy.core.expr import Expr
 
-Expr = sym.core.expr.Expr
 Coeff = Union[int, float, Fraction, complex, Expr]
 Energy = Coeff
 Energy_real = Union[int, float, Fraction]
@@ -24,9 +30,15 @@ def energy(indices: Indices[E]) -> E:
 
     Returns the sum M(m) of operator sequence indices.
 
+    Parameters
+    ----------
+    indices
+        Operator sequence indices.
+
     Returns
     -------
     Union[int, float, Fraction, complex, Expr]
+        Sum M(m).
     """
 
     return sum(reduce(operator.add, indices), cast(E, 0))
@@ -36,12 +48,18 @@ def energy_broad(indices: Indices[Energy_real], delta: Energy_real) -> Energy_re
     """
     energy_broad(indices)
 
-    Returns the 'broadened' sum M(m)*theta(|M(m)|-`delta`) of operator sequence 
-    indices, where theta is the Heaviside step function.
+    Returns the *broadened* sum M(m)*theta(|M(m)|-delta) of operator sequence indices, where theta is the Heaviside
+    step function.
+
+    Parameters
+    ----------
+    indices
+        Operator sequence indices.
 
     Returns
     -------
     Union[int, float, Fraction]
+        Sum M(m)*theta(|M(m)|-delta).
     """
 
     e = energy(indices)
@@ -56,9 +74,17 @@ def signum(indices1: Indices[Energy_real], indices2: Indices[Energy_real]) -> in
 
     Returns the prefactor sgn(M(m1)) - sgn(M(m2)).
 
+    Parameters
+    ----------
+    indices1
+        Operator sequence indices whose sgn(M(m1)) is to be added.
+    indices2
+        Operator sequence indices whose sgn(M(m2)) is to be subtracted.
+
     Returns
     -------
     int
+        Difference of signum functions.
     """
 
     return int(np.sign(energy(indices1))) - int(np.sign(energy(indices2)))
@@ -68,13 +94,20 @@ def signum_broad(indices1: Indices[Energy_real], indices2: Indices[Energy_real],
     """
     signum_broad(indices1, indices2, delta)
 
-    Returns the prefactor sgn_`delta`(M(m1)) - sgn_`delta`(M(m2)), where sgn_d is
-    the broadened signum function with sgn_d (x) = 0 for |x| <= d and sgn_d (x)=sgn (x),
-    otherwise.
+    Returns the prefactor sgn_`delta`(M(m1)) - sgn_delta(M(m2)), where sgn_d is the broadened signum function with
+    sgn_d(x) = 0 for |x| <= d and sgn_d(x) = sgn(x), otherwise.
+
+    Parameters
+    ----------
+    indices1
+        Operator sequence indices whose sgn_d(M(m1)) is to be added.
+    indices2
+        Operator sequence indices whose sgn_d(M(m2)) is to be subtracted.
 
     Returns
     -------
     int
+        Difference of broad signum functions.
     """
 
     return int(np.sign(energy_broad(indices1, delta))) - int(np.sign(energy_broad(indices2, delta)))
@@ -85,12 +118,19 @@ def signum_complex(indices1: Indices[Union[complex, Expr]], indices2: Indices[Un
     """
     signum_complex(indices1, indices2)
 
-    Returns the prefactor sgn(M(m1)) - sgn(M(m2)) with the definition sgn(z) = z / |z|
-    as used in the Ferkinghoff, Uhrig paper.
+    Returns the prefactor sgn(M(m1)) - sgn(M(m2)) with the definition sgn(z) = z / |z|.
+
+    Parameters
+    ----------
+    indices1
+        Operator sequence indices whose complex sgn(M(m1)) is to be added.
+    indices2
+        Operator sequence indices whose complex sgn(M(m2)) is to be subtracted.
 
     Returns
     -------
     Union[complex, Expr]
+        Difference of complex signum functions.
     """
 
     complex_sgn = lambda z: 0 if is_zero(z) else z.conjugate() / abs(z)
@@ -104,11 +144,23 @@ def exponential(indices: Indices[Energy],
     """
     exponential(indices, indices1, indices2)
 
-    Returns the exponential exp(- alpha x) with alpha = - (|M(sequence)| - |M(m1)| - |M(m2)|).
+    Returns the exponential exp(- alpha x) with alpha = - (|M(m)| - |M(m1)| - |M(m2)|).
+
+    Parameters
+    ----------
+    indices
+        Operator sequence indices whose |M(m)| is to be added in the exponential.
+    indices1
+        First operator sequence indices whose |M(m1)| is to be subtracted in the exponential.
+    indices2
+        Second operator sequence indices whose |M(m2)| is to be subtracted in the exponential.
+    energy_func
+        Energy function to be used (normal or broad).
 
     Returns
     -------
     QuasiPolynomial
+        Resulting quasi-polynomial.
     """
 
     alpha = abs(energy_func(indices)) - abs(energy_func(indices1)) - abs(energy_func(indices2))
@@ -121,15 +173,17 @@ def partitions(sequence: Sequence) -> List[Tuple[Sequence, Sequence]]:
 
     Returns all partitions of the operator sequence (m, n, o, ...) into ((m1, n1, o1, ...), (m2, n2, o2, ...)).
 
+    Parameters
+    ----------
+    sequence
+        Operator sequence to be partitioned.
+
     Returns
     -------
     List[Tuple[Tuple[Tuple[int,...],...],Tuple[Tuple[int,...],...]]]
+        List of partitions.
     """
 
-    # TODO: Why we have to look at all possible partitions, especially those where
-    # we have different amount of terms on the left side for commuting Hilbert spaces?
-    # Should this depend on the starting conditions e.g. is this needed for the Dicke model?
-    # -> Maybe add an option to restrict partitions depending on the model
     partitions = [[(s[:i], s[i:]) for i in range(len(s) + 1)] for s in sequence]
     # skip edge cases of completely empty left or right side
     valid_partitions = list(product(*partitions))[1:-1]

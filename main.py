@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from fractions import Fraction
 from numpy import iscomplex
 import yaml
@@ -20,16 +18,16 @@ from sympy import sympify
 a = sym.Symbol("a", positive=True)
 
 
-def main(raw_args: Sequence[str] | None = None):
-    my_parser = argparse.ArgumentParser(description='Use pCUT to block-diagonalize a Lindbladian or a Hamiltonian with '
-                                                    'two particle types')
+def main(raw_args: Union[Sequence[str],None] = None):
+    my_parser = argparse.ArgumentParser(description='Use pcst++ to block-diagonalize a Lindbladian or a Hamiltonian'
+                                                    'with multiple particle types')
     my_parser.add_argument('-t', '--trafo', action='store_true', help='calculate the transformation directly')
     my_config = my_parser.add_mutually_exclusive_group()
-    my_config.add_argument('-f', '--file', nargs='?', const='config.yml', default=None,
-                           help='pass configuration using the config file "config.yml" '
+    my_config.add_argument('-f', '--file', nargs='?', const='config.yaml', default=None,
+                           help='pass configuration using the config file "config.yaml" '
                                 'or a custom one given as an argument')
     my_config.add_argument('-c', '--config', action='store_true',
-                           help='Writes an exemplary config file to "config.yml" without performing '
+                           help='Writes an exemplary config file to "config.yaml" without performing '
                                 'any calculations.')
     args = my_parser.parse_args(raw_args)
 
@@ -67,8 +65,8 @@ def main(raw_args: Sequence[str] | None = None):
         # index as its name, provided that they are unique. The operators can be separated in arbitrarily different
         # lists which marks them as groups whose operators commute pairwise with those of other groups.
         operators = [[-1, -2, -3, -4, -5], [1, 2, 3, 4, 5]]
-        # Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the operators.
-        # In Lea's case, enter the indices of the operators prior to transposition.
+        # Enter the operator indices, i.e., the unperturbed energy differences caused by the operators.
+        # The indices can be of type integer, float, Fraction (e.g. '1/2') or complex (e.g. (1+2j)).
         translation = {
             -1: -2,
             -2: -1,
@@ -99,6 +97,7 @@ def main(raw_args: Sequence[str] | None = None):
     starting_conditions = cast(Dict[str, Union[Coeff, str]], starting_conditions)
     translation = cast(Dict[int, Energy], translation)
 
+    # Calculation is skipped if solely a exemplary config file shall be created
     if not args.config:
         # Assuming expressions of type `Expr` to be exact
         # If needed, convert all starting_conditions to the same type
@@ -132,6 +131,7 @@ def main(raw_args: Sequence[str] | None = None):
             # If string, the value has to be converted to Fraction
             if isinstance(v, str):
                 translation[k] = Fraction(v)
+        # Typechecking and conversion done
 
         # Prepare the coefficient function storage.
         collection = coefficientFunction.FunctionCollection(translation)
@@ -143,8 +143,7 @@ def main(raw_args: Sequence[str] | None = None):
             trafo_collection = coefficientFunction.FunctionCollection(translation)
             trafo_collection[tuple([()] * len(operators))] = qp.new_integer([['1']])
 
-        operators_all = [operator for operator_space in operators for operator in operator_space]
-
+        # Choosing the signum for the generator
         if delta > 0:
             print("Using the broad signum function.")
             signum_func = lambda l, r: signum_broad(l, r, delta=delta)
@@ -163,18 +162,20 @@ def main(raw_args: Sequence[str] | None = None):
             signum_func = signum
             energy_func = energy
 
+        # Combine all elements in `operators` to one list
+        operators_all = [operator for operator_space in operators for operator in operator_space]
+
         for order in range(max_order + 1):
             print('Starting calculations for order ' + str(order) + '.')
-            # TODO: This version is slower as needed as we do not use the arbitrary order of the commuting operators
             sequences = set(product(operators_all, repeat=order))
             for sequence in sequences:
-                sequence_sorted = tuple(tuple([s for s in sequence if s in o_s]) for o_s in operators)
+                sequence_sorted = tuple(tuple([s for s in sequence if s in operator_space]) for operator_space in operators)
                 if not args.trafo:
                     indices = coefficientFunction.sequence_to_indices(sequence_sorted, translation)
                     # Make use of block diagonality.
                     if coefficientFunction.is_zero(energy_func(indices)):
                         # As the band diagonality is only fulfilled up to a multiple of delta add + delta * max_order
-                        # TODO: According to Andi's calculations, max_energy should depend on the specific order used in
+                        # TODO: For the broad signum, max_energy should depend on the specific order used in
                         #  one calculation -> implement order-dependent max_energy in `calc` in `coefficientFunction.py`
                         # TODO: Maybe even make max_energy completely automatic?
                         coefficientFunction.calc(sequence_sorted, collection, translation,
@@ -182,7 +183,7 @@ def main(raw_args: Sequence[str] | None = None):
                 else:
                     coefficientFunction.trafo_calc(sequence_sorted, trafo_collection, collection, translation,
                                                    max_energy + delta * max_order, signum_func, energy_func)
-        # print(collection.pretty_print())
+
         print('Starting writing process.')
         # Write the results in a file.
         with open("result.txt", "w") as result:
@@ -196,18 +197,19 @@ def main(raw_args: Sequence[str] | None = None):
                     if not coefficientFunction.is_zero(resulting_constant):
                         # Reverse the operator sequences, because the Solver thinks from left to right.
                         inverted_sequence = [str(operator) for s in sequence for operator in s[::-1]]
-                        # Return 'order' 'sequence' 'numerator' 'denominator'.
                         if isinstance(resulting_constant, Fraction):
+                            # Return 'order' 'sequence' 'numerator' 'denominator'.
                             output = [str(sum([len(seq) for seq in sequence]))] + inverted_sequence + [
                                 str(resulting_constant.numerator), str(resulting_constant.denominator)]
                         else:
+                            # Return 'order' 'sequence' 'coefficient'.
                             output = [str(sum([len(seq) for seq in sequence]))] + inverted_sequence + [
                                 str(resulting_constant)]
                         print(' '.join(output), file=result)
             result.close()
 
     # Generate the config file.
-    config_file = open("config.yml", "w")
+    config_file = open("config.yaml", "w")
     print('---', file=config_file)
     print("# This is an exemplary config file. Following the comments in this file, you can modify it for your "
           "purpose and rerun\n"
@@ -217,14 +219,12 @@ def main(raw_args: Sequence[str] | None = None):
     print('max_order: ' + str(max_order), file=config_file)
     print("# Give a unique name (integer) to every operator, so that you can distinguish them. You can take the "
           "operator index as\n"
-          "# its name, provided that they are unique. The operators can separated in arbitrarily different lists "
-          "which marks them\n"
-          "# as groups whose operators commute pairwise with those of other groups. ",
+          "# its name, provided that they are unique. The operators can be separated in arbitrarily different lists "
+          "which marks\n"
+          "# them as groups whose operators commute pairwise with those of other groups. ",
           file=config_file)
     print('operators: ' + str(list(operators)), file=config_file)
-    print("# Enter the operator indices. In Andi's case, enter the unperturbed energy differences caused by the "
-          "operators. In Lea's\n"
-          "# case, enter the indices of the operators prior to transposition.\n"
+    print("# Enter the operator indices, i.e., the unperturbed energy differences caused by the operators.\n"
           "# The indices can be of type integer, float, Fraction (e.g. '1/2') or complex (e.g. (1+2j)).",
           file=config_file)
     print('indices:', file=config_file)
@@ -252,10 +252,10 @@ def main(raw_args: Sequence[str] | None = None):
     if not args.config:
         print('The calculations are done. Your coefficient file is "result.txt". If you want to keep it, store it under'
               ' a different name before executing the program again.')
-        print('The used configuration is found in "config.yml", you can store that together with the results.')
+        print('The used configuration is found in "config.yaml", you can store that together with the results.')
     else:
         print(
-            'The default configuration file is found in "config.yml". It will be overwritten when rerunning the program'
+            'The default configuration file is found in "config.yaml". It will be overwritten when rerunning the program'
             '.')
 
 
