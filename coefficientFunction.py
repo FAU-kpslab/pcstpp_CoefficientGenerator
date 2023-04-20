@@ -397,8 +397,7 @@ def trafo_calc(sequence: Sequence, trafo_collection: FunctionCollection, collect
             # Check whether the required functions are already calculated.
             g1 = trafo_calc(partition[0], trafo_collection, collection, translation, signum_func,
                             energy_func, band_diagonality_func)
-            f2 = calc(partition[1], collection, translation, signum_func, energy_func, 
-                      band_diagonality_func)
+            f2 = calc(partition[1], collection, translation, signum_func, energy_func, band_diagonality_func)
             # Translate the operator sequences into its indices.
             m1 = sequence_to_indices(s1, translation)
             m2 = sequence_to_indices(s2, translation)

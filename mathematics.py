@@ -189,13 +189,13 @@ def partitions(sequence: Sequence) -> List[Tuple[Sequence, Sequence]]:
     return [(tuple(l[0] for l in pr), tuple(r[1] for r in pr)) for pr in valid_partitions]
 
 
-def band_diagonality(indices: Indices[Energy_real],max_energy:Energy_real)->bool:
+def band_diagonality(indices: Indices[Energy_real], max_energy: Energy_real) -> bool:
     return abs(energy(indices)) <= abs(max_energy)
 
-def band_diagonality_broad(indices: Indices[Energy_real],max_energy:Energy_real, delta:Energy_real)->bool:
+def band_diagonality_broad(indices: Indices[Energy_real], max_energy:Energy_real, delta:Energy_real) -> bool:
     # TODO: Is `delta * len(indices)` the correct factor or has it to depend on the
     # complete indices list
     return abs(energy(indices)) <= abs(max_energy) + delta * len(indices)
 
-def band_diagonality_complex(indices: Indices[Energy])->bool:
+def band_diagonality_complex(indices: Indices[Energy]) -> bool:
     return True
