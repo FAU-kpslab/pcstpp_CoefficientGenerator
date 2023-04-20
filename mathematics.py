@@ -3,8 +3,6 @@ Defines basic mathematical functions for calculating the coefficient functions,
 like the unperturbed eigenvalue change $M(m)$ and the occurring exponents in the
 modified coefficient functions.
 """
-#__pdoc__ = {}
-#__pdoc__['Expr'] = False
 
 from fractions import Fraction
 from functools import reduce
@@ -15,8 +13,8 @@ from quasiPolynomial import QuasiPolynomial, are_close, is_zero
 import numpy as np
 import sympy as sym
 from typing import Callable, List, Tuple, Union, TypeVar, cast
+from sympy.core.expr import Expr
 
-Expr = sym.core.expr.Expr
 Coeff = Union[int, float, Fraction, complex, Expr]
 Energy = Coeff
 Energy_real = Union[int, float, Fraction]
