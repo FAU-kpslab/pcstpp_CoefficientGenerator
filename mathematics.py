@@ -241,8 +241,8 @@ def band_diagonality_complex(indices: Indices[Energy]) -> bool:
     band_diagonality_complex(indices)
 
     Returns whether the given process of the corresponding operator sequence indices does contribute to the effective
-    operator for potentially non-Hermitian systems. Ass band diagonality does not hold for non-Hermitian systems, for
-    all processes `True` is returned.
+    operator for potentially non-Hermitian systems. As band diagonality does not hold for non-Hermitian systems, for all
+    processes `True` is returned.
 
     Parameters
     ----------
