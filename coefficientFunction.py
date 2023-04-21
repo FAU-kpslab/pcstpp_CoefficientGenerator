@@ -249,6 +249,11 @@ def sequence_to_key(sequence: Sequence) -> Sequence:
 
     Converts the operator sequence m into the key.
 
+    Parameters
+    ----------
+    sequence
+        Operator sequence whose function is to be calculated.
+
     Returns
     -------
     Tuple[Tuple[int,...],...]
@@ -265,6 +270,11 @@ def key_to_sequence(key: Sequence) -> Sequence:
 
     Converts the key into the operator sequence m.
 
+    Parameters
+    ----------
+    key
+        Key whose function is to be calculated.
+
     Returns
     -------
     Tuple[Tuple[int,...],...]
@@ -276,9 +286,17 @@ def key_to_sequence(key: Sequence) -> Sequence:
 
 def sequence_to_indices(sequence: Sequence, translation: Dict[int, Energy]) -> Indices[Energy]:
     """
-    sequence_to_indices(key)
+    sequence_to_indices(sequence, translation)
 
-    Converts the operator sequence into the indices of the operator sequence m.
+    Converts the operator sequence into the indices of the operator sequence m
+    using the translation dictionary.
+
+    Parameters
+    ----------
+    sequence
+        Operator sequence whose function is to be calculated.
+    translation
+        Dictionary translating operator indices to energy values.
 
     Returns
     -------
