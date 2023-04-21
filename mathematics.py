@@ -196,8 +196,8 @@ def band_diagonality(indices: Indices[Energy_real], max_energy: Energy_real) -> 
     """
     band_diagonality(indices, max_energy)
 
-    Returns whether the given process of the corresponding operator sequence indices
-    does contribute to the effective operator, by checking for the band diagonality.
+    Returns whether the given process of the corresponding operator sequence indices does contribute to the effective
+    operator, by checking for the band diagonality.
 
     Parameters
     ----------
@@ -217,9 +217,8 @@ def band_diagonality_broad(indices: Indices[Energy_real], max_energy:Energy_real
     """
     band_diagonality_broad(indices, max_energy, delta)
 
-    Returns whether the given process of the corresponding operator sequence indices
-    does contribute to the effective operator, by checking for the band diagonality
-    for the 'broad-signum' generator.
+    Returns whether the given process of the corresponding operator sequence indices does contribute to the effective
+    operator, by checking for the band diagonality for the 'broad-signum' generator.
 
     Parameters
     ----------
@@ -241,10 +240,9 @@ def band_diagonality_complex(indices: Indices[Energy]) -> bool:
     """
     band_diagonality_complex(indices)
 
-    Returns whether the given process of the corresponding operator sequence indices
-    does contribute to the effective operator for potentially non-Hermitian systems.
-    Ass band diagonality does not hold for non-Hermitian systems, for all processes
-    `True` is returned. 
+    Returns whether the given process of the corresponding operator sequence indices does contribute to the effective
+    operator for potentially non-Hermitian systems. Ass band diagonality does not hold for non-Hermitian systems, for
+    all processes `True` is returned.
 
     Parameters
     ----------

@@ -288,8 +288,7 @@ def sequence_to_indices(sequence: Sequence, translation: Dict[int, Energy]) -> I
     """
     sequence_to_indices(sequence, translation)
 
-    Converts the operator sequence into the indices of the operator sequence m
-    using the translation dictionary.
+    Converts the operator sequence into the indices of the operator sequence m using the translation dictionary.
 
     Parameters
     ----------
