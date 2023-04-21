@@ -18,8 +18,7 @@ closed and open quantum many-body systems with multiple quasiparticle types", (2
     - [Output format](#output-format)
     - [Examples](#examples)  
   - [Module specification](#module-specification)
-  - [Authors](#authors) 
-  - [License](#license)
+  - [Authors](#authors)
 
 > Both program and documentation rely on the mathematical notation used in our paper
 > [arXiv:2302.01000](https://doi.org/10.48550/arXiv.2302.01000).
