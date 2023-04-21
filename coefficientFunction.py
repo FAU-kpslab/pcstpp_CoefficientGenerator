@@ -308,12 +308,12 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
         Function collection where the result is to be stored in.
     translation
         Dictionary translating operator indices to energy values.
-    max_energy
-        Width of the band-diagonality band.
     signum_func
         Signum function to be used (normal, broad or complex).
     energy_func
         Energy function to be used (normal or broad).
+    band_diagonality_func
+        Band diagonality function to be used (normal, broad or complex).
 
     Returns
     -------
@@ -368,12 +368,12 @@ def trafo_calc(sequence: Sequence, trafo_collection: FunctionCollection, collect
         Function collection where the resulting f(ell; m) are to be stored in.
     translation
         Dictionary translating operator indices to energy values.
-    max_energy
-        Width of the band diagonality band.
     signum_func
         Signum function to be used (normal, broad or complex).
     energy_func
         Energy function to be used (normal or broad).
+    band_diagonality_func
+        Band diagonality function to be used (normal, broad or complex).
 
     Returns
     -------
