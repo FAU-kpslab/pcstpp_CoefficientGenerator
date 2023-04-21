@@ -193,9 +193,7 @@ def band_diagonality(indices: Indices[Energy_real], max_energy: Energy_real) -> 
     return abs(energy(indices)) <= abs(max_energy)
 
 def band_diagonality_broad(indices: Indices[Energy_real], max_energy:Energy_real, delta:Energy_real) -> bool:
-    # TODO: Is `delta * len(indices)` the correct factor or has it to depend on the
-    # complete indices list
-    return abs(energy(indices)) <= abs(max_energy) + delta * len(indices)
+    return abs(energy(indices)) <= abs(max_energy) + delta * sum([len(i) for i in indices])
 
 def band_diagonality_complex(indices: Indices[Energy]) -> bool:
     return True
