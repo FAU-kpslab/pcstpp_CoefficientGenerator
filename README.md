@@ -189,7 +189,8 @@ order mk ... m2 m1 coefficient
 
 ### Examples
 
-Config files for all exemplary models in our paper [arXiv:2302.01000](https://doi.org/10.48550/arXiv.2302.01000) are in the folder [config-examples](./config-examples/).
+Config files for all exemplary models in our paper [arXiv:2302.01000](https://doi.org/10.48550/arXiv.2302.01000) are in
+the folder [config-examples](./config-examples/).
 This includes the [staggered transverse-field Ising model](TODO),
 the [non-Hermitian staggered transverse-field Ising model](./config-examples/config-NHTFIM.yaml),
 the [spin-one transverse-field Ising model with single-ion anisotropy](TODO)
@@ -197,6 +198,9 @@ and the [Dissipative transverse-field Ising model](./config-examples/config-DTFI
 
 
 ## Module specification
+
+The modeule specification can be found on our [GitHub Pages
+](https://fau-kpslab.github.io/pcstpp_CoefficientGenerator/index.html).
 
 - [Index](./docs/index.html)
   - [main](./docs/main.html)
