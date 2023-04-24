@@ -123,7 +123,8 @@ delta: 0
   `starting_conditions`.
 - It is necessary to indicate non-zero coefficient functions $F(0, \mathbf{m}) = 0$ via `starting_conditions`, even when
   you want to calculate the coefficient functions of the transformation $G(\ell, \mathbf{m})$.
-- TODO: Something about band-diagonality.
+- When using the complex signum, `max_energy` will be ignored.
+  You have to insert something nonetheless.
 - If you don't want to use the broad signum function you can either specify `delta: 0` or don't specify delta at all.
 - After running, the program will save the used input in a new file `config.yaml` for you to store with your result.
   This will overwrite any existing file `config.yaml`.

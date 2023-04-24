@@ -249,6 +249,11 @@ def sequence_to_key(sequence: Sequence) -> Sequence:
 
     Converts the operator sequence m into the key.
 
+    Parameters
+    ----------
+    sequence
+        Operator sequence whose function is to be calculated.
+
     Returns
     -------
     Tuple[Tuple[int,...],...]
@@ -265,6 +270,11 @@ def key_to_sequence(key: Sequence) -> Sequence:
 
     Converts the key into the operator sequence m.
 
+    Parameters
+    ----------
+    key
+        Key whose function is to be calculated.
+
     Returns
     -------
     Tuple[Tuple[int,...],...]
@@ -276,9 +286,16 @@ def key_to_sequence(key: Sequence) -> Sequence:
 
 def sequence_to_indices(sequence: Sequence, translation: Dict[int, Energy]) -> Indices[Energy]:
     """
-    sequence_to_indices(key)
+    sequence_to_indices(sequence, translation)
 
-    Converts the operator sequence into the indices of the operator sequence m.
+    Converts the operator sequence into the indices of the operator sequence m using the translation dictionary.
+
+    Parameters
+    ----------
+    sequence
+        Operator sequence whose function is to be calculated.
+    translation
+        Dictionary translating operator indices to energy values.
 
     Returns
     -------
@@ -290,10 +307,11 @@ def sequence_to_indices(sequence: Sequence, translation: Dict[int, Energy]) -> I
 
 
 def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[int, Energy],
-         max_energy: Union[Energy_real, Expr], signum_func: Union[
+         signum_func: Union[
             Callable[[Indices[Energy_real], Indices[Energy_real]], int], Callable[
                 [Indices[Union[complex, Expr]], Indices[Union[complex, Expr]]], Union[complex, Expr]]],
-         energy_func: Callable[[Indices[Energy]], Energy]) -> QuasiPolynomial:
+         energy_func: Callable[[Indices[Energy]], Energy],
+         band_diagonality_func: Callable[[Indices[Energy]], bool]) -> QuasiPolynomial:
     """
     calc(sequence)
 
@@ -307,12 +325,12 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
         Function collection where the result is to be stored in.
     translation
         Dictionary translating operator indices to energy values.
-    max_energy
-        Width of the band-diagonality band.
     signum_func
         Signum function to be used (normal, broad or complex).
     energy_func
         Energy function to be used (normal or broad).
+    band_diagonality_func
+        Band diagonality function to be used (normal, broad or complex).
 
     Returns
     -------
@@ -331,38 +349,15 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
             s1 = partition[0]
             s2 = partition[1]
             # Check whether the required functions are already calculated.
-            f1 = calc(partition[0], collection, translation, max_energy, signum_func, energy_func)
-            f2 = calc(partition[1], collection, translation, max_energy, signum_func, energy_func)
+            f1 = calc(partition[0], collection, translation, signum_func, energy_func, band_diagonality_func)
+            f2 = calc(partition[1], collection, translation, signum_func, energy_func, band_diagonality_func)
             # Translate the operator sequences into its indices.
             m = sequence_to_indices(sequence, translation)
             m1 = sequence_to_indices(s1, translation)
             m2 = sequence_to_indices(s2, translation)
             # Only calculate non-vanishing contributions to the integrand.
-            try:
-                # TODO: Replace `max_energy` by `band_diagonality_func` which gets argument `m1`, `m2`
-                if (abs(energy_func(m1)) <= max_energy) and (abs(energy_func(m2)) <= max_energy):
-                    integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
-            # TODO: Remove these checks after implementing the `band_diagonality_func`
-            except TypeError:
-                # If 'if-clause' can not be determined uniquely, as it depends on the `a`
-                # symbol, try helping the sympy module by checking for a equivalent relation.
-                try:
-                    if ((sym.Abs(energy_func(m1)) ** 2).expand(real=True) <= (max_energy ** 2).expand(real=True)) and (
-                            (sym.Abs(energy_func(m2)) ** 2).expand(real=True) <= (max_energy ** 2).expand(real=True)):
-                        integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
-                except TypeError:
-                    # If 'if-clause' can not be determined again, print the unresolved relational
-                    # and assume that the contribution does not vanish generally
-                    if isinstance(
-                            (sym.Abs(energy_func(m1)) ** 2).expand(real=True) <= (max_energy ** 2).expand(real=True),
-                            sym.core.relational.Relational):
-                        print("Unresolved relational: {}".format((abs(energy_func(m1)) <= max_energy)))
-                    elif isinstance(
-                            (sym.Abs(energy_func(m2)) ** 2).expand(real=True) <= (max_energy ** 2).expand(real=True),
-                            sym.core.relational.Relational):
-                        print("Unresolved relational: {}".format((abs(energy_func(m2)) <= max_energy)))
-                    integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
-
+            if (band_diagonality_func(m1) and band_diagonality_func(m2)):
+                integrand = integrand + exponential(m, m1, m2, energy_func) * signum_func(m1, m2) * f1 * f2
         result = integrand.integrate()
         # Insert the result into the collection.
         collection[sequence] = result
@@ -370,10 +365,11 @@ def calc(sequence: Sequence, collection: FunctionCollection, translation: Dict[i
 
 
 def trafo_calc(sequence: Sequence, trafo_collection: FunctionCollection, collection: FunctionCollection,
-               translation: Dict[int, Energy], max_energy: Union[Energy_real, Expr],
+               translation: Dict[int, Energy],
                signum_func: Union[Callable[[Indices[Energy_real], Indices[Energy_real]], int], Callable[
                 [Indices[Union[complex, Expr]], Indices[Union[complex, Expr]]], Union[complex, Expr]]],
-               energy_func: Callable[[Indices[Energy]], Energy]) -> QuasiPolynomial:
+               energy_func: Callable[[Indices[Energy]], Energy],
+               band_diagonality_func: Callable[[Indices[Energy]], bool]) -> QuasiPolynomial:
     """
     trafo_calc(sequence)
 
@@ -389,12 +385,12 @@ def trafo_calc(sequence: Sequence, trafo_collection: FunctionCollection, collect
         Function collection where the resulting f(ell; m) are to be stored in.
     translation
         Dictionary translating operator indices to energy values.
-    max_energy
-        Width of the band diagonality band.
     signum_func
         Signum function to be used (normal, broad or complex).
     energy_func
         Energy function to be used (normal or broad).
+    band_diagonality_func
+        Band diagonality function to be used (normal, broad or complex).
 
     Returns
     -------
@@ -409,16 +405,16 @@ def trafo_calc(sequence: Sequence, trafo_collection: FunctionCollection, collect
         m = sequence_to_indices(sequence, translation)
         # TODO: Why does `signum_func` gives a type checking error?
         integrand = (exponential(((), ()), ((), ()), m, energy_func) * signum_func(((), ()), m)
-                     * calc(sequence, collection, translation, max_energy, signum_func, energy_func))
+                     * calc(sequence, collection, translation, signum_func, energy_func,band_diagonality_func))
         partition_list = partitions(sequence)
         for partition in partition_list:
             # Rename the operator sequences.
             s1 = partition[0]
             s2 = partition[1]
             # Check whether the required functions are already calculated.
-            g1 = trafo_calc(partition[0], trafo_collection, collection, translation, max_energy, signum_func,
-                            energy_func)
-            f2 = calc(partition[1], collection, translation, max_energy, signum_func, energy_func)
+            g1 = trafo_calc(partition[0], trafo_collection, collection, translation, signum_func,
+                            energy_func, band_diagonality_func)
+            f2 = calc(partition[1], collection, translation, signum_func, energy_func, band_diagonality_func)
             # Translate the operator sequences into its indices.
             m1 = sequence_to_indices(s1, translation)
             m2 = sequence_to_indices(s2, translation)

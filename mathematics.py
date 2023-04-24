@@ -46,7 +46,7 @@ def energy(indices: Indices[E]) -> E:
 
 def energy_broad(indices: Indices[Energy_real], delta: Energy_real) -> Energy_real:
     """
-    energy_broad(indices)
+    energy_broad(indices, delta)
 
     Returns the *broadened* sum M(m)*theta(|M(m)|-delta) of operator sequence indices, where theta is the Heaviside
     step function.
@@ -55,7 +55,8 @@ def energy_broad(indices: Indices[Energy_real], delta: Energy_real) -> Energy_re
     ----------
     indices
         Operator sequence indices.
-
+    delta
+        delta parameter of the 'broad signum' function.
     Returns
     -------
     Union[int, float, Fraction]
@@ -66,7 +67,6 @@ def energy_broad(indices: Indices[Energy_real], delta: Energy_real) -> Energy_re
     # also return 0 if `abs(e)` is very close to `delta` to deal with
     # floating errors
     return e if abs(e) > delta and not are_close(abs(e), delta) else 0
-
 
 def signum(indices1: Indices[Energy_real], indices2: Indices[Energy_real]) -> int:
     """
@@ -103,6 +103,8 @@ def signum_broad(indices1: Indices[Energy_real], indices2: Indices[Energy_real],
         Operator sequence indices whose sgn_d(M(m1)) is to be added.
     indices2
         Operator sequence indices whose sgn_d(M(m2)) is to be subtracted.
+    delta
+        delta parameter of the 'broad signum' function.
 
     Returns
     -------
@@ -188,3 +190,68 @@ def partitions(sequence: Sequence) -> List[Tuple[Sequence, Sequence]]:
     # skip edge cases of completely empty left or right side
     valid_partitions = list(product(*partitions))[1:-1]
     return [(tuple(l[0] for l in pr), tuple(r[1] for r in pr)) for pr in valid_partitions]
+
+
+def band_diagonality(indices: Indices[Energy_real], max_energy: Energy_real) -> bool:
+    """
+    band_diagonality(indices, max_energy)
+
+    Returns whether the given process of the corresponding operator sequence indices does contribute to the effective
+    operator, by checking for the band diagonality.
+
+    Parameters
+    ----------
+    indices
+        Operator sequence indices.
+    max_energy
+        Largest absolute value of unperturbed energy change in the starting conditions. 
+    
+    Returns
+    -------
+    bool
+        Result of whether process lies within the band.
+    """
+    return abs(energy(indices)) <= abs(max_energy)
+
+def band_diagonality_broad(indices: Indices[Energy_real], max_energy:Energy_real, delta:Energy_real) -> bool:
+    """
+    band_diagonality_broad(indices, max_energy, delta)
+
+    Returns whether the given process of the corresponding operator sequence indices does contribute to the effective
+    operator, by checking for the band diagonality for the 'broad-signum' generator.
+
+    Parameters
+    ----------
+    indices
+        Operator sequence indices.
+    max_energy
+        Largest absolute value of unperturbed energy change in the starting conditions. 
+    delta
+        delta parameter of the 'broad signum' function.
+        
+    Returns
+    -------
+    bool
+        Result of whether process lies within the band.
+    """
+    return abs(energy(indices)) <= abs(max_energy) + delta * sum([len(i) for i in indices])
+
+def band_diagonality_complex(indices: Indices[Energy]) -> bool:
+    """
+    band_diagonality_complex(indices)
+
+    Returns whether the given process of the corresponding operator sequence indices does contribute to the effective
+    operator for potentially non-Hermitian systems. As band diagonality does not hold for non-Hermitian systems, for all
+    processes `True` is returned.
+
+    Parameters
+    ----------
+    indices
+        Operator sequence indices.
+    
+    Returns
+    -------
+    bool
+        Result of whether process lies within the band. Always returns `True`.
+    """
+    return True

@@ -3,7 +3,7 @@
 # the program with the flag '--file'. For more infos, use flag '--help'.
 
 # Enter the total order.
-max_order: 2
+max_order: 6
 # Give a unique name (integer) to every operator, so that you can distinguish them. You can take the operator index as
 # its name, provided that they are unique. The operators can be separated in arbitrarily different lists which marks
 # them as groups whose operators commute pairwise with those of other groups. 
