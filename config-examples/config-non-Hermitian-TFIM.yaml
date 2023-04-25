@@ -1,3 +1,13 @@
+# This config file is used in the paper "Series expansions in closed and open quantum many-body systems with multiple quasiparticle types" (arXiv:2302.01000).
+# It corresponds to the "Non-Hermitian staggered transverse-field Ising model" from Sec. III.B.
+# The Hamiltonian is rescaled by a factor 1/(4 eta).
+# The symbolic parameter is defined as a = xi/(4 eta).
+# The correspondence of indices to actual perturbation operators is:
+# - 1: T_(-1,-1)
+# - 2: T_(-1,+1)
+# - 3: T_(+1,-1)
+# - 4: T_(+1,+1)
+
 ---
 # This is an exemplary config file. Following the comments in this file, you can modify it for your purpose and rerun
 # the program with the flag '--file'. For more infos, use flag '--help'.
