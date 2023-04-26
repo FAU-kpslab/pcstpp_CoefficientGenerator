@@ -4,14 +4,14 @@
 # The symbolic parameter is defined as a = (D+h)/(D-h).
 # The perturbation operators are given in Table II.
 # The correspondence of indices to Table II is:
-# - -4: T_(-2,0)
-# - -3: T_(0,-2)
+# - -4: T_(-2, 0)
+# - -3: T_( 0,-2)
 # - -2: T_(-1,-1)
-# - -1: T_(1,-1)
-# -  1: T_(-1,1)
-# -  2: T_(1,1)
-# -  3: T_(0,2)
-# -  4: T_(2,0)
+# - -1: T_(+1,-1)
+# -  1: T_(-1,+1)
+# -  2: T_(+1,+1)
+# -  3: T_( 0,+2)
+# -  4: T_(+2, 0)
 
 ---
 # This is an exemplary config file. Following the comments in this file, you can modify it for your purpose and rerun
