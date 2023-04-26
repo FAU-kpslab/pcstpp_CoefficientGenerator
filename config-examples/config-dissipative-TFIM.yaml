@@ -1,7 +1,7 @@
 # This config file is used in the paper "Series expansions in closed and open quantum many-body systems with multiple quasiparticle types" (arXiv:2302.01000).
 # It corresponds to the "Dissipative transverse-field Ising model" from Sec. III.A.
-# The Lindbladian is rescaled by a factor 1/(2h).
-# The symbolic parameter is defined as a = Gamma/(4h).
+# The Lindbladian is rescaled by a factor 2/Gamma.
+# The symbolic parameter is defined as a = 4h/Gamma.
 # The perturbation operators are given in Tables III and IV.
 # The correspondence of indices to these tables is:
 # - 0: T_(-2,-2)
