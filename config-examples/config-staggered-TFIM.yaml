@@ -1,3 +1,14 @@
+# This config file is used in the paper "Series expansions in closed and open quantum many-body systems with multiple quasiparticle types" (arXiv:2302.01000).
+# It corresponds to the "Staggered transverse-field Ising model" from Sec. III.A.
+# The Hamiltonian is rescaled by a factor 1/(2h_+).
+# The symbolic parameter is defined as a = h_-/(2h_+).
+# The perturbation operators are given in Table I.
+# The correspondence of indices to Table I is:
+# - -2: T_(-1,-1)
+# - -1: T_(-1,+1)
+# -  1: T_(+1,-1)
+# -  2: T_(+1,+1)
+
 ---
 # This is an exemplary config file. Following the comments in this file, you can modify it for your purpose and rerun
 # the program with the flag '--file'. For more infos, use flag '--help'.
@@ -7,32 +18,24 @@ max_order: 6
 # Give a unique name (integer) to every operator, so that you can distinguish them. You can take the operator index as
 # its name, provided that they are unique. The operators can be separated in arbitrarily different lists which marks
 # them as groups whose operators commute pairwise with those of other groups. 
-operators: [[0, 1, 2, 3, 4, 5, 6, 7]]
+operators: [[1, -1, 2, -2]]
 # Enter the operator indices, i.e., the unperturbed energy differences caused by the operators.
 # The indices can be of type integer, float, Fraction (e.g. '1/2') or complex (e.g. (1+2j)).
 indices:
-  0: -a - I
-  1: a - I
-  2: a + I
-  3: -a + I
-  4: 0
-  5: -I
-  6: a
-  7: -a
+  -2: -a - 1
+  -1: a - 1
+  1: 1 - a
+  2: a + 1
 # Manually insert the solution for the coefficient functions with non-vanishing starting condition as string, integer,
 # float or complex (e.g. (1+2j)).
 starting_conditions:
-  ((0,),): 1
+  ((-1,),): 1
+  ((-2,),): 1
   ((1,),): 1
   ((2,),): 1
-  ((3,),): 1
-  ((4,),): 1
-  ((5,),): 1
-  ((6,),): 1
-  ((7,),): 1
 # Introduce band-diagonality, i.e., write down the largest absolute value of possible index sums occurring in the
 # starting conditions.
-max_energy: sqrt(a**2 + 1)
+max_energy: a + 1
 # Optionally, specify the delta value for the 'broad signum' function, i.e., half of the width of the 0 level.
 delta: 0
 ...

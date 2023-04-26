@@ -191,10 +191,10 @@ order mk ... m2 m1 coefficient
 
 Config files for all exemplary models in our paper [arXiv:2302.01000](https://doi.org/10.48550/arXiv.2302.01000) are in
 the folder [config-examples](./config-examples/).
-This includes the [staggered transverse-field Ising model](TODO),
-the [non-Hermitian staggered transverse-field Ising model](./config-examples/config-NHTFIM.yaml),
-the [spin-one transverse-field Ising model with single-ion anisotropy](TODO)
-and the [Dissipative transverse-field Ising model](./config-examples/config-DTFIM.yaml).
+This includes the [staggered transverse-field Ising model](./config-examples/config-staggered-TFIM.yaml),
+the [non-Hermitian staggered transverse-field Ising model](./config-examples/config-non-Hermitian-TFIM.yaml),
+the [spin-one transverse-field Ising model with single-ion anisotropy](./config-examples/config-spin-one-TFIM-w-single-ion-anisotropy.yaml)
+and the [Dissipative transverse-field Ising model](./config-examples/config-dissipative-TFIM.yaml).
 
 
 ## Module specification
