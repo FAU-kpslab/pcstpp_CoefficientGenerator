@@ -524,7 +524,7 @@ class Polynomial:
             Resulting polynomial after integration.
         """
 
-        prefactors = np.array([Fraction(1, n + 1) for n in np.arange(self.__private_coefficients.size)])
+        prefactors = np.array([Fraction(1, int(n + 1)) for n in np.arange(self.__private_coefficients.size)])
         output = (prefactors * self.__private_coefficients).tolist()
         return Polynomial([Fraction(0)] + output)
 
