@@ -101,3 +101,20 @@ poly = Polynomial.new(coefficient_list=[2,fr])
 print(poly.pretty_print())
 print(type(poly.coefficients()[1].denominator))
 ```
+
+```python
+# Comparison of two versions, once with `np.int64` and once with `int`
+# First result is wrong an throws a RuntimeWarning for overflow
+fr = Fraction(*np.array([1,1000000],dtype=np.int64))
+poly = Polynomial.new(coefficient_list=[fr])
+poly = poly*poly*poly*poly
+print(poly.pretty_print())
+fr = Fraction(1,1000000)
+poly = Polynomial.new(coefficient_list=[fr])
+poly = poly*poly*poly*poly
+print(poly.pretty_print())
+```
+
+```python
+
+```

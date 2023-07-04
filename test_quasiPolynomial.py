@@ -129,6 +129,14 @@ class TestPolynomial(unittest.TestCase):
         self.assertEqual(P.new([5]).diff(), P.zero())
         self.assertEqual(P.new([5, 5 * a, 7]).diff(), P.new([5 * a, 14]))
 
+    def test_large_numbers(self):
+        ratio = [1,1000000]
+        fr_64 = Fraction(*np.array(ratio,dtype=np.int64))
+        fr_int = Fraction(*ratio)
+        poly_64, poly_int = P.new([fr_64]), P.new([fr_int])
+        self.assertEqual(poly_64, poly_int)
+        self.assertEqual(poly_64*poly_64*poly_64*poly_64, poly_int*poly_int*poly_int*poly_int)
+
 
 class TestQuasiPolynomial(unittest.TestCase):
 
