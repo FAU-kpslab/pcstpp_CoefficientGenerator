@@ -20,6 +20,7 @@ from fractions import Fraction
 from decimal import Decimal
 import decimal
 from quasiPolynomial import QuasiPolynomial, Polynomial
+import numpy as np
 ```
 
 ```python
@@ -29,7 +30,6 @@ from quasiPolynomial import QuasiPolynomial, Polynomial
 ```python
 # https://stackoverflow.com/questions/7559595/python-runtimewarning-overflow-encountered-in-long-scalars 
 # The starting case. One *may* obtain an error when performing an overflowing operation with the numpy types
-import numpy as np
 np.seterr(all='warn')
 B = np.array([144],dtype='double')
 b=B[-1]
@@ -136,4 +136,76 @@ list(np.asarray([1,23]))
 fr = Fraction(1,1000000)
 poly = Polynomial.new(coefficient_list=[fr])
 type((poly * np.asarray([20])[0]).coefficients()[0].denominator)
+```
+
+```python
+type([[Fraction(*np.array([1,2]))]][0][0].denominator)
+```
+
+```python
+type(np.array([Fraction(1, n + 1) for n in np.arange(10)])[-1].denominator)
+```
+
+```python
+fr = Fraction(1,1000000)
+poly = Polynomial.new(coefficient_list=[fr,fr,2*fr])
+print((poly*np.int64(4000000)).pretty_print())
+print((poly*(1/np.int64(400))).pretty_print())
+print((poly*(1/np.int64(400000))).pretty_print())
+print((poly*(1/400000)).pretty_print())
+print((poly*Fraction(np.int64(1),np.int64(400000))).pretty_print())
+```
+
+```python
+isinstance(np.int64(4000000),(int, float, complex, Fraction,Polynomial))
+```
+
+Why does the expression `poly*np.int64(4000000)` not trigger a NotImplemented error? As the type `np.int64` is not supported in the list, the module should fail. At the moment I would assume that the fall back to the `np.int64` multiplication somehow solves the problem.
+
+```python
+fr = Fraction(1,10000000000000000000)
+poly = Polynomial.new(coefficient_list=[fr])
+poly.integrate()
+```
+
+```python
+Fraction(1,10000000000000000000) * Fraction(1,np.int64(4))
+```
+
+```python
+fr = Fraction(1,100000000)
+poly = Polynomial.new(coefficient_list=[fr])
+poly.integrate().pretty_print()
+```
+
+```python
+(1/np.int64(4000000))
+```
+
+```python
+np.int64(4000000000000)*4000000000000000
+```
+
+```python
+np.int64(4000000000000)*Fraction(4000000000000000,1)
+```
+
+```python
+(np.int64(4000000000000)*Polynomial.new([Fraction(4000000000000000,1)])).pretty_print()
+```
+
+```python
+(np.int64(4000000000000)*Polynomial.new([4000000000000000])).pretty_print()
+```
+
+```python
+np.int64(4000000000000) * np.array([4000000000000000],dtype=int)
+```
+
+```python
+Polynomial.new([4000000000000000]).coefficients()
+```
+
+```python
+
 ```
