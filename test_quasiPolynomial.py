@@ -136,6 +136,8 @@ class TestPolynomial(unittest.TestCase):
         poly_64, poly_int = P.new([fr_64]), P.new([fr_int])
         self.assertEqual(poly_64, poly_int)
         self.assertEqual(poly_64*poly_64*poly_64*poly_64, poly_int*poly_int*poly_int*poly_int)
+        self.assertEqual(poly_64*poly_64*poly_64*poly_64*(1/fr_64.denominator), poly_int*poly_int*poly_int*poly_int*(1/fr_64.denominator))
+        self.assertEqual(poly_64*poly_64*poly_64*poly_64*(1/fr_int.denominator), poly_int*poly_int*poly_int*poly_int*(1/fr_64.denominator))
 
 
 class TestQuasiPolynomial(unittest.TestCase):

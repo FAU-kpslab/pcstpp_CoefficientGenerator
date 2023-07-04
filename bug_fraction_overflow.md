@@ -116,5 +116,24 @@ print(poly.pretty_print())
 ```
 
 ```python
+print(type(np.asarray([1,23])[0]))
+print(type(np.asarray([1,23],dtype=int)[0]))
+print(type(np.asarray([1,23],dtype=float)[0]))
+print(type(np.asarray([1,23],dtype=int).tolist()[0])) #This seems to work
+print(type(np.asarray([1,23],dtype=np.int64).tolist()[0])) #This seems to work
+print(type(np.asarray([1,23],dtype=int).astype(int)[0]))
+```
 
+```python
+np.asarray([]).astype(Fraction)
+```
+
+```python
+list(np.asarray([1,23]))
+```
+
+```python
+fr = Fraction(1,1000000)
+poly = Polynomial.new(coefficient_list=[fr])
+type((poly * np.asarray([20])[0]).coefficients()[0].denominator)
 ```

@@ -204,6 +204,9 @@ class Polynomial:
         if len(coefficient_list) == 0:
             self.__private_coefficients = np.asarray([]).astype(Fraction)
         else:
+            # Forcing all Fraction instances to have numerator, denominator as `int` 
+            # (and not as limited numpy type e.g. np.int64) 
+            coefficient_list = [coeff if not isinstance(coeff,Fraction) else Fraction( int(coeff.numerator), int(coeff.denominator)) for coeff in coefficient_list]
             self.__private_coefficients = np.asarray(coefficient_list)
 
     def __str__(self) -> str:
