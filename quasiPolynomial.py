@@ -994,8 +994,8 @@ class QuasiPolynomial:
                     # Perform partial integration multiple times.
                     for n in np.arange(1, p.coefficients().size):
                         temp_polynomial = temp_polynomial.diff()
-                        resulting_polynomial = resulting_polynomial - (temp_polynomial * inverse(e) ** (n + 1))
-                        resulting_constant = resulting_constant + temp_polynomial.coefficients()[0] * inverse(e) ** (
+                        resulting_polynomial = resulting_polynomial - (temp_polynomial * inverse(e) ** int(n + 1))
+                        resulting_constant = resulting_constant + temp_polynomial.coefficients()[0] * inverse(e) ** int(
                                 n + 1)
                     constant = constant + resulting_constant
                     output[e] = resulting_polynomial

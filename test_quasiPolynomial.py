@@ -344,6 +344,9 @@ class TestQuasiPolynomial(unittest.TestCase):
                                                                                -20 / a ** 2, -5 / a]}))
         self.assertEqual(QP.new({2: [a, a ** 3]}).integrate(),
                          QP.new({0: [a ** 3 / 4 + a / 2], 2: [-a ** 3 / 4 - a / 2, -a ** 3 / 2]}))
+        self.assertEqual(QP.new({0:[Fraction(1,10000000000000000000)]}).integrate(), QP.new({0:[0, Fraction(1,10000000000000000000)]}))
+        self.assertEqual(QP.new({2:[Fraction(1,10000000000000000000)]}).integrate(), QP.new({0:[Fraction(1,10000000000000000000)/2],2:[-Fraction(1,10000000000000000000)/2]}))
+        self.assertEqual(QP.new({1:[0,Fraction(1,10000000000000000000)]}).integrate(), QP.new({0:[Fraction(1,10000000000000000000)],1:[-Fraction(1,10000000000000000000), -Fraction(1,10000000000000000000)]}))
 
     def test_get_constant(self):
         self.assertEqual(QP.new_integer([[5, 5, 7]]).get_constant(), Fraction(5))
