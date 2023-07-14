@@ -122,6 +122,7 @@ class TestPolynomial(unittest.TestCase):
         self.assertEqual(P.new([5, 5j + 2.1, 7.]).integrate(), P.new([0, 5, (5j + 2.1) / 2, 7 / 3]))
         self.assertEqual(P.zero().integrate(), P.zero())
         self.assertEqual(P.new([5, 5, a]).integrate(), P.new([0, 5, Fraction(5, 2), a / 3]))
+        # Testing possible overflow of variables
         self.assertEqual(P.new([Fraction(1,10000000000000000000)]).integrate(), P.new([0, Fraction(1,10000000000000000000)]))
 
     def test_diff(self):
@@ -129,9 +130,11 @@ class TestPolynomial(unittest.TestCase):
         self.assertEqual(P.zero().diff(), P.zero())
         self.assertEqual(P.new([5]).diff(), P.zero())
         self.assertEqual(P.new([5, 5 * a, 7]).diff(), P.new([5 * a, 14]))
+        # Testing possible overflow of variables
         self.assertEqual(P.new([1,Fraction(1,10000000000000000000)]).diff(), P.new([Fraction(1,10000000000000000000)]))
 
     def test_large_numbers(self):
+        # Testing possible overflow of variables
         ratio = [1,1000000]
         fr_64 = Fraction(*np.array(ratio,dtype=np.int64))
         fr_int = Fraction(*ratio)
@@ -179,6 +182,7 @@ class TestQuasiPolynomial(unittest.TestCase):
     def test_new_integer(self):
         self.assertEqual(QP({0: P.new([2, 3, 4]), 1: P.new([1])}), QP.new_integer([[2, 3, 4], [1]]))
         self.assertIsInstance(QP.new_integer([[2]]).polynomial_dict[0].coefficients()[0], Fraction)
+        # Checking for correct type conversion to python `int`
         self.assertIsInstance(QP.new_integer([[Fraction(*np.array([1,2]))]]).polynomial_dict[0].coefficients()[0].denominator, int)
         self.assertIsInstance((QP.new_integer([[Fraction(*np.array([1,2]))]])*np.array([3])[0]).polynomial_dict[0].coefficients()[0].denominator, int)
         self.assertIsInstance(QP.new_integer([[2.]]).polynomial_dict[0].coefficients()[0], float)
@@ -344,6 +348,7 @@ class TestQuasiPolynomial(unittest.TestCase):
                                                                                -20 / a ** 2, -5 / a]}))
         self.assertEqual(QP.new({2: [a, a ** 3]}).integrate(),
                          QP.new({0: [a ** 3 / 4 + a / 2], 2: [-a ** 3 / 4 - a / 2, -a ** 3 / 2]}))
+        # Testing possible overflow of variables
         self.assertEqual(QP.new({0:[Fraction(1,10000000000000000000)]}).integrate(), QP.new({0:[0, Fraction(1,10000000000000000000)]}))
         self.assertEqual(QP.new({2:[Fraction(1,10000000000000000000)]}).integrate(), QP.new({0:[Fraction(1,10000000000000000000)/2],2:[-Fraction(1,10000000000000000000)/2]}))
         self.assertEqual(QP.new({1:[0,Fraction(1,10000000000000000000)]}).integrate(), QP.new({0:[Fraction(1,10000000000000000000)],1:[-Fraction(1,10000000000000000000), -Fraction(1,10000000000000000000)]}))
